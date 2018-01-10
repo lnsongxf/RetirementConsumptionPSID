@@ -12,14 +12,14 @@ use "$folder\Data\Intermediate\Basic-Panel.dta", clear
 * https://www.econstor.eu/bitstream/10419/67323/1/727547445.pdf
 
 gen healthservicesexpenditure = healthcareexpenditure - healthinsuranceexpenditure // my best guess as to how Pistaferri et al define this variable
-gen transportationexgasexpenditure = transportationexpenditure - gasolineexpenditure
+gen transportexgasexpenditure = transportationexpenditure - gasolineexpenditure
 
 gen rent_imputed = rentexpenditure 
 replace rent_imputed = 0.06 * housevalue if homeowner == 1
 
 local expenditure_list foodathomeexpenditure gasolineexpenditure foodawayfromhomeexpenditure /// 
 healthinsuranceexpenditure healthservicesexpenditure utilityexpenditure ///
-transportationexgasexpenditure educationexpenditure childcareexpenditure /// 
+transportexgasexpenditure educationexpenditure childcareexpenditure /// 
 homeinsuranceexpenditure rent_imputed 
 
 egen expenditure_blundell = rowtotal(`expenditure_list')
@@ -43,7 +43,7 @@ lab var expenditure_blundell "Total Expenditure (Blundell et al)"
 
 * Question: are there suspiciously many entries with food expenditure = 0?
 
-/*
+
 preserve
 	keep if wave <= 2003
 	
@@ -57,14 +57,29 @@ preserve
 	}
 	
 	keep if age <= 75 & age >= 23
+	desc food*ma
+
+	lab var foodexpenditure_ma "Total Food Expenditure"
+	lab var foodathomeexpenditure_ma "Food at Home"
+	lab var foodawayfromhomeexpenditure_ma "Food Away From Home"
+	lab var fooddeliveredexpenditure_ma "Food Delivered"
 	tsline food*ma if wave == 2001, name(food, replace) title("Food Expenditure in 2001")
 	collapse *expenditure_ma, by(age)
 	
 	tsset age
+
+	lab var housingexpenditure "Housing Expenditure"
+	lab var mortgageexpenditure "Mortgage Expenditure"
+	lab var rentexpenditure "Rent Expenditure"
+
+	lab var propertytaxexpenditure "Property Tax Expenditure"
+	lab var homeinsuranceexpenditure "Home Insurance Expenditure"
+	lab var utilityexpenditure "Utility Expenditure"
+
 	tsline housingexpenditure mortgageexpenditure rentexpenditure, name(housing, replace) title("Housing Expenditure")
 	tsline propertytaxexpenditure homeinsuranceexpenditure utilityexpenditure, name(housing_cont, replace) title("Housing Expenditure Cont.")
 restore
-*/
+
 
 
 ****************************************************************************************************
