@@ -7,6 +7,7 @@ global folder "C:\Users\pedm\Documents\Research\Cormac\RetirementConsumptionPSID
 ****************************************************************************************************
 
 cap ssc install psidtools
+cap mkdir "$folder\Data\Raw\PSID_Install"
 psid install using "$folder\Data\Raw\PSID_Download", to("$folder\Data\Raw\PSID_Install")
 
 ****************************************************************************************************
@@ -51,7 +52,7 @@ psid use
 	// Family Composition Change between this wave and previous wave
 	// All recontact cases, including splitoffs from recontacts, are coded 8 for this variable.
 	// Codes 2-8 have priority over codes 0 and 1, and code 8 has priority over everything else
-	|| family_comp_change
+	|| fchg
 	// [69]V542 [70]V1109 [71]V1809 [72]V2410 [73]V3010 [74]V3410 [75]V3810
 	// [76]V4310 [77]V5210 [78]V5710 [79]V6310 [80]V6910 [81]V7510 [82]V8210
 	// [83]V8810 [84]V10010 [85]V11112 [86]V12510 [87]V13710 [88]V14810
@@ -122,6 +123,16 @@ psid use
 	|| educhead
 	[99]ER16516 [01]ER20457 [03]ER24148 [05]ER28047 [07]ER41037 [09]ER46981
 	[11]ER52405 [13]ER58223 [15]ER65459
+
+	// # in FU
+	|| fsize
+	// [68]V115 [69]V549 [70]V1238 [71]V1941 [72]V2541 [73]V3094 [74]V3507
+	// [75]V3920 [76]V4435 [77]V5349 [78]V5849 [79]V6461 [80]V7066 [81]V7657
+	// [82]V8351 [83]V8960 [84]V10418 [85]V11605 [86]V13010 [87]V14113
+	// [88]V15129 [89]V16630 [90]V18048 [91]V19348 [92]V20650 [93]V22405
+	// [94]ER2006 [95]ER5005 [96]ER7005 [97]ER10008 
+	[99]ER13009 [01]ER17012 [03]ER21016 [05]ER25016 [07]ER36016 [09]ER42016
+	[11]ER47316 [13]ER53016 [15]ER60016
 
 	//////////////////////////////////////////////////////////////////////////
 	// EMPLOYMENT STATUS (HEAD)
@@ -326,6 +337,13 @@ psid use
 	[99]ER16515A4 [01]ER20456A4 [03]ER24138A4 [05]ER28037A4 [07]ER41027A4 
 	[09]ER46971A4 [11]ER52395A4 [13]ER58212A4 [15]ER65413
 
+	// F12. How much did (you/they) receive in food stamp benefits in previous year?
+	// (included because food stamps is not measured in food expenditure)
+	|| foodstamp
+	// [93]V21713 [94]ER3060 [95]ER6059 [96]ER8156 [97]ER11050 
+	[99]ER14256 [01]ER18387 [03]ER21653 [05]ER25655 [07]ER36673 [09]ER42692
+	[11]ER48008 [13]ER53705 [15]ER60720
+
 	// housing expenditure
 	|| housingexpenditure
 	[99]ER16515A5 [01]ER20456A5 [03]ER24138A5 [05]ER28037A5 [07]ER41027A5 
@@ -369,11 +387,57 @@ psid use
 	[99]ER16515B6 [01]ER20456B6 [03]ER24138B6 [05]ER28037B7 [07]ER41027B7 
 	[09]ER46971B7 [11]ER52395B7 [13]ER58212B7 [15]ER65425
 
+	/* subcomponents of transportation (total annual cost imputed) */
+
+	|| vehicleloanexpenditure
+	[99]ER16515B7 [01]ER20456B7 [03]ER24138B7 [05]ER28037B8 [07]ER41027B8
+	[09]ER46971B8 [11]ER52395B8 [13]ER58212B8 [15]ER65426
+
+	// vehicle down payment expenditure
+	|| vehicledpexpenditure
+	[99]ER16515B8 [01]ER20456B8 [03]ER24138B8 [05]ER28037B9 [07]ER41027B9
+	[09]ER46971B9 [11]ER52395B9 [13]ER58212B9 [15]ER65427
+
+	|| vehicleleaseexpenditure
+	[99]ER16515B9 [01]ER20456B9 [03]ER24138B9 [05]ER28037C1 [07]ER41027C1
+	[09]ER46971C1 [11]ER52395C1 [13]ER58212C1 [15]ER65428
+
+	// auto insurance
+	|| autoinsexpenditure
+	[99]ER16515C1 [01]ER20456C1 [03]ER24138C1 [05]ER28037C2 [07]ER41027C2
+	[09]ER46971C2 [11]ER52395C2 [13]ER58212C2 [15]ER65429
+
+	// additional vehicle expenditure
+	|| addvehicleexpenditure
+	[99]ER16515C2 [01]ER20456C2 [03]ER24138C2 [05]ER28037C3 [07]ER41027C3
+	[09]ER46971C3 [11]ER52395C3 [13]ER58212C3 [15]ER65430
+
+	|| vehiclerepairexpenditure
+	[99]ER16515C3 [01]ER20456C3 [03]ER24138C3 [05]ER28037C4 [07]ER41027C4
+	[09]ER46971C4 [11]ER52395C4 [13]ER58212C4 [15]ER65431
+
 	|| gasolineexpenditure	
-	// note: subcomponenet of transportationexpenditure
 	[99]ER16515C4 [01]ER20456C4 [03]ER24138C4 [05]ER28037C5 [07]ER41027C5
 	[09]ER46971C5 [11]ER52395C5 [13]ER58212C5 [15]ER65432
 
+	|| parkingexpenditure
+	// includes carpool
+	[99]ER16515C5 [01]ER20456C5 [03]ER24138C5 [05]ER28037C6 [07]ER41027C6
+	[09]ER46971C6 [11]ER52395C6 [13]ER58212C6 [15]ER65433
+
+	|| bustrainexpenditure
+	[99]ER16515C6 [01]ER20456C6 [03]ER24138C6 [05]ER28037C7 [07]ER41027C7
+	[09]ER46971C7 [11]ER52395C7 [13]ER58212C7 [15]ER65434
+
+	|| taxiexpenditure
+	[99]ER16515C7 [01]ER20456C7 [03]ER24138C7 [05]ER28037C8 [07]ER41027C8
+	[09]ER46971C8 [11]ER52395C8 [13]ER58212C8 [15]ER65435
+
+	|| othertransexpenditure
+	[99]ER16515C8 [01]ER20456C8 [03]ER24138C8 [05]ER28037C9 [07]ER41027C9
+	[09]ER46971C9 [11]ER52395C9 [13]ER58212C9 [15]ER65436
+
+	/* end of subcomponents of transportation */
 
 	|| educationexpenditure
 	[99]ER16515C9 [01]ER20456C9 [03]ER24138C9 [05]ER28037D1 [07]ER41027D1
@@ -643,13 +707,12 @@ label define homeowner
 
 psid long
 
-
 * addvaluelabel does not work
 * psid vardoc rel2head, addvaluelabel(rel2head)
-* psid vardoc family_comp_change, addvaluelabel(fam_change)
+* psid vardoc fchg, addvaluelabel(fam_change)
 
 label values rel2head rel2head
-label values family_comp_change family_comp_lab
+label values fchg family_comp_lab
 label values emp_status_head emp_status_lab
 label values emp_status_head_2 emp_status_lab
 label values emp_status_head_3 emp_status_lab
@@ -716,6 +779,21 @@ rename x11102 family_id
 * year. All families with the same 1968 ID contain at least one of the original
 * members from the 1968 family or their lineal descendents born after 1968.
 
+* Deal with DK or NA codings 
+replace foodstamp = 0 if foodstamp >= 999998
+lab var foodstamp "Food stamps value last year"
+replace housevalue = 0 if housevalue >= 9999998
+replace age_spouse = . if age_spouse == 999
+replace educhead = . if educhead == 99
+replace ret_year = . if ret_year >= 9998
+replace ret_year_spouse = . if ret_year_spouse => 9998
+
+* Note fam_wealth is topcoded, but I just leave that as is for now
+
+foreach var of varlist _all {
+	summ `var'
+	count if `var' == 9999998 | `var' == 999998 | `var' == 9999999 | `var' == 999999
+}
 
 keep if family_id != .
 
@@ -730,3 +808,5 @@ preserve
 restore
 
 save "$folder\Data\Intermediate\Basic-Panel.dta", replace
+
+* TODO: add in code from psid_sample.do 
