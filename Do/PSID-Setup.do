@@ -43,6 +43,12 @@ psid use
 	[11]ER47318 [13]ER53018 [15]ER60018
 	// note: if you want sex of the individual, use ER32000 instead
 
+	|| sex_indiv
+	[]ER32000
+
+	|| deathyr 
+	[]ER32050 
+	
 	// month of interview
 	|| month	
 	[99]ER13006 [01]ER17009 [03]ER21012 [05]ER25012 [07]ER36012 [09]ER42012
@@ -247,6 +253,14 @@ psid use
 	// ER52337 Head Social Security Income-2010
 	// ER52339 Wife/"Wife" Social Security Income-2010
 	// ER52341 OFUM Social Security Income-2010
+
+	// This variable is the sum of these five 2002 variables:
+	// ER24100 Head and Wife/"Wife" Taxable Income
+	// ER24101 Head and Wife/"Wife" Transfer Income
+	// ER24102 Taxable Income of Other FU Members
+	// ER24103 Transfer Income of Other FU Members
+	// ER24104 Social Security Income of All FU Members 
+
 	// [68]V81 [69]V529 [70]V1514 [71]V2226 [72]V2852 [73]V3256 [74]V3676
 	// [75]V4154 [76]V5029 [77]V5626 [78]V6173 [79]V6766 [80]V7412 [81]V8065
 	// [82]V8689 [83]V9375 [84]V11022 [85]V12371 [86]V13623 [87]V14670 [88]V16144
@@ -301,6 +315,34 @@ psid use
 	// [96]ER9238 [97]ER12071 
 	[99]ER16454 [01]ER20450 [03]ER24101 [05]ER28002 [07]ER40992 [09]ER46900
 	[11]ER52308 [13]ER58117 [15]ER65314
+
+	// Head's Income from Social Security last year
+	|| inc_ss_head
+	// [86]V12832 [87]V13934 [88]V14949 [89]V16449 [90]V17865 [91]V19165
+	// [92]V20465 [93]V22027
+	[05]ER28031 [07]ER41021 [09]ER46929 [11]ER52337 [13]ER58146 [15]ER65343
+
+	// Wife's Income from Social Security last year
+	|| inc_ss_spouse
+	// [86]V12853 [87]V13955 [88]V14970 [89]V16470 [90]V17886 [91]V19186
+	// [92]V20486 [93]V22301
+	[05]ER28033 [07]ER41023 [09]ER46931 [11]ER52339 [13]ER58148 [15]ER65345
+
+	// Total Income from Social Security of All Other FU Members in FU last year --NOT PRORATED
+	|| inc_ss_ofum
+	// [75]V3898 [76]V4412 [77]V5324 [78]V5824 [79]V6435 [80]V7039 [81]V7631
+	// [82]V8324 [83]V8932 [84]V10388 [85]V11568 [86]V12975 [87]V14077
+	// [88]V15092 [89]V16592 [90]V18008 [91]V19308 [92]V20608 [93]V22380
+	[05]ER28035 [07]ER41025 [09]ER46933 [11]ER52341 [13]ER58150 [15]ER65347
+
+	// Total Family Social Security Income last year
+	|| inc_ss_fam
+	// This variable includes Social Security income for Heads, Wives/"Wives",
+	// and OFUMs.
+	// [94]ER4152 [95]ER6992 [96]ER9243 [97]ER12077 
+	[99]ER16460 [01]ER20455 [03]ER24104
+
+	// NOTE: between 99 and 03, we have inc_ss_fam. between 05 and 15, sum up inc_ss_head, inc_ss_spouse, and inc_ss_ofum
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -524,13 +566,50 @@ psid use
 	[13]ER58209 [15]ER65406
 
 	// Total Family Wealth including home equity
+	// also known as IMP WEALTH W/ EQUITY (WEALTH2)
 	|| fam_wealth
-	// This variable is constructed as sum of values of six asset types (S103,
-	// S105, S109, S111, S113, S115) net of debt value (S107) plus value of
-	// home equity.
+	// Constructed wealth variable, including equity. This imputed variable is
+	// constructed as the sum of values of seven asset types (ER58155,
+	// ER58161, ER58165, ER58171, ER58173, ER58177, ER58181) net of debt value
+	// (ER58157, ER58167, ER58185, ER58189, ER58193, ER58197, ER58201,
+	// ER58205) plus value of home equity (ER58207). All missing data were
+	// assigned.
+	// NOTE: this was the description for 2013. Some of these debt categories
+	// were lumped together prior to 2011. For instance, in 2011 they started
+	// differentiating between credit card debt and other types of debt
 	// [84]S117 [89]S217 [94]S317 
 	[99]S417 [01]S517 [03]S617 [05]S717 [07]S817 [09]ER46970 [11]ER52394
 	[13]ER58211 [15]ER65408
+
+	// IMP VAL CHECKING/SAVING (W28)
+	|| bank_accounts
+	// W28. If you added up all such accounts [ for all of your family living
+	// here], about how much would they amount to right now? This is an
+	// imputed version of a variable used in the creation of the 2013 Wealth
+	// summary variables. All missing data were assigned.
+	// [84]S105 [89]S205 [94]S305 
+	[99]S405 [01]S505 [03]S605 [05]S705 [07]S805 [09]ER46942 [11]ER52350
+	[13]ER58161 [15]ER65358
+	// imputed for just under 5% of people
+
+	// IMP VALUE ANNUITY/IRA (W22)
+	|| IRA_wealth
+	// W22. How much would they be worth? This is an imputed version of a
+	// variable used in the creation of the 2013 Wealth summary variables. All
+	// missing data were assigned.
+	[99]S419 [01]S519 [03]S619 [05]S719 [07]S819 [09]ER46964 [11]ER52368
+	[13]ER58181 [15]ER65378
+
+	// IMP VALUE STOCKS (W16)
+	|| stock_wealth
+	// W16. If you sold all that and paid off anything you owed on it, how
+	// much would you have? This is an imputed version of a variable used in
+	// the creation of the 2013 Wealth summary variables. All missing data
+	// were assigned.
+	// [84]S111 [89]S211 [94]S311 
+	[99]S411 [01]S511 [03]S611 [05]S711 [07]S811 [09]ER46954 [11]ER52358
+	[13]ER58171 [15]ER65368
+
 
 	|| housevalue
 	// Could you tell me what the present value of (your/their)
@@ -545,6 +624,16 @@ psid use
 	[99]ER13041 [01]ER17044 [03]ER21043 [05]ER25029 [07]ER36029 [09]ER42030
 	[11]ER47330 [13]ER53030 [15]ER60031
 
+	// IMP VALUE HOME EQUITY
+	|| homeequity
+	// Constructed value of home equity. This imputed variable is constructed
+	// as: value-of-home (A20) minus mortgage-1 (A24, first mention) minus
+	// mortgage-2 (A24, second mention). All missing data were assigned.
+	// [84]S120 [89]S220 [94]S320 
+	[99]S420 [01]S520 [03]S620 [05]S720 [07]S820 [09]ER46966 [11]ER52390
+	[13]ER58207 [15]ER65404
+
+
 	// Own or Rent
 	|| homeowner
 	// [68]V103 [69]V593 [70]V1264 [71]V1967 [72]V2566 [73]V3108 [74]V3522
@@ -554,6 +643,45 @@ psid use
 	// [94]ER2032 [95]ER5031 [96]ER7031 [97]ER10035 
 	[99]ER13040 [01]ER17043 [03]ER21042 [05]ER25028 [07]ER36028 [09]ER42029
 	[11]ER47329 [13]ER53029 [15]ER60030
+
+	// TYPE MORTGAGE MOR 1	
+	|| type_mortgage1
+	// A23a. Is that a mortgage, a land contract, a home equity loan, or what?
+	// --FIRST MORTGAGE
+	// [96]ER7036 [97]ER10040 
+	[99]ER13045 [01]ER17050 [03]ER21049 [05]ER25040 [07]ER36040 [09]ER42041
+	[11]ER47346 [13]ER53046 [15]ER60047
+
+	|| type_mortgage2
+	// may be interesting! I notice that in 2013, 246 obs with home equity loan (2.7%)
+	// and 38 obs (.4%) with line of credit loan
+	// [96]ER7037 [97]ER10041 
+	[99]ER13054 [01]ER17061 [03]ER21060 [05]ER25051 [07]ER36052 [09]ER42060
+	[11]ER47367 [13]ER53067 [15]ER60068
+
+	// REM PRINCIPAL MOR 1
+	|| mortgage1	
+	// A24. About how much is the remaining principal on this loan?--FIRST
+	// MORTGAGE The values for this variable represent the principal currently
+	// owed from all mortgages or land contracts on the home in whole dollars.
+	// [69]V451 [70]V1124 [71]V1825 [72]V2425 [76]V4320 [77]V5219 [78]V5719
+	// [79]V6321 [80]V6919 [81]V7519 [83]V8819 [84]V10020 [85]V11127
+	// [86]V12526 [87]V13726 [88]V14826 [89]V16326 [90]V17726 [91]V19026
+	// [92]V20326 [93]V21612 [94]ER2037 [95]ER5036 [96]ER7042 [97]ER10044
+	[99]ER13047 [01]ER17052 [03]ER21051 [05]ER25042 [07]ER36042 [09]ER42043
+	[11]ER47348 [13]ER53048 [15]ER60049
+
+	// REM PRINCIPAL MOR 2
+	|| mortgage2
+	// About how much is the remaining principal on this loan?--SECOND
+	// MORTGAGE. The values for this variable represent the principal
+	// currently owed on the second mortgage or land contract on the home in
+	// whole dollars.
+	// [94]ER2038 [95]ER5037 [96]ER7043 [97]ER10045 
+	[99]ER13056 [01]ER17063 [03]ER21062 [05]ER25053 [07]ER36054 [09]ER42062
+	[11]ER47369 [13]ER53069 [15]ER60070
+	// Note: very few people have second mortgage. 4% in 2013
+
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -594,8 +722,8 @@ psid use
 
 
 	// Pat Note: Alt Q to wrap text
-    using "$folder\Data\Raw\PSID_Install", clear design(1) keepnotes; 
-    // dofile(psid_setup_retrival.do, replace)
+    using "$folder\Data\Raw\PSID_Install", clear design(1)  
+    dofile(psid_setup_retrival.do, replace);
 
 
 label define rel2head
@@ -702,8 +830,21 @@ label define homeowner
 1 "Owns" // Owns or is buying home, either fully or jointly; mobile home owners who rent lots are included here
 5 "Rents"
 8 "Neither";
-#delimit cr
 
+label define type_mortgage
+1 "Mortgage"
+2 "Land contract, loan from seller"
+3 "Home equity"
+4 "Home improvement"
+5 "Line of credit loan"
+7 "Other"
+8 "DK"
+9 "NA; refused"
+0 "Inap.";
+
+
+
+#delimit cr
 
 psid long
 
@@ -720,17 +861,28 @@ label values emp_status_spouse emp_status_lab
 label values emp_status_spouse_2 emp_status_lab
 label values emp_status_spouse_3 emp_status_lab
 label values sex_head sex
+label values sex_indiv sex
 label values splitoff_indicator splitoff_lab
 label values married married
 label values racehead race
 label values why_last_job_end why_last_job_end
 label values why_last_job_end_spouse why_last_job_end
 label values homeowner homeowner
+label values type_mortgage1 type_mortgage
+label values type_mortgage2 type_mortgage
 
 rename xsqnr sequence
 rename x11101ll pid 
 label var pid "Person identification number (1968 Interview Number * 1000 + Person Number)"
 rename x11102 family_id
+
+* Note on sequence variable
+* 1 - 20	Individuals in the family at the time of the yy interview
+* 51 - 59	Individuals in institutions at the time of the yy interview
+* 71 - 80	Individuals who moved out of the FU or out of institutions and established their own households between the yy-2 and yy interviews
+* 81 - 89	Individuals who were living in y but died by the time of the 1999 interview
+* 0	Inap.: born or moved in after the 1999 interview; from Latino sample (ER30001=7001-9308); main family nonresponse by yy or mover-out nonresponse by yy-2 (ER33501=0)
+
 
 * Note on personal indentification number
 * gen long x11101ll = ER30001*1000 + ER30002
@@ -786,7 +938,9 @@ replace housevalue = 0 if housevalue >= 9999998
 replace age_spouse = . if age_spouse == 999
 replace educhead = . if educhead == 99
 replace ret_year = . if ret_year >= 9998
-replace ret_year_spouse = . if ret_year_spouse => 9998
+replace ret_year_spouse = . if ret_year_spouse >= 9998
+replace mortgage1 = . if mortgage1 >= 9999998
+replace mortgage2 = . if mortgage2 >= 9999998
 
 * Note fam_wealth is topcoded, but I just leave that as is for now
 
@@ -810,3 +964,13 @@ restore
 save "$folder\Data\Intermediate\Basic-Panel.dta", replace
 
 * TODO: add in code from psid_sample.do 
+
+
+* TODO: why are there cases where sex_head changes?
+by pid, sort: egen max_sex = max(sex_head)
+by pid, sort: egen min_sex = min(sex_head)
+gen dif = max_sex - min_sex
+tab dif
+
+* edit pid wave sex_head sex_indiv rel2head if dif == 1
+
