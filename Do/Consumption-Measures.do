@@ -15,7 +15,7 @@ parkingexpenditure bustrainexpenditure taxiexpenditure othertransexpenditure
 gen healthservicesexpenditure = healthcareexpenditure - healthinsuranceexpenditure // my best guess as to how Pistaferri et al define this variable
 
 gen rent_imputed = rentexpenditure 
-replace rent_imputed = 0.06 * housevalue if homeowner == 1
+replace rent_imputed = 0.06 * housevalue if housingstatus == 1
 
 local expenditure_blundell foodathomeexpenditure foodstamp gasolineexpenditure foodawayfromhomeexpenditure /// 
 healthinsuranceexpenditure healthservicesexpenditure utilityexpenditure ///
@@ -28,8 +28,9 @@ egen transportation_blundell = rowtotal(`transportation_blundell')
 lab var transportation_blundell "Transportation Services (Blundell et al)"
 
 * Blundell et al Expenditure (equivalence scale)
-egen expenditure_blundell    = rowtotal(`expenditure_blundell')
-gen expenditure_blundell_eq  = expenditure_blundell / fsize
+egen expenditure_blundell          = rowtotal(`expenditure_blundell')
+gen expenditure_blundell_exhousing = expenditure_blundell - rent_imputed - homeinsuranceexpenditure
+gen expenditure_blundell_eq        = expenditure_blundell / fsize
 lab var expenditure_blundell "Total Expenditure (Blundell et al)"
 lab var expenditure_blundell_eq "Total Expenditure (equivalence scale)"
 

@@ -42,3 +42,16 @@ gen dif          = ret_year - wave if retirement_transition == 1
 * It's worrisome that some people have a ret_year so much earlier than the year they are listed as retiring
 * tab dif
 * TODO: try dropping families for which dif <= -3
+
+****************************************************************************************************
+** Show retirement
+****************************************************************************************************
+
+* Flag anyone after a retirement transition
+gen retired = 1 if retirement_transition == 1
+replace retired = 1 if L.retired == 1
+replace retired = 0 if retired == .
+
+* by pid, sort: egen max_retired = max(retired)
+* edit pid wave retirement_transition retired inc_ss_fam inc_ss_head if max_r == 1
+

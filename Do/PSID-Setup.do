@@ -582,7 +582,7 @@ psid use
 	[13]ER58211 [15]ER65408
 
 	// IMP VAL CHECKING/SAVING (W28)
-	|| bank_accounts
+	|| bank_account_wealth
 	// W28. If you added up all such accounts [ for all of your family living
 	// here], about how much would they amount to right now? This is an
 	// imputed version of a variable used in the creation of the 2013 Wealth
@@ -635,7 +635,7 @@ psid use
 
 
 	// Own or Rent
-	|| homeowner
+	|| housingstatus
 	// [68]V103 [69]V593 [70]V1264 [71]V1967 [72]V2566 [73]V3108 [74]V3522
 	// [75]V3939 [76]V4450 [77]V5364 [78]V5864 [79]V6479 [80]V7084 [81]V7675
 	// [82]V8364 [83]V8974 [84]V10437 [85]V11618 [86]V13023 [87]V14126
@@ -723,7 +723,7 @@ psid use
 
 	// Pat Note: Alt Q to wrap text
     using "$folder\Data\Raw\PSID_Install", clear design(1)  
-    dofile(psid_setup_retrival.do, replace);
+    dofile(PSID-Setup-Replication, replace);
 
 
 label define rel2head
@@ -762,8 +762,7 @@ label define rel2head
 98 "Other nonrelatives" // (includes homosexual partners, friends of children of the FU, etc.)
 0 "Inap."; // from Latino sample (ER30001=7001-9308); main family nonresponse by 2011 or mover-out nonresponse by 2009 (ER34102=0)
 
-
-label define family_comp_lab
+label define fchg
 0 "No change; no movers-in or movers-out of the family"
 1 "Change in members other than Head or Spouse/Partner only"
 2 "Head is the same but partner changed" // Spouse/Partner left or died; Head has new Spouse/Partner; used also when cohabiting, nonrelative female becomes Partner
@@ -826,7 +825,7 @@ label define why_last_job_end
 9 "DK; NA; refused"
 0 "Inap."; // : did not work for money in 2002 or has not worked for money since January 1, 2001 (ER21127=5, 8, or 9); began working for this employer in 2003 (ER21130=2003); still working for this employer
 
-label define homeowner
+label define housingstatus
 1 "Owns" // Owns or is buying home, either fully or jointly; mobile home owners who rent lots are included here
 5 "Rents"
 8 "Neither";
@@ -848,12 +847,18 @@ label define type_mortgage
 
 psid long
 
+* Add up social security income
+* Between 99 and 03 we have inc_ss_fam
+* Between 05 and 15 we have inc_ss_head, inc_ss_spouse, and inc_ss_ofum
+* For comparison, let's use inc_ss_fam
+replace inc_ss_fam = inc_ss_head + inc_ss_spouse + inc_ss_ofum if wave >= 2005
+
 * addvaluelabel does not work
 * psid vardoc rel2head, addvaluelabel(rel2head)
 * psid vardoc fchg, addvaluelabel(fam_change)
 
 label values rel2head rel2head
-label values fchg family_comp_lab
+label values fchg fchg
 label values emp_status_head emp_status_lab
 label values emp_status_head_2 emp_status_lab
 label values emp_status_head_3 emp_status_lab
@@ -867,7 +872,7 @@ label values married married
 label values racehead race
 label values why_last_job_end why_last_job_end
 label values why_last_job_end_spouse why_last_job_end
-label values homeowner homeowner
+label values housingstatus housingstatus
 label values type_mortgage1 type_mortgage
 label values type_mortgage2 type_mortgage
 
@@ -932,22 +937,20 @@ rename x11102 family_id
 * members from the 1968 family or their lineal descendents born after 1968.
 
 * Deal with DK or NA codings 
-replace foodstamp = 0 if foodstamp >= 999998
+replace foodstamp       = 0 if foodstamp >= 999998
 lab var foodstamp "Food stamps value last year"
-replace housevalue = 0 if housevalue >= 9999998
-replace age_spouse = . if age_spouse == 999
-replace educhead = . if educhead == 99
-replace ret_year = . if ret_year >= 9998
+replace housevalue      = 0 if housevalue >= 9999998
+replace age_spouse      = . if age_spouse == 999
+replace educhead        = . if educhead == 99
+replace ret_year        = . if ret_year >= 9998
 replace ret_year_spouse = . if ret_year_spouse >= 9998
-replace mortgage1 = . if mortgage1 >= 9999998
-replace mortgage2 = . if mortgage2 >= 9999998
+replace mortgage1       = . if mortgage1 >= 9999998
+replace mortgage2       = . if mortgage2 >= 9999998
 
 * Note fam_wealth is topcoded, but I just leave that as is for now
 
-foreach var of varlist _all {
-	summ `var'
-	count if `var' == 9999998 | `var' == 999998 | `var' == 9999999 | `var' == 999999
-}
+* Look for other variables with error codes
+summ *
 
 keep if family_id != .
 
