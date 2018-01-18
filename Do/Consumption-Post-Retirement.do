@@ -3,17 +3,20 @@ global folder "C:\Users\pedm\Documents\Research\Cormac\RetirementConsumptionPSID
 use "$folder\Data\Intermediate\Basic-Panel.dta", clear
 
 * Switches
-global quintiles_definition 4 // Defines quintiles. Can be 1, 2, 3, or 4. My preference is 4
+global quintiles_definition 4    // Defines quintiles. Can be 1, 2, 3, or 4. My preference is 4
+global retirement_definition 0   // 0 is default (last job ended due to "Quit, Resigned, Retire" or "NA")
+                                 // 1 is loose (does not ask why last job ended) and 2 is strict (last job ended due to "Quit, Resigned, Retire" only)
 global ret_duration_definition 2 // Defines retirement year. Can be 1, 2, or 3. My preference is 3 (for the sharp income drop) although 2 is perhaps better when looking at consumption data (for smoothness)
-global graphs_by_quintile 1 // Graph by quintile. Can be 0 or 1
-global allow_kids_to_leave_hh 1 // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH 
-                                // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
+global graphs_by_quintile 0      // Graph by quintile. Can be 0 or 1
+global allow_kids_to_leave_hh 1  // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH 
+                                 // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
 
 * Sample selection: households with same husband-wife over time
 do "$folder\Do\Sample-Selection.do"
 
 * Look for retirement transitions of the head
 do "$folder\Do\Find-Retirements.do"
+* NOTE: could also define retirement based on whether you worked < 500 hours that year. Might be worth exploring
 
 * Generate aggregate consumption (following Blundell et al)
 do "$folder\Do\Consumption-Measures.do"
@@ -133,10 +136,19 @@ if $graphs_by_quintile == 0{
 	label var ret_duration "Duration of Head's Retirement"
 	lab var transportation_blundell "Transportation Services"
 	lab var gasolineexpenditure "Gasoline Expenditure"
+	lab var healthcareexpenditure "Health care"
+	lab var healthinsuranceexpenditure "Health insurance"
+	lab var healthservicesexpenditure "Health services"
+	lab var tripsexpenditure "Trips"
+	lab var recreationexpenditure "Recreation"
+	lab var clothingexpenditure "Clothing"
+	lab var foodathomeexpenditure "Food at home"
+	lab var foodawayfromhomeexpenditure "Food away from home"
 
 	tsline expenditure_blundell, title("Blundell Expenditure") name("expenditure_blundell", replace)
 	tsline expenditure_blundell_eq, title("Blundell Expenditure (Eq Scale)") name("expenditure_blundell_eq", replace)
-	tsline expenditure_blundell_exhousing, title("Blundell Expenditure Ex Housing") name("expenditure_blundell_exhousing", replace)
+	tsline expenditure_blundell_exhous, title("Blundell Expenditure Ex Housing") name("expenditure_blundell_exhous", replace)
+	tsline expenditure_blundell_exhealth,  title("Blundell Expenditure Ex Health") name("expenditure_blundell_exhealth", replace)
 
 	tsline foodawayfromhomeexpenditure foodathomeexpenditure, title("Food") name("food", replace)
 	tsline taxiexpenditure, title("Taxis") name("taxis", replace)
@@ -157,13 +169,22 @@ if $graphs_by_quintile == 1{
 
 	xtset quintile ret_duration
 	
-	label var ret_duration "Duration of Head's Retirement"
+	lab var ret_duration "Duration of Head's Retirement"
 	lab var transportation_blundell "Transportation Services"
 	lab var gasolineexpenditure "Gasoline Expenditure"
+	lab var healthcareexpenditure "Health care"
+	lab var healthinsuranceexpenditure "Health insurance"
+	lab var healthservicesexpenditure "Health services"
+	lab var tripsexpenditure "Trips"
+	lab var recreationexpenditure "Recreation"
+	lab var clothingexpenditure "Clothing"
+	lab var foodathomeexpenditure "Food at home"
+	lab var foodawayfromhomeexpenditure "Food away from home"
 
 	xtline expenditure_blundell, byopts(title("Blundell Expenditure")) name("expenditure_blundell", replace) ylabel(#3)
 	xtline expenditure_blundell_eq, byopts(title("Blundell Expenditure (Eq Scale)")) name("expenditure_blundell_eq", replace) ylabel(#3)
-	xtline expenditure_blundell_exhousing, byopts(title("Blundell Expenditure Ex Housing")) name("expenditure_blundell_exhousing", replace) ylabel(#3)
+	xtline expenditure_blundell_exhous, byopts(title("Blundell Expenditure Ex Housing")) name("expenditure_blundell_exhous", replace) ylabel(#3)
+	xtline expenditure_blundell_exhealth,  byopts(title("Blundell Expenditure Ex Health")) name("expenditure_blundell_exhealth", replace) ylabel(#3)
 
 	xtline foodawayfromhomeexpenditure foodathomeexpenditure, byopts(title("Food")) name("food", replace) ylabel(#3)
 	xtline taxiexpenditure, byopts(title("Taxis")) name("taxis", replace) ylabel(#3)

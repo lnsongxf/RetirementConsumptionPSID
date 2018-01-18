@@ -55,16 +55,16 @@ title("Estimates of Annual Consumption Expenditures and Its Major Componenets, A
 
 * Question: are there suspiciously many entries with food expenditure = 0?
 
-/*
+
 preserve
 	keep if wave <= 2003
 	
 	* Collapse by age and wave
-	collapse *expenditure [pweight = family_weight], by(age wave)
+	collapse *expenditure* [pweight = family_weight], by(age wave)
 	
 	* Two sided moving average by age
 	xtset wave age
-	foreach var of varlist *expenditure {
+	foreach var of varlist *expenditure* {
 		tssmooth ma `var'_ma = `var', window(1 1 1) 
 	}
 	
@@ -76,7 +76,7 @@ preserve
 	lab var foodawayfromhomeexpenditure_ma "Food Away From Home"
 	lab var fooddeliveredexpenditure_ma "Food Delivered"
 	tsline food*ma if wave == 2001, name(food, replace) title("Food Expenditure in 2001")
-	collapse *expenditure_ma, by(age)
+	collapse *expenditure_ma expenditure_blundell*ma, by(age)
 	
 	tsset age
 
@@ -88,10 +88,19 @@ preserve
 	lab var homeinsuranceexpenditure "Home Insurance Expenditure"
 	lab var utilityexpenditure "Utility Expenditure"
 
+	lab var expenditure_blundell_ma "Blundell Expenditure"
+	lab var expenditure_blundell_exhealth_ma "Blundell Expenditure (ex health)"
+	lab var expenditure_blundell_exhous_ma "Blundell Expenditure (ex housing)"
+	lab var expenditure_blundell_eq_ma "Blundell Expenditure"
+	lab var expenditure_blundell_eq_exH_ma "Blundell Expenditure (ex housing)"
+
 	tsline housingexpenditure mortgageexpenditure rentexpenditure, name(housing, replace) title("Housing Expenditure")
 	tsline propertytaxexpenditure homeinsuranceexpenditure utilityexpenditure, name(housing_cont, replace) title("Housing Expenditure Cont.")
+
+	tsline expenditure_blundell_ma expenditure_blundell_exhealth_ma expenditure_blundell_exhous_ma, name(blundell, replace) title("Blundell Expenditure")
+	tsline expenditure_blundell_eq_ma expenditure_blundell_eq_exH_ma, name(blundell_eq, replace) title("Blundell Expenditure (Equivalence Scale)")
 restore
-*/
+
 
 ****************************************************************************************************
 ** Sample Selection as in Blundell et al

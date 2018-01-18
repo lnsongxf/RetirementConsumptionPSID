@@ -31,9 +31,30 @@ replace retirement_transition_loose  = 0 if back_to_work == 1
 replace retirement_transition_strict = 0 if back_to_work == 1
 
 * Replace all retirement transitions with zero if outside of 50 - 70 age range (following Hurd and Rohwedder)
-replace retirement_transition        = 0 if age < 50 | age > 70
-replace retirement_transition_loose  = 0 if age < 50 | age > 70
-replace retirement_transition_strict = 0 if age < 50 | age > 70
+* Pat Note: I expanded to age 75, just in case it gives us more observations
+replace retirement_transition        = 0 if age < 50 | age > 75
+replace retirement_transition_loose  = 0 if age < 50 | age > 75
+replace retirement_transition_strict = 0 if age < 50 | age > 75
+
+****************************************************************************************************
+** Choose an alternative measure of retirement
+****************************************************************************************************
+
+* Loose
+if $retirement_definition == 1{
+	drop retirement_transition
+	rename retirement_transition_loose retirement_transition
+}
+
+* Strict
+if $retirement_definition == 2{
+	drop retirement_transition
+	rename retirement_transition_strict retirement_transition
+}
+
+****************************************************************************************************
+** Look into the difference between observed retirement and reported retirement
+****************************************************************************************************
 
 * Look at difference in self reported retirement year and the wave that they are first observed retired 
 * NOTE: any value < -2 is suspicious!
@@ -54,4 +75,5 @@ replace retired = 0 if retired == .
 
 * by pid, sort: egen max_retired = max(retired)
 * edit pid wave retirement_transition retired inc_ss_fam inc_ss_head if max_r == 1
+
 

@@ -2,8 +2,10 @@ set more off
 global folder "C:\Users\pedm\Documents\Research\Cormac\RetirementConsumptionPSID"
 use "$folder\Data\Intermediate\Basic-Panel.dta", clear
 
-global allow_kids_to_leave_hh 1 // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH 
-                                // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
+global retirement_definition 0   // 0 is default (last job ended due to "Quit, Resigned, Retire" or "NA")
+                                 // 1 is loose (does not ask why last job ended) and 2 is strict (last job ended due to "Quit, Resigned, Retire" only)
+global allow_kids_to_leave_hh 1  // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH 
+                                 // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
 
 * Sample selection: households with same husband-wife over time
 do "$folder\Do\Sample-Selection.do"

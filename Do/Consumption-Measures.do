@@ -29,8 +29,11 @@ lab var transportation_blundell "Transportation Services (Blundell et al)"
 
 * Blundell et al Expenditure (equivalence scale)
 egen expenditure_blundell          = rowtotal(`expenditure_blundell')
-gen expenditure_blundell_exhousing = expenditure_blundell - rent_imputed - homeinsuranceexpenditure
+gen expenditure_blundell_exhealth  = expenditure_blundell - healthservicesexpenditure - healthinsuranceexpenditure
+gen expenditure_blundell_exhous    = expenditure_blundell - rent_imputed - homeinsuranceexpenditure
 gen expenditure_blundell_eq        = expenditure_blundell / fsize
+gen expenditure_blundell_eq_exH    = expenditure_blundell_exhous / fsize
+
 lab var expenditure_blundell "Total Expenditure (Blundell et al)"
 lab var expenditure_blundell_eq "Total Expenditure (equivalence scale)"
 

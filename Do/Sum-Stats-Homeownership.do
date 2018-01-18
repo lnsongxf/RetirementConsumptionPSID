@@ -6,11 +6,13 @@ use "$folder\Data\Intermediate\Basic-Panel.dta", clear
 global allow_kids_to_leave_hh 1 // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH 
                                 // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
 
+drop if emp_status_head != 1 // only keep employed heads. Question: should I put this earlier? ie to split up HH? or later?
+
 * Sample selection: households with same husband-wife over time
 do "$folder\Do\Sample-Selection.do"
 
 * Generate aggregate consumption (following Blundell et al)
-* do "$folder\Do\Consumption-Measures.do"
+do "$folder\Do\Consumption-Measures.do"
 
 ****************************************************************************************************
 ** Find home purchases
@@ -38,20 +40,34 @@ by pid, sort: egen waves = count(wave)
 tab waves if homepurchase_ != .
 keep if waves >= 9
 
-** Only keep those observed at least 4 years before home purchase
-* by pid, sort: egen min_t = min(t_homeownership)
-* keep if min_t <= -4
+* Only keep those observed at least 4 years before home purchase
+by pid, sort: egen min_t = min(t_homeownership)
+keep if min_t <= -4
 
-** And do the same on the other side
-* by pid, sort: egen max_t = max(t_homeownership)
-* keep if max_t >= 4
+* And do the same on the other side
+by pid, sort: egen max_t = max(t_homeownership)
+keep if max_t >= 4
 
 ****************************************************************************************************
 ** Collapse
 ****************************************************************************************************
 
-collapse *wealth* homeequity homeowner housevalue mortgage* rentexpenditure (count) n = homeowner, by(t_homeownership)
+* Wow homeequity does some crazy things
+* Lots of cases where they own a house and then homeequity becomes 0 for a year
+* Or where homeequity is originally huge (perhaps whole value of home) then becomes very low (as in 10-20%)
+* edit pid wave homeequity homeowner if t_homeownership != .
+
+
+* drop if emp_status_head != 1 // only keep employed heads. Question: should I put this earlier? ie to split up HH?
+* could do similar if spouse is unemployed?
+
+gen c_to_i = expenditure_blundell_exhousing / inc_fam
+hist c_to_i if t_homeownership == -4
+
+collapse *wealth* homeequity homeowner housevalue mortgage1 mortgage2 *expenditure* c_to_i (count) n = c_to_i, by(t_homeownership)
 drop if t_homeownership == .
+
+drop if t_homeownership < -4 | t_homeownership > 4
 
 tsset t_homeownership
 
@@ -78,3 +94,14 @@ tsline rentexpenditure mortgageexpenditure, name("expend", replace)
 * though what if we just look at those who are observed earlier?
 
 * todo: issues related to nominal vs real?
+
+tsline expenditure_blundell, name("blundell", replace)
+tsline expenditure_blundell_eq, name("blundell_eq", replace)
+tsline expenditure_blundell_exhousing, name("expenditure_blundell_exhousing", replace)
+tsline expenditure_blundell_eq_exH, name("expenditure_blundell_eq_exH", replace)
+tsline furnishingsexpenditure, name("furnishingsexpenditure", replace)
+
+tsline c_to_i , name("c_to_i", replace)
+
+
+* question: do we know when the marriage takes place? i just realized that a "wife" can transition to wife. and this will still be included in current sample
