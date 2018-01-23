@@ -1,5 +1,6 @@
 set more off
-global folder "C:\Users\pedm\Documents\Research\Cormac\RetirementConsumptionPSID"
+* global folder "C:\Users\pedm\Documents\Research\Cormac\RetirementConsumptionPSID"
+global folder "F:\Cormac Project January 18 2018 Backup\RetirementConsumptionPSID"
 use "$folder\Data\Intermediate\Basic-Panel.dta", clear
 
 * Switches
@@ -112,7 +113,6 @@ if $ret_duration_definition == 3{
 	gen ret_duration                      = wave - generated_ret_year
 }
 
-
 ****************************************************************************************************
 ** Look at consumption based on time since retirement
 ** Here retirement year is defined as the first survey wave where they say they are retired
@@ -149,7 +149,8 @@ if $graphs_by_quintile == 0{
 	tsline expenditure_blundell_eq, title("Blundell Expenditure (Eq Scale)") name("expenditure_blundell_eq", replace)
 	tsline expenditure_blundell_exhous, title("Blundell Expenditure Ex Housing") name("expenditure_blundell_exhous", replace)
 	tsline expenditure_blundell_exhealth,  title("Blundell Expenditure Ex Health") name("expenditure_blundell_exhealth", replace)
-
+	tsline expenditure_blundell_ex3, title("Blundell Expenditure Ex Edu, Child Care, Health") name("expenditure_blundell_ex3", replace)
+	
 	tsline foodawayfromhomeexpenditure foodathomeexpenditure, title("Food") name("food", replace)
 	tsline taxiexpenditure, title("Taxis") name("taxis", replace)
 	tsline recreationexpenditure clothingexpenditure tripsexpenditure, title("New Consumption Measures (Post 2005)") name("newmeasures", replace)

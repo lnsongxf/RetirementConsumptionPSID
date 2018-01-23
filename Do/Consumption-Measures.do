@@ -22,8 +22,6 @@ healthinsuranceexpenditure healthservicesexpenditure utilityexpenditure ///
 transportation_blundell educationexpenditure childcareexpenditure /// 
 homeinsuranceexpenditure rent_imputed 
 
-gen equiv = sqrt(fsize)
-
 egen transportation_blundell = rowtotal(`transportation_blundell')
 lab var transportation_blundell "Transportation Services (Blundell et al)"
 
@@ -31,11 +29,10 @@ lab var transportation_blundell "Transportation Services (Blundell et al)"
 egen expenditure_blundell          = rowtotal(`expenditure_blundell')
 gen expenditure_blundell_exhealth  = expenditure_blundell - healthservicesexpenditure - healthinsuranceexpenditure
 gen expenditure_blundell_exhous    = expenditure_blundell - rent_imputed - homeinsuranceexpenditure
-gen expenditure_blundell_eq        = expenditure_blundell / fsize
-gen expenditure_blundell_eq_exH    = expenditure_blundell_exhous / fsize
+gen expenditure_blundell_ex3 = expenditure_blundell - educationexpenditure - childcareexpenditure - healthservicesexpenditure
 
+lab var expenditure_blundell_ex3 "Blundell Ex - Edu, Child Care, Health"
 lab var expenditure_blundell "Total Expenditure (Blundell et al)"
-lab var expenditure_blundell_eq "Total Expenditure (equivalence scale)"
 
 
 * /* Consumption */
@@ -59,3 +56,54 @@ lab var expenditure_blundell_eq "Total Expenditure (equivalence scale)"
 * maintenance, gasoline, parking bus fares and train fares, taxicabs and
 * other transportation.
 
+
+****************************************************************************************************
+** Merge in CPI
+****************************************************************************************************
+
+gen year = wave - 1 // note that expenditure data is for year prior to interview
+merge m:1 year using "$folder\Data\Intermediate\CPI.dta"
+drop if _m == 2 
+drop year _m
+
+* Convert to real terms using individual index
+* Note: individual index might have different base year from CPI_all 
+* Can see base year in xlsx file with CPI data
+* (do not add/subtract real series without accounting for this)
+replace gasolineexpenditure = 100 * gasolineexpenditure / CPI_gasoline
+replace foodexpenditure = 100 * foodexpenditure / CPI_food
+replace foodathomeexpenditure = 100 * foodathomeexpenditure / CPI_foodathome
+replace foodawayfromhomeexpenditure = 100 * foodawayfromhomeexpenditure / CPI_foodawayfromhome 
+replace fooddeliveredexpenditure = 100 * fooddeliveredexpenditure / CPI_food
+replace transportationexpenditure = 100 * transportationexpenditure / CPI_transportation 
+replace healthcareexpenditure = 100 * healthcareexpenditure / CPI_health
+replace healthinsuranceexpenditure = 100 * healthinsuranceexpenditure / CPI_health
+replace healthservicesexpenditure = 100 * healthservicesexpenditure / CPI_health
+replace clothingexpenditure = 100 * clothingexpenditure / CPI_apparel
+replace recreationexpenditure = 100 * recreationexpenditure / CPI_recreation
+
+* Convert to real terms using CPI_all
+foreach var of varlist housingexpenditure mortgageexpenditure rentexpenditure ///
+	propertytaxexpenditure homeinsuranceexpenditure utilityexpenditure ///
+	vehicleloanexpenditure vehicledpexpenditure vehicleleaseexpenditure ///
+	autoinsexpenditure addvehicleexpenditure vehiclerepairexpenditure ///
+	parkingexpenditure bustrainexpenditure taxiexpenditure othertransexpenditure ///
+	educationexpenditure childcareexpenditure telephoneexpenditure ///
+	repairsexpenditure furnishingsexpenditure tripsexpenditure ///
+	expenditure_blundell expenditure_blundell_exhealth expenditure_blundell_exhous ///
+	expenditure_blundell_ex3 {
+	
+	* di "`var'"
+	replace `var' = 100 * `var' / CPI_all
+}
+
+****************************************************************************************************
+** Equivalence scale
+****************************************************************************************************
+
+gen equiv = sqrt(fsize)
+
+gen expenditure_blundell_eq        = expenditure_blundell / fsize
+gen expenditure_blundell_eq_exH    = expenditure_blundell_exhous / fsize
+
+lab var expenditure_blundell_eq "Total Expenditure (equivalence scale)"

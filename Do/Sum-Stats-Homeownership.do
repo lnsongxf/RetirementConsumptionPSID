@@ -1,5 +1,6 @@
 set more off
-global folder "C:\Users\pedm\Documents\Research\Cormac\RetirementConsumptionPSID"
+* global folder "C:\Users\pedm\Documents\Research\Cormac\RetirementConsumptionPSID"
+global folder "F:\Cormac Project January 18 2018 Backup\RetirementConsumptionPSID"
 use "$folder\Data\Intermediate\Basic-Panel.dta", clear
 
 * Switches
@@ -20,6 +21,7 @@ do "$folder\Do\Consumption-Measures.do"
 
 gen homeowner                           = housingstatus == 1 // housing status can be rent, own, or other
 by pid, sort: generate runsum_homeowner = sum(homeowner) // will be 0 if they have never owned previously (in our sample)
+sort pid wave
 gen homepurchase_                       = wave if homeowner == 1 & L.runsum_homeowner == 0 // select the year that they are first observed owning a house
 by pid, sort: egen homepurchase_year    = max(homepurchase_) // replicate this across waves
 gen t_homeownership                     = wave - homepurchase_year // duration of homeownership
@@ -61,10 +63,10 @@ keep if max_t >= 4
 * drop if emp_status_head != 1 // only keep employed heads. Question: should I put this earlier? ie to split up HH?
 * could do similar if spouse is unemployed?
 
-gen c_to_i = expenditure_blundell_exhousing / inc_fam
-hist c_to_i if t_homeownership == -4
+// gen c_to_i = expenditure_blundell_exhous / inc_fam
+// hist c_to_i if t_homeownership == -4
 
-collapse *wealth* homeequity homeowner housevalue mortgage1 mortgage2 *expenditure* c_to_i (count) n = c_to_i, by(t_homeownership)
+collapse *wealth* homeequity homeowner housevalue mortgage1 mortgage2 *expenditure* /* c_to_i */ (count) n = c_to_i, by(t_homeownership)
 drop if t_homeownership == .
 
 drop if t_homeownership < -4 | t_homeownership > 4
@@ -97,11 +99,11 @@ tsline rentexpenditure mortgageexpenditure, name("expend", replace)
 
 tsline expenditure_blundell, name("blundell", replace)
 tsline expenditure_blundell_eq, name("blundell_eq", replace)
-tsline expenditure_blundell_exhousing, name("expenditure_blundell_exhousing", replace)
+tsline expenditure_blundell_exhous, name("expenditure_blundell_exhousing", replace)
 tsline expenditure_blundell_eq_exH, name("expenditure_blundell_eq_exH", replace)
 tsline furnishingsexpenditure, name("furnishingsexpenditure", replace)
 
-tsline c_to_i , name("c_to_i", replace)
+// tsline c_to_i , name("c_to_i", replace) // WARNING: c is real, i is nominal
 
 
 * question: do we know when the marriage takes place? i just realized that a "wife" can transition to wife. and this will still be included in current sample
