@@ -1,5 +1,6 @@
 set more off
-global folder "C:\Users\pedm\Documents\Research\Cormac\RetirementConsumptionPSID"
+// global folder "C:\Users\pedm\Documents\Research\Cormac\RetirementConsumptionPSID"
+global folder "C:\Users\Person\Documents\GitHub\RetirementConsumptionPSID"
 use "$folder\Data\Intermediate\Basic-Panel.dta", clear
 
 global retirement_definition 0   // 0 is default (last job ended due to "Quit, Resigned, Retire" or "NA")
@@ -81,3 +82,27 @@ preserve
 	label var ret_duration "Duration of Head's Retirement (ret year as self reported)"
 	tsline `inc_measures', title("Income based on time since head's retirement") name("income_by_ret_duration_3", replace) ylabel(#3)
 restore
+
+
+
+****************************************************************************************************
+* Check about the zero social security. I would hope there are very few 
+* households with zero Social Security who have reached age 65?
+****************************************************************************************************
+
+gen pos_inc_ss_head = inc_ss_head > 0 & inc_ss_head != .
+gen pos_inc_ss_fam = inc_ss_fam > 0 & inc_ss_fam != .
+
+keep if wave >= 2005 // in 2005 they started recording inc_ss_head
+collapse *inc_ss* (count) c = inc_ss_head, by(age)
+tsset age
+
+lab var pos_inc_ss_head "% with positive inc_ss_head"
+lab var pos_inc_ss_fam  "% with positive inc_ss_fam"
+
+tsline inc_ss_head inc_ss_fam, name("inc_ss", replace)
+tsline pos_inc_ss*, name("pos_inc_ss", replace)
+
+* At age 62, 29.4% of heads have positive SS income
+* At age 65, 60.7% of heads have positive SS income
+* At age 70, 94.3% of heads have positive SS income

@@ -4,11 +4,11 @@ global folder "F:\Cormac Project January 18 2018 Backup\RetirementConsumptionPSI
 use "$folder\Data\Intermediate\Basic-Panel.dta", clear
 
 * Switches
-global quintiles_definition 4    // Defines quintiles. Can be 1, 2, 3, or 4. My preference is 4
+global quintiles_definition 4    // Defines quintiles. Can be 1, 2, 3, or 4. My preference is 4. I think the next best option is 2
 global retirement_definition 0   // 0 is default (last job ended due to "Quit, Resigned, Retire" or "NA")
                                  // 1 is loose (does not ask why last job ended) and 2 is strict (last job ended due to "Quit, Resigned, Retire" only)
 global ret_duration_definition 2 // Defines retirement year. Can be 1, 2, or 3. My preference is 3 (for the sharp income drop) although 2 is perhaps better when looking at consumption data (for smoothness)
-global graphs_by_quintile 0      // Graph by quintile. Can be 0 or 1
+global graphs_by_quintile 1      // Graph by quintile. Can be 0 or 1
 global allow_kids_to_leave_hh 1  // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH 
                                  // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
 
@@ -35,7 +35,7 @@ if $quintiles_definition == 1{
 
 	** Problem with this measure is that there are lots of cases where inc_ss_fam_last == 0
 	** So the lowest quintile isn't made of households with the lowest permanent income
-	* hist inc_ss_fam_last if wave == max_year & retired == 1, name("hist", replace)
+	hist inc_ss_fam_last if wave == max_year & retired == 1, name("hist", replace)
 }
 
 
@@ -52,8 +52,38 @@ if $quintiles_definition == 2{
 	** Problem with this measure is that there are lots of cases where max_inc_ss_fam == 0
 	** So the lowest quintile isn't made of households with the lowest permanent income
 	* hist max_inc_ss_fam if wave == max_year & retired == 1, name("hist_max", replace)
+	
+	* by pid, sort: egen max_retired = max(retired)
+	* sort pid wave
+	* edit pid wave age sex_head retired inc_ss_fam inc_ss_head if max_retired == 1 & quintile == 1
+	
+	* Look into the people with 0 inc_ss_fam
+	by pid, sort: egen max_age = max(age)
+	sort pid wave
+	tab max_age if retired == 1 & L.retired == 0 & max_inc_ss_fam == 0
+	tab max_age if retired == 1 & L.retired == 0 & max_inc_ss_fam > 0
+	
+	* I think we're catching the young households in quintile 1
+	* For instance, 65% of individuals with max_inc_ss_fam == 0 are last observed at age <= 62
+	
+	* The average person in quintile 1 retired at age 60
+	* The average person in quintile 2-5 retired at age 63-64
+	reg age i.quintile  if retired == 1 & L.retired == 0
+	
+	* The average person in quintile 1 is last observed at age 62
+	* The average person in quintile 2-5 is last observed between 68-70
+	reg max_age i.quintile  if retired == 1 & L.retired == 0
+
 }
 
+sdfsdf
+
+* Going forward, if we want to divide by max_inc_ss_fam quintiles, perhaps we drop households that retired young
+
+* Note: when using this type of quintile, there's a very large increase in trips expenditure for the top quintile
+*       food away from home also increases a bit
+*       real blundell expenditure declines for quintiles 1-4, but remains flat for quintile 5
+*       real blundell expenditure (in equivalence units) remains flat for the other quintiles, but goes up for quintile 5
 
 ****************************************************************************************************
 ** (3) Quintiles based on HEAD social security income in retirement

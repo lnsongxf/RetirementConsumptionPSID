@@ -72,3 +72,5 @@ while `ind'>0 {
 /*  Drop observations with total net worth higher than 20M$ */ 
 drop if fam_wealth >= 20000000 & fam_wealth!=.
 xtset pid wave, delta(2) // specify that we have data every other year
+
+drop if age >= 100

@@ -31,10 +31,10 @@ replace retirement_transition_loose  = 0 if back_to_work == 1
 replace retirement_transition_strict = 0 if back_to_work == 1
 
 * Replace all retirement transitions with zero if outside of 50 - 70 age range (following Hurd and Rohwedder)
-* Pat Note: I expanded to age 75, just in case it gives us more observations
-replace retirement_transition        = 0 if age < 50 | age > 75
-replace retirement_transition_loose  = 0 if age < 50 | age > 75
-replace retirement_transition_strict = 0 if age < 50 | age > 75
+* Pat Note: I expanded to age 80, just in case it gives us more observations
+replace retirement_transition        = 0 if age < 50 | age > 80
+replace retirement_transition_loose  = 0 if age < 50 | age > 80
+replace retirement_transition_strict = 0 if age < 50 | age > 80
 
 ****************************************************************************************************
 ** Choose an alternative measure of retirement
