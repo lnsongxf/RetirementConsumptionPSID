@@ -56,10 +56,35 @@ lab var expenditure_blundell "Total Expenditure (Blundell et al)"
 * maintenance, gasoline, parking bus fares and train fares, taxicabs and
 * other transportation.
 
+****************************************************************************************************
+** Total expenditure
+** Will be useful for constructing savings rate = (Y - C) / Y
+****************************************************************************************************
+
+* Pre 2005, only measure 70% of expenditure
+local expenditure_total_70 foodexpenditure healthcareexpenditure utilityexpenditure ///
+      transportationexpenditure educationexpenditure childcareexpenditure ///
+	  housingexpenditure
+	  
+	  * rent_imputed propertytaxexpenditure homeinsuranceexpenditure
+	  
+* I exclude housingexpenditure and replace it with rent_imputed propertytaxexpenditure homeinsuranceexpenditure
+
+* Starting in 2005, more comprehensive measure
+* TODO: check that repairsexpenditure is not included in housingexpenditure. pretty sure it's not
+local expenditure_total_100 `expenditure_total_70' furnishingsexpenditure ///
+      clothingexpenditure tripsexpenditure recreationexpenditure repairsexpenditure
+
+egen expenditure_total_70          = rowtotal(`expenditure_total_70')
+egen expenditure_total_100         = rowtotal(`expenditure_total_100')
+
+* WARNING: housingexpenditure includes mortgage payment. Might be better to include imputed rents for those people
+* Also, Straub drops repairsexpenditure (and maybe furnishing?) cause those are savings rather than consumption
 
 ****************************************************************************************************
 ** Merge in CPI
 ****************************************************************************************************
+
 
 gen year = wave - 1 // note that expenditure data is for year prior to interview
 merge m:1 year using "$folder\Data\Intermediate\CPI.dta"
@@ -96,6 +121,8 @@ foreach var of varlist housingexpenditure mortgageexpenditure rentexpenditure //
 	* di "`var'"
 	replace `var' = 100 * `var' / CPI_all
 }
+
+* TODO: perhaps down the road add expenditure_total* and inc_* 
 
 ****************************************************************************************************
 ** Equivalence scale

@@ -7,9 +7,10 @@ if $allow_kids_to_leave_hh == 1{
 	* Blundell et al use fchg>1 to break the HH when there's a change in the head or spouse
 	local fchg_cutoff 1
 
-	* Note: by selecting fchg>1, we select all cases other than these:
+	* Note: by dropping if fchg>1, we keep these cases only:
 	* 0 "No change; no movers-in or movers-out of the family"
 	* 1 "Change in members other than Head or Spouse/Partner only"
+	
 	* (fchg>1 indicates that there has been some change in either the head or the spouse)
 	* (there are only two exceptions: "other" and "underage splitoff child")
 

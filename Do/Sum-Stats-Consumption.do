@@ -1,5 +1,6 @@
 set more off
-global folder "C:\Users\pedm\Documents\Research\Cormac\RetirementConsumptionPSID"
+* global folder "C:\Users\pedm\Documents\Research\Cormac\RetirementConsumptionPSID"
+global folder "C:\Users\Person\Documents\GitHub\RetirementConsumptionPSID"
 
 use "$folder\Data\Intermediate\Basic-Panel.dta", clear
 
@@ -13,6 +14,7 @@ do "$folder\Do\Consumption-Measures.do"
 ** Replicate Transportation Section of Appendix Table 4 in "Estimates of Annual Consumption Expenditures and Its Major Componenets"
 ****************************************************************************************************
 
+/*
 * All components of transportation
 local transportation_subcomponenets vehicleloanexpenditure vehicledpexpenditure /// 
 vehicleleaseexpenditure autoinsexpenditure addvehicleexpenditure ///
@@ -36,6 +38,8 @@ title("Estimates of Annual Consumption Expenditures and Its Major Componenets, A
 * In their table, this is 92 to 133 per year. Approximately 1/12th the value in my data
 * Perhaps they forgot to convert monthly to annual?
 * I have not done anything to modify this variable. The PSID converted monthly to annual (and did an imputation) for us
+
+*/
 
 ****************************************************************************************************
 ** Replicate Figures in "Studying Consumption with the PSID"
@@ -68,26 +72,29 @@ preserve
 		tssmooth ma `var'_ma = `var', window(1 1 1) 
 	}
 	
-	keep if age <= 75 & age >= 23
+	keep if age <= 75 & age >= 22
 	desc food*ma
 
 	lab var foodexpenditure_ma "Total Food Expenditure"
 	lab var foodathomeexpenditure_ma "Food at Home"
 	lab var foodawayfromhomeexpenditure_ma "Food Away From Home"
 	lab var fooddeliveredexpenditure_ma "Food Delivered"
-	tsline food*ma if wave == 2001, name(food, replace) title("Food Expenditure in 2001")
-	collapse *expenditure_ma expenditure_blundell*ma, by(age)
 	
+	tsline food*ma if wave == 2001, name(food, replace) title("Food Expenditure in 2001")
+	
+	* Collapse by age
+	* PS: here I am following Kerwin Charles' methodology for smoothing these
+	collapse *expenditure_ma expenditure_blundell*ma expenditure_total_*, by(age)
 	tsset age
 
 	lab var housingexpenditure "Housing Expenditure"
 	lab var mortgageexpenditure "Mortgage Expenditure"
 	lab var rentexpenditure "Rent Expenditure"
-
 	lab var propertytaxexpenditure "Property Tax Expenditure"
 	lab var homeinsuranceexpenditure "Home Insurance Expenditure"
 	lab var utilityexpenditure "Utility Expenditure"
-
+	
+	lab var expenditure_total_70_ma "Total Expenditure (70%)"
 	lab var expenditure_blundell_ma "Blundell Expenditure"
 	lab var expenditure_blundell_exhealth_ma "Blundell Expenditure (ex health)"
 	lab var expenditure_blundell_exhous_ma "Blundell Expenditure (ex housing)"
@@ -99,8 +106,35 @@ preserve
 
 	tsline expenditure_blundell_ma expenditure_blundell_exhealth_ma expenditure_blundell_exhous_ma, name(blundell, replace) title("Blundell Expenditure")
 	tsline expenditure_blundell_eq_ma expenditure_blundell_eq_exH_ma, name(blundell_eq, replace) title("Blundell Expenditure (Equivalence Scale)")
+	
+	tsline expenditure_total_70_ma, name(total70, replace) title("Total Expenditure (Average for 1999, 2001, 2003)") subtitle("Charles et al, Figure 8")
+	* TODO: why does expenditure reach a higher peak than in Charles? Perhaps he uses imputed rents rather than housing expenditure?
+
+	* Or could it be this? "Over all three waves of data combined, fifteen cases had values for expenditures in one category that were several 
+	* orders of magnitude larger than the average spending across all families for the given category. In these cases, the 
+	* value was assumed to be invalid and it was imputed using the same approach that was used for item nonresponse 
+	* described below."
+
 restore
 
+****************************************************************************************************
+** Total Expenditure
+****************************************************************************************************
+
+graph bar expenditure_total* [pweight = family_weight], over(wave) title("Average annual expenditure in PSID, nominal") name(bar, replace)
+
+gen savings_rate = (inc_fam - expenditure_total_70)/inc_fam if inc_fam > 5000
+
+* looks a bit crazy - there are some people with 6 digit expenditure, but low income. why? a few very high expenditure values?
+hist savings_rate
+
+graph bar savings_rate [pweight = family_weight], over(wave) title("Average savings rate") name(bar, replace)
+* note: will need to subtract taxes
+* also we're just using the 70% c measure
+
+* TODO: can I find a paper that computes this by wave using the PSID?
+
+sdfsdf
 
 ****************************************************************************************************
 ** Sample Selection as in Blundell et al
