@@ -1,13 +1,14 @@
 set more off
 * global folder "C:\Users\pedm\Documents\Research\Cormac\RetirementConsumptionPSID"
-global folder "F:\Cormac Project January 18 2018 Backup\RetirementConsumptionPSID"
+global folder "C:\Users\Person\Documents\GitHub\RetirementConsumptionPSID"
+
 use "$folder\Data\Intermediate\Basic-Panel.dta", clear
 
 * Switches
 global allow_kids_to_leave_hh 1 // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH 
                                 // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
 
-drop if emp_status_head != 1 // only keep employed heads. Question: should I put this earlier? ie to split up HH? or later?
+// drop if emp_status_head != 1 // only keep employed heads. Question: should I put this so early? ie to split up HH? or later?
 
 * Sample selection: households with same husband-wife over time
 do "$folder\Do\Sample-Selection.do"
@@ -19,8 +20,10 @@ do "$folder\Do\Consumption-Measures.do"
 ** Find home purchases
 ****************************************************************************************************
 
+sort pid wave                                                // this is very important so that the runsum works correctly
 gen homeowner                           = housingstatus == 1 // housing status can be rent, own, or other
-by pid, sort: generate runsum_homeowner = sum(homeowner) // will be 0 if they have never owned previously (in our sample)
+by pid, sort: generate runsum_homeowner = sum(homeowner)     // will be 0 if they have never owned previously (in our sample)
+
 sort pid wave
 gen homepurchase_                       = wave if homeowner == 1 & L.runsum_homeowner == 0 // select the year that they are first observed owning a house
 by pid, sort: egen homepurchase_year    = max(homepurchase_) // replicate this across waves
@@ -34,21 +37,77 @@ tab homepurchase_
 
 * TODO: can I get a better measure of home purchase year? for instance, do they ask people when they moved into their current house?
 
+
+* I wonder if it would be interesting to look at savings rates before / after getting either a home equity loan or HELOC
+tab type_mortgage2 wave
+* (2,136 year-wave observations with home equity loan, 334 year-wave obs with HELOC. plus maybe a few more if we look in type_mortgage1)
+
 ****************************************************************************************************
 ** Only keep those who are observed for at least n waves
 ****************************************************************************************************
+
+* drop people with positive mortgage expenditure but who do not own a house
+* all of these people responded "neither" to the rent or own question
+* edit if mortgageexpenditure > 0 & t_homeownership < 0
+drop if mortgageexpenditure > 0 & t_homeownership < 0 // these people do not make sense
 
 by pid, sort: egen waves = count(wave)
 tab waves if homepurchase_ != .
 keep if waves >= 9
 
+/*
 * Only keep those observed at least 4 years before home purchase
 by pid, sort: egen min_t = min(t_homeownership)
+tab min_t
 keep if min_t <= -4
 
 * And do the same on the other side
 by pid, sort: egen max_t = max(t_homeownership)
+tab max_t
 keep if max_t >= 4
+*/
+
+* After dropping based on min_t and max_t, I observe just 31 households making the transition :/
+
+****************************************************************************************************
+** Savings
+****************************************************************************************************
+
+* Dynan et al 2004 ("Do the rich save more?") have two ways to compute savings rates:
+* consumption based savings rate = (Y-C) / Y (SCF)
+* wealth difference savings rate = (At - At-1) / Y (SCF, PSID)
+
+* Straub prefers the consumption based savings rate "because it is generally difficult 
+* to distentagle ex-ante savings behavior from ex-post returns or transfers"
+* Straub uses PSID. He faces the choice between the long running (70% measure)
+* and short running but comprehensive measure. Chooses long running measure. But shows
+* that switching to the comprehensive measure has only a small impact on results
+
+* Largest categories missing pre 2005 are home repairs and maintenance, household furnishing, and clothing
+
+* Includes all available expenditure categories including durable goods
+* Since mortgage payments = imputed rents + accumulation of housing welath, he 
+* replaces mortgage payments with imputed rent as computed by the PSID
+* (notes that results are very similar if he computes imputed rents as 6% of the house price
+* as in Blundell et al 2016 and Poterba and Sinai 2008. 
+
+* Also uses post-tax household labor income (labor income of all family members minus taxes, computed using NBER's taxsim program)
+* Discusses alternative: after-tax total income (including capital income as well as private and public transfers)
+* Uses post-1999 longitudinal weights
+
+* Straub:
+* exclude households without a single non-missing consumption and income observation
+* exclude extreme observations with income below 5% of yearly average income
+
+* QUESTION: PSID reports imputed rents?
+* Macro Handbook suggests that PSID housing expenditure is 
+
+* In baseline results, includes durables in his expenditure measure, since those would scale linearly in permanent income
+* But does robustness where he excludes 
+
+* When using the post 2005 expenditure measure, excludes home repairs and maintenance costs since these are investments
+
+* PS: 2007 wave asks the head about their reported bequest intention
 
 ****************************************************************************************************
 ** Collapse
@@ -66,12 +125,15 @@ keep if max_t >= 4
 // gen c_to_i = expenditure_blundell_exhous / inc_fam
 // hist c_to_i if t_homeownership == -4
 
-collapse *wealth* homeequity homeowner housevalue mortgage1 mortgage2 *expenditure* /* c_to_i */ (count) n = c_to_i, by(t_homeownership)
+collapse *wealth* inc_* homeequity homeowner housevalue mortgage1 mortgage2 *expenditure* /* c_to_i  (count) n = c_to_i */, by(t_homeownership)
 drop if t_homeownership == .
-
 drop if t_homeownership < -4 | t_homeownership > 4
-
 tsset t_homeownership
+
+
+tsline inc_fam inc_head inc_spouse /* inc_transfer inc_ss_fam */ , title("Income (Nominal)") name("inc", replace)
+
+
 
 tsline homeowner, name("homeowner", replace) // woaw. was not expecting that 20% of people who buy a home are back to renting 2 years later
 
