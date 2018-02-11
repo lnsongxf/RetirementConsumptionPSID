@@ -156,9 +156,9 @@ gen age_sq = age^2
 * xtreg foodathomeexpenditure i.years_before_first_home children inc_fam educhead age age_sq i.married i.racehead, fe
 
 
-
+/*
 * Look at results
-keep if tripsexp != . // only needed when looking at trips / recreation
+// keep if tripsexp != . // only needed when looking at trips / recreation
 by pid, sort: egen min_t_homeown = min(t_homeown)
 tab min_t_h
 keep if min_t_home <= -4
@@ -169,18 +169,18 @@ foreach var of varlist food*{
 	gen `var'_eq = `var' / equiv
 }
 
-collapse children fsize *expenditure* (count)c = foodexpenditure, by(t_homeown)
+collapse children fsize (mean) *expenditure* (count)c = foodexpenditure, by(t_homeown) // TODO: mean or median?
 tsset t_
 tsline food*e if t_ <= 0 & t_ >= -4
 tsline food*eq if t_ <= 0 & t_ >= -4
 // tsline children fsize if t_ <= 0 & t_ >= -4
 
 tsline tripsexpenditure recreationexpenditure if t_ <= 0 & t_ >= -4
-
-// tsline c
+// tsline expenditure_blundell_eq_exH if t_ >= -4 & t_ <=0
 
 sdfdsf
 
+*/
 
 
 ****************************************************************************************************
@@ -261,17 +261,18 @@ by pid, sort: egen min_t = min(t_homeownership)
 tab min_t
 keep if min_t <= -6
 
-collapse *wealth* inc_* homeequity homeowner housevalue mortgage1 mortgage2 *expenditure* /* c_to_i  (count) n = c_to_i */, by(t_homeownership)
+collapse *wealth* inc_* homeequity homeowner housevalue mortgage1 mortgage2 *expenditure* (count) n = inc_fam /* c_to_i  (count) n = c_to_i */, by(t_homeownership)
 drop if t_homeownership == .
 drop if t_homeownership < -6 | t_homeownership > 0
 tsset t_homeownership
 
+tsline n, name("n", replace)
+tsline food*, name("foodeq", replace)
 tsline expenditure_blundell, name("blundell1", replace)
 tsline expenditure_blundell_eq, name("blundell_eq1", replace)
 tsline expenditure_blundell_exhous, name("expenditure_blundell_exhousing1", replace)
 tsline expenditure_blundell_eq_exH, name("expenditure_blundell_eq_exH1", replace)
 tsline furnishingsexpenditure, name("furnishingsexpenditure1", replace)
-
 
 restore
 
