@@ -1,6 +1,7 @@
 set more off
 clear all
-global folder "C:\Users\pedm\Documents\Research\Cormac\RetirementConsumptionPSID"
+// global folder "C:\Users\pedm\Documents\Research\Cormac\RetirementConsumptionPSID"
+global folder "C:\Users\STUDENT\Documents\GitHub\RetirementConsumptionPSID"
 
 ****************************************************************************************************
 ** Convert year level zip files to dta files
@@ -681,9 +682,49 @@ psid use
 	[99]ER13056 [01]ER17063 [03]ER21062 [05]ER25053 [07]ER36054 [09]ER42062
 	[11]ER47369 [13]ER53069 [15]ER60070
 	// Note: very few people have second mortgage. 4% in 2013
+	
+	// How many rooms do you have (for your family) not counting bathrooms?
+	|| room_count
+	// [68]V102 [69]V592 [70]V1263 [71]V1966 [72]V2565 [73]V3107 [74]V3521 
+	// [75]V3937 [76]V4448 [77]V5362 [78]V5862 [79]V6477 [80]V7080 [81]V7671 
+	// [82]V8360 [83]V8969 [84]V10432 [85]V11614 [86]V13019 [87]V14122 
+	// [88]V15138 [89]V16639 [90]V18070 [91]V19370 [92]V20670 [93]V22425 
+	// [94]ER2029 [95]ER5028 [96]ER7028 [97]ER10032 
+	[99]ER13037 [01]ER17040 [03]ER21039 [05]ER25027 [07]ER36027 [09]ER42028 
+	[11]ER47328 [13]ER53028 [15]ER60029
 
+	// Year Moved into current house
+	|| year_moved
+	// What is the street address and move-in date of (your/HEAD's) current residence?
+	//[93]V22443 [94]ER2064 [95]ER5063 [96]ER7157 [97]ER10074 
+	[99]ER13079 [01]ER17090 [03]ER21119 [05]ER25100 [07]ER36105 [09]ER42134 
+	[11]ER47442 [13]ER53142 [15]ER60157
+	
+	|| month_moved
+	// The month coded here is that of the most recent move since the yyyy interview.
+	// (Have you/Has [he/she]) lived anywhere else since January yyyy-2? 
+	// [75]V3942 [76]V4453 [77]V5367 [78]V5867 [79]V6485 [80]V7090 [81]V7701 
+	// [83]V9000 [84]V10448 [85]V11629 [86]V13038 [87]V14141 [88]V15149 
+	// [89]V16650 [90]V18088 [91]V19388 [92]V20688 [93]V22442 [94]ER2063 
+	// [95]ER5062 [96]ER7156 [97]ER10073 
+	[99]ER13078 [01]ER17089 [03]ER21118 [05]ER25099 [07]ER36104 [09]ER42133 
+	[11]ER47441 [13]ER53141 [15]ER60156
+	
+	// TODO: A50. Why did (you/HEAD) move?--FIRST MENTION ... ER60158 etc
+	
+	// TODO: A51. Do you think (you/HEAD) might move in the next couple of years? ... ER60161
+	// TODO: ER60162(2015)  	"A52 LIKELIHOOD OF MOVING"
+	// A52. Would you say (you/HEAD) definitely will move, probably will move, or are you more uncertain?
 
+	|| current_state
+	// Current State (FIPS Code)
+	// Please refer to FIPS state codes here http://psidonline.isr.umich.edu/data/Documentation/FIPSStateCodes.pdf
+	// [85]V12380 [86]V13632 [87]V14679 [88]V16153 [89]V17539 [90]V18890 [91]V20190 
+	// [92]V21496 [93]V23328 [94]ER4157 [95]ER6997 [96]ER9248 [97]ER10004 
+	[99]ER13005 [01]ER17005 [03]ER21004 [05]ER25004 [07]ER36004 [09]ER42004 
+	[11]ER47304 [13]ER53004 [15]ER60004
 
+	
 	//////////////////////////////////////////////////////////////////////////
 	// WEIGHTS
 	//////////////////////////////////////////////////////////////////////////
@@ -946,6 +987,24 @@ replace ret_year        = . if ret_year >= 9998
 replace ret_year_spouse = . if ret_year_spouse >= 9998
 replace mortgage1       = . if mortgage1 >= 9999998
 replace mortgage2       = . if mortgage2 >= 9999998
+
+* Clean up the year_moved variable (coding is different in 1999 and 2001)
+replace year_moved = 1997 if year_moved == 1 & wave == 1999
+replace year_moved = 1998 if year_moved == 2 & wave == 1999
+replace year_moved = 1999 if year_moved == 3 & wave == 1999
+replace year_moved = 1999 if year_moved == 1 & wave == 2001
+replace year_moved = 2000 if year_moved == 2 & wave == 2001
+replace year_moved = 2001 if year_moved == 3 & wave == 2001
+
+* Clean up month_moved (had some winter/spring/summer/fall options in 1999 and 2001)
+replace month_moved = 1  if month_moved == 21
+replace month_moved = 4  if month_moved == 22
+replace month_moved = 7  if month_moved == 23
+replace month_moved = 10 if month_moved == 24
+
+* Clean up missings
+replace month_moved     = . if month_moved == 0 | month_moved > 24 // should this be 12 or 24??
+replace year_moved      = . if year_moved < 10 | year_moved > 2100
 
 * Note fam_wealth is topcoded, but I just leave that as is for now
 

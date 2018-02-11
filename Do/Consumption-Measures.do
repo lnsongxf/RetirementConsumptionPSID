@@ -130,7 +130,7 @@ foreach var of varlist housingexpenditure mortgageexpenditure rentexpenditure //
 
 gen equiv = sqrt(fsize)
 
-gen expenditure_blundell_eq        = expenditure_blundell / fsize
-gen expenditure_blundell_eq_exH    = expenditure_blundell_exhous / fsize
+gen expenditure_blundell_eq        = expenditure_blundell / equiv
+gen expenditure_blundell_eq_exH    = expenditure_blundell_exhous / equiv
 
 lab var expenditure_blundell_eq "Total Expenditure (equivalence scale)"
