@@ -612,6 +612,10 @@ psid use
 	[13]ER58171 [15]ER65368
 
 
+	//////////////////////////////////////////////////////////////////////////
+	// HOUSING
+	//////////////////////////////////////////////////////////////////////////
+
 	|| housevalue
 	// Could you tell me what the present value of (your/their)
 	// (apartment/mobile home/house) is (including the value of the lot if
@@ -633,8 +637,7 @@ psid use
 	// [84]S120 [89]S220 [94]S320 
 	[99]S420 [01]S520 [03]S620 [05]S720 [07]S820 [09]ER46966 [11]ER52390
 	[13]ER58207 [15]ER65404
-
-
+	
 	// Own or Rent
 	|| housingstatus
 	// [68]V103 [69]V593 [70]V1264 [71]V1967 [72]V2566 [73]V3108 [74]V3522
@@ -724,6 +727,56 @@ psid use
 	[99]ER13005 [01]ER17005 [03]ER21004 [05]ER25004 [07]ER36004 [09]ER42004 
 	[11]ER47304 [13]ER53004 [15]ER60004
 
+	//////////////////////////////////////////////////////////////////////////
+	// INHERITANCE
+	//////////////////////////////////////////////////////////////////////////
+
+	// WTR RECD GIFT/INHERITANCE
+	|| received_gift
+	// 1 = yes, 5 = no
+	// W123. Some people's assets come from gifts and inheritances. During the 
+	// last x years, have you (or anyone in your family) received any large 
+	// gifts or inheritances of money or property worth $10,000 or more?
+	// x is infinity in 1984, 5 in 1989, 1994, and 1999. Then 2 since then
+	// [84]V10937 [89]V17381 [94]ER3836 
+	[99]ER15115 [01]ER19311 [03]ER22706 [05]ER26687 [07]ER37705 [09]ER43696 
+	[11]ER49041 [13]ER54797 [15]ER61908
+
+	// What year did you receive that?--FIRST INHERITANCE
+	|| year_gift_1
+	// [84]V10939 [89]V17383 [94]ER3837 
+	[99]ER15116 [01]ER19312 [03]ER22707 [05]ER26688 [07]ER37706 [09]ER43697 
+	[11]ER49042 [13]ER54798 [15]ER61910
+
+	// W125. How much was it worth altogether, at that time?--FIRST INHERITANCE
+	|| value_gift_1
+	// [84]V10940 [89]V17384 [94]ER3838 
+	[99]ER15117 [01]ER19313 [03]ER22708 [05]ER26689 [07]ER37707 [09]ER43698 
+	[11]ER49043 [13]ER54799 [15]ER61913
+
+	// W129. What year did you receive that?--SECOND INHERITANCE
+	|| year_gift_2
+	// [84]V10944 [89]V17386 [94]ER3842 
+	[99]ER15121 [01]ER19317 [03]ER22712 [05]ER26693 [07]ER37711 [09]ER43702 
+	[11]ER49047 [13]ER54803 [15]ER61918
+
+	// W130. How much was it worth altogether, at that time?--SECOND INHERITANCE
+	|| value_gift_2
+	// [94]ER3843 
+	[99]ER15122 [01]ER19318 [03]ER22713 [05]ER26694 [07]ER37712 [09]ER43703 
+	[11]ER49048 [13]ER54804 [15]ER61921
+
+	// W133a. What year did you receive that?--THIRD INHERITANCE
+	|| year_gift_3
+	// [94]ER3847 
+	[99]ER15126 [01]ER19322 [03]ER22717 [05]ER26698 [07]ER37716 [09]ER43707 
+	[11]ER49052 [13]ER54808 [15]ER61926
+
+	// W133b. How much was it worth altogether, at that time?--THIRD INHERITANCE
+	|| value_gift_3
+	// [94]ER3848 
+	[99]ER15127 [01]ER19323 [03]ER22718 [05]ER26699 [07]ER37717 [09]ER43708 
+	[11]ER49053 [13]ER54809 [15]ER61929
 	
 	//////////////////////////////////////////////////////////////////////////
 	// WEIGHTS
@@ -1007,6 +1060,23 @@ replace month_moved     = . if month_moved == 0 | month_moved > 24 // should thi
 replace year_moved      = . if year_moved < 10 | year_moved > 2100
 
 * Note fam_wealth is topcoded, but I just leave that as is for now
+
+* Clean up inheritance/gift data
+replace received_gift = . if received_gift > 5
+forvalues i = 1/3{
+	replace year_gift_`i' = .    if year_gift_`i' >= 9997 | year_gift_`i' == 0
+	replace year_gift_`i' = 2013 if year_gift_`i' == 1 & wave == 2015
+	replace year_gift_`i' = 2014 if year_gift_`i' == 2 & wave == 2015
+	replace year_gift_`i' = 2015 if year_gift_`i' == 3 & wave == 2015
+	replace year_gift_`i' = 2015 if year_gift_`i' == 7 & wave == 2015 
+	replace year_gift_`i' = .    if year_gift_`i' == 8 & wave == 2015
+	replace year_gift_`i' = .    if year_gift_`i' == 1988 & wave == 1999
+	replace year_gift_`i' = .    if year_gift_`i' == 1992 & wave == 1999
+	replace value_gift_`i' = 0   if value_gift_`i' >= 999999998
+	replace value_gift_`i' = 0   if ( value_gift_`i' == 9999998 | value_gift_`i' == 9999999 ) & wave >= 2013
+}
+egen value_gifts = rowtotal(value_gift_1 value_gift_2 value_gift_3)
+lab var value_gifts "Value of inheritance/gifts since last wave"
 
 * Look for other variables with error codes
 summ *
