@@ -97,10 +97,12 @@ drop year _m
 * (do not add/subtract real series without accounting for this)
 replace gasolineexpenditure = 100 * gasolineexpenditure / CPI_gasoline
 replace foodexpenditure = 100 * foodexpenditure / CPI_food
+replace foodstamp = 100 * foodstamp / CPI_food
 replace foodathomeexpenditure = 100 * foodathomeexpenditure / CPI_foodathome
 replace foodawayfromhomeexpenditure = 100 * foodawayfromhomeexpenditure / CPI_foodawayfromhome 
 replace fooddeliveredexpenditure = 100 * fooddeliveredexpenditure / CPI_food
 replace transportationexpenditure = 100 * transportationexpenditure / CPI_transportation 
+replace transportation_blundell = 100 * transportation_blundell / CPI_transportation
 replace healthcareexpenditure = 100 * healthcareexpenditure / CPI_health
 replace healthinsuranceexpenditure = 100 * healthinsuranceexpenditure / CPI_health
 replace healthservicesexpenditure = 100 * healthservicesexpenditure / CPI_health
@@ -116,13 +118,52 @@ foreach var of varlist housingexpenditure mortgageexpenditure rentexpenditure //
 	educationexpenditure childcareexpenditure telephoneexpenditure ///
 	repairsexpenditure furnishingsexpenditure tripsexpenditure ///
 	expenditure_blundell expenditure_blundell_exhealth expenditure_blundell_exhous ///
-	expenditure_blundell_ex3 {
+	expenditure_blundell_ex3  {
 	
 	* di "`var'"
 	replace `var' = 100 * `var' / CPI_all
 }
 
 * TODO: perhaps down the road add expenditure_total* and inc_* 
+
+****************************************************************************************************
+** Aguiar and Hurst Additions
+****************************************************************************************************
+
+// When examining the life cycle profile of mean
+// expenditures and cross-sectional dispersion, we limit our analysis to nondurables
+// excluding health and education expenditures. Our measure of
+// nondurables consists of expenditure on food (both home and away), alcohol,
+// tobacco, clothing and personal care, utilities, domestic services,
+// nondurable transportation, airfare, nondurable entertainment, net gambling
+// receipts, business services, and charitable giving.7We also examine a
+// broader measure of nondurables that includes housing services, where
+// housing services are calculated as either rent paid (for renters) or the selfreported
+// rental equivalent of the respondent’s house (for homeowners).
+
+* PSID: we do same as AH but do not have tobacco, clothing and personal care, 
+* domestic services, airfare, nondurale entertainemtn, net gambling, business services, charitable giving
+
+local expenditure_hurst_nonH foodathomeexpenditure foodstamp foodawayfromhomeexpenditure /// 
+		gasolineexpenditure  utilityexpenditure ///
+		transportation_blundell childcareexpenditure
+		
+local expenditure_hurst `expenditure_hurst_nonH' homeinsuranceexpenditure rent_imputed 
+
+egen expenditure_hurst      = rowtotal( `expenditure_hurst' )
+egen expenditure_hurst_nonH = rowtotal( `expenditure_hurst_nonH' )
+
+// Figure 2
+// The categories are food at home;
+// work-related expenses which include transportation, food away from home, and clothing/personal care;
+// and core nondurables which include all other categories of total nondurable
+// expenditure, including housing services but excluding alcohol and tobacco.
+// NOTE: I exclude clothingexpenditure since it only begins in 2005
+
+egen workrelatedexpenditure     = rowtotal(transportation_blundell gasolineexpenditure foodawayfromhomeexpenditure ) // if wave >= 2005 // clothingexpenditure begins in 2005
+egen nonwork_nondur_expenditure = rowtotal( healthinsuranceexpenditure healthservicesexpenditure utilityexpenditure ///
+											educationexpenditure childcareexpenditure homeinsuranceexpenditure /// 
+											rent_imputed )
 
 ****************************************************************************************************
 ** Equivalence scale

@@ -256,12 +256,16 @@ keep if max_t >= 4
 ****************************************************************************************************
 preserve
 
+* TODO: try t_homeown rather than t_homeownership -- tried already but looks too choppy
+
 * Only keep those observed at least 6 years before home purchase
 by pid, sort: egen min_t = min(t_homeownership)
 tab min_t
 keep if min_t <= -6
 
-collapse *wealth* inc_* homeequity homeowner housevalue mortgage1 mortgage2 *expenditure* (count) n = inc_fam /* c_to_i  (count) n = c_to_i */, by(t_homeownership)
+gen neither_rentown = housingstatus == 8
+
+collapse *wealth* inc_* homeequity homeowner housevalue mortgage1 mortgage2 *expenditure* neither_rentown (count) n = inc_fam /* c_to_i  (count) n = c_to_i */, by(t_homeownership)
 drop if t_homeownership == .
 drop if t_homeownership < -6 | t_homeownership > 0
 tsset t_homeownership
@@ -273,6 +277,7 @@ tsline expenditure_blundell_eq, name("blundell_eq1", replace)
 tsline expenditure_blundell_exhous, name("expenditure_blundell_exhousing1", replace)
 tsline expenditure_blundell_eq_exH, name("expenditure_blundell_eq_exH1", replace)
 tsline furnishingsexpenditure, name("furnishingsexpenditure1", replace)
+tsline neither_rentown, name("neither_rentown", replace)
 
 restore
 

@@ -37,6 +37,14 @@ psid use
 	// [93]ER30809 [94]ER33104 [95]ER33204 [96]ER33304 [97]ER33404 
 	[99]ER33504 [01]ER33604 [03]ER33704 [05]ER33804 [07]ER33904 
 	[09]ER34004 [11]ER34104 [13]ER34204 [15]ER34305
+	
+	// year individual born
+	|| year_born
+	// [83]ER30404 [84]ER30434 [85]ER30468 [86]ER30503 [87]ER30540 [88]ER30575 
+	// [89]ER30611 [90]ER30647 [91]ER30694 [92]ER30738 [93]ER30811 [94]ER33106 
+	// [95]ER33206 [96]ER33306 [97]ER33406 
+	[99]ER33506 [01]ER33606 [03]ER33706 [05]ER33806 [07]ER33906 [09]ER34006 
+	[11]ER34106 [13]ER34206 [15]ER34307
 
 	// sex of head
 	|| sex_head	
@@ -112,6 +120,9 @@ psid use
 	[11]ER47319 [13]ER53019 [15]ER60019
 
 	// Number of Children in Family Unit
+	// This variable represents the actual number of persons currently in the FU 
+	// who are neither Head nor wife/"wife" from newborns through those 17 years 
+	// of age, whether or not they are actually children of the Head or Wife/"Wife."
 	|| children
 	[99]ER13013 [01]ER17016 [03]ER21020 [05]ER25020 [07]ER36020 [09]ER42020
 	[11]ER47320 [13]ER53020 [15]ER60021
@@ -819,7 +830,6 @@ psid use
     using "$folder\Data\Raw\PSID_Install", clear design(1)  
     dofile(PSID-Setup-Replication, replace);
 
-
 label define rel2head
 10 "Head"
 20 "Legal Wife"
@@ -855,6 +865,7 @@ label define rel2head
 97 "Other relative of cohabitor" // (the cohabitor is code 22 or 88)
 98 "Other nonrelatives" // (includes homosexual partners, friends of children of the FU, etc.)
 0 "Inap."; // from Latino sample (ER30001=7001-9308); main family nonresponse by 2011 or mover-out nonresponse by 2009 (ER34102=0)
+		   // TODO: we drop everyone from latino sample, cause they don't have rel2head == 10. is this the norm?
 
 label define fchg
 0 "No change; no movers-in or movers-out of the family"
@@ -934,8 +945,6 @@ label define type_mortgage
 8 "DK"
 9 "NA; refused"
 0 "Inap.";
-
-
 
 #delimit cr
 
@@ -1032,7 +1041,8 @@ rename x11102 family_id
 
 * Deal with DK or NA codings 
 replace foodstamp       = 0 if foodstamp >= 999998
-lab var foodstamp "Food stamps value last year"
+lab var foodstamp       "Food stamps value last year"
+lab var age             "Age"
 replace housevalue      = 0 if housevalue >= 9999998
 replace age_spouse      = . if age_spouse == 999
 replace educhead        = . if educhead == 99
@@ -1040,6 +1050,7 @@ replace ret_year        = . if ret_year >= 9998
 replace ret_year_spouse = . if ret_year_spouse >= 9998
 replace mortgage1       = . if mortgage1 >= 9999998
 replace mortgage2       = . if mortgage2 >= 9999998
+replace year_born       = . if year_born == 9999
 
 * Clean up the year_moved variable (coding is different in 1999 and 2001)
 replace year_moved = 1997 if year_moved == 1 & wave == 1999
@@ -1080,6 +1091,44 @@ lab var value_gifts "Value of inheritance/gifts since last wave"
 
 * Look for other variables with error codes
 summ *
+
+****************************************************************************************************
+** Count kids by age in each household (needed for Aguiar and Hurst regressions)
+****************************************************************************************************
+
+tempvar kid counted_children kid0_17 kid0_2 kid3_5 kid6_13 kid14_17m kid18_21m kid14_17f kid18_21f
+gen `kid' = (rel2head != 10) & (rel2head != 20) & (rel2head != 22) & sequence > 0 & sequence <= 20
+
+gen `kid0_17'  = `kid' & age <= 17 // this matches the PSID definition of children = all persons <= 17 who are not head/wife/"wife"
+gen `kid0_2'   = `kid' & age >= 0  & age <= 2
+gen `kid3_5'   = `kid' & age >= 3  & age <= 5
+gen `kid6_13'  = `kid' & age >= 6  & age <= 13
+gen `kid14_17m' = `kid' & age >= 14 & age <= 17 & sex_indiv == 1
+gen `kid14_17f' = `kid' & age >= 14 & age <= 17 & sex_indiv == 2
+gen `kid18_21m' = `kid' & age >= 18 & age <= 21 & sex_indiv == 1
+gen `kid18_21f' = `kid' & age >= 18 & age <= 21 & sex_indiv == 2
+
+by family_id wave, sort: egen `counted_children' = total(`kid0_17')
+by family_id wave: egen children0_2   = total(`kid0_2')
+by family_id wave: egen children3_5   = total(`kid3_5')
+by family_id wave: egen children6_13  = total(`kid6_13')
+by family_id wave: egen children14_17m = total(`kid14_17m')
+by family_id wave: egen children14_17f = total(`kid14_17f')
+by family_id wave: egen children18_21m = total(`kid18_21m')
+by family_id wave: egen children18_21f = total(`kid18_21f')
+
+* Apparently tempvars get saved in the dta file down below... that's annoying
+drop `kid' `counted_children' `kid0_17' `kid0_2' `kid3_5' `kid6_13' `kid14_17m' `kid18_21m' `kid14_17f' `kid18_21f'
+
+// gen DIF = `counted_children' - children
+// tab DIF // this gets a 99.87% match
+
+// sort family_id wave pid
+// edit family_id wave pid age rel2head children counted_children kid sequence if DIF != 0
+
+****************************************************************************************************
+** Keep only heads of household
+****************************************************************************************************
 
 keep if family_id != .
 
