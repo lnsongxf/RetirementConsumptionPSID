@@ -43,7 +43,8 @@ tab missings
 * Convert to logs
 local collapse_vars 
 foreach var of varlist expenditure_hurst expenditure_hurst_nonH ///
-	foodathomeexpenditure workrelatedexpenditure nonwork_nondur_expenditure{
+	foodathomeexpenditure workexpenditure nonwork_nondur_expenditure ///
+	clothingexpenditure workexpenditure_post05 {
 	gen log_`var' = log(`var')
 	local collapse_vars `collapse_vars' log_`var'
 }
@@ -72,7 +73,6 @@ xtset cohort age
 
 ****************************************************************************************************
 ** Figure 1a - by cohorts
-** mean log expenditure by age conditional on cohort, normalized year, and family status controls
 ****************************************************************************************************
 
 xtline  log_expenditure_hurst, overlay name("Fig1a", replace) ///
@@ -93,40 +93,61 @@ xtline  log_expenditure_hurst_nonH, overlay name("Fig1a_exH", replace) ///
 xtline  log_foodathomeexpenditure, overlay name("Fig2a_food", replace) ///
 		title("Fig 2a. Food at Home Expenditure") 
 
-xtline  log_workrelatedexpenditure /* if c_2005 >= 5000 */, overlay name("Fig2a_work", replace) ///
+xtline  log_workexpenditure /* if c_2005 >= 5000 */, overlay name("Fig2a_work", replace) ///
 		title("Fig 2a. Work Related Expenditure") 
 		
 xtline  log_nonwork_nondur_expenditure, overlay name("Fig2a_nonwork", replace) ///
 		title("Fig 2a. Non Work Non Durable Expenditure") 
 
+xtline  log_clothingexpenditure, overlay name("Fig2a_clothing", replace) ///
+		title("Fig 2a. Clothing Expenditure") 
 }
 ****************************************************************************************************
-** Figure 1a - Control for cohorts as in Aguiar and Hurst
+** Control for cohorts and normalized years as in Aguiar and Hurst
 ****************************************************************************************************
 else{
 
-local family_controls i.married i.fsize i.children i.children0_2 i.children3_5 i.children6_13 i.children14_17m i.children14_17f i.children18_21m i.children18_21f 
+* Aguiar Hurst restrict cohorts to those that have at least 10 years in the sample
+* Aka age 65 in 1980 (birth year >= 1915) and age 35 in 2003 (birth year <= 1968)
+* Should I also trim off the tails? 
+* Aka age 65 in 1999 (birth year >= 1934) and age 35 in 2015 (birth year <= 1980)
+keep if year_born >= 1934 & year_born <= 1980
+
+* Create year dummies, where year dummies are normalized so that Ed_year=0 and Cov(d_year,trend)=0
+quietly tab wave, gen(year_cat)
+foreach num of numlist 3/9 {
+	gen d_year_`num'=year_cat`num'+(1-`num')*year_cat2+(`num'-2)*year_cat1
+}
+
+gen married_dummy = married == 1
+
+local family_controls i.married_dummy i.fsize i.children i.children0_2 i.children3_5 i.children6_13 i.children14_17m i.children14_17f i.children18_21m i.children18_21f 
+local reg_controls i.age i.year_born d_year* `family_controls' 
+
 * Technically numchild in AH includes all children, not just those under 17
 * Question - should i include divorce in marital?
 
-* TODO: d_year*
+* TODO: weights
+* TODO: add fixed effects?
 
-// quietly reg ln_nondurable age_cat* cohort_cat*  d_year* marital_cat*  hhsize_cat* numchild_cat* child12_cat* child35_cat* child613_cat* 
+// quietly reg ln_nondurable  hhsize_cat* numchild_cat* child12_cat* child35_cat* child613_cat* 
 // child1417m_cat* child1417f_cat* child1821m_cat* child1821f_cat* [aw=adjwt];
 
+****************************************************************************************************
+** Figure 1a - Nondurables w and w/out housing
+****************************************************************************************************
 
-
-reg log_expenditure_hurst i.age i.year_born `family_controls'
 tempfile results
-regsave using `results', addlabel(lab, "Nondurable Expenditure") replace
 
-reg log_expenditure_hurst_nonH i.age i.year_born `family_controls'
-regsave using `results', addlabel(lab, "Nondurable Expenditure w/out housing") append
+reg log_expenditure_hurst `reg_controls'
+regsave using `results', addlabel(lab, "Nondurables") replace
+
+reg log_expenditure_hurst_nonH `reg_controls' 
+regsave using `results', addlabel(lab, "Nondurables w/out Housing") append
 
 preserve
-use `results', clear
-
 * Find coefs by age
+use `results', clear
 gen is_age = strpos(var, "age")
 keep if is_age > 0
 drop is_age
@@ -138,26 +159,34 @@ encode lab, gen(labels)
 xtset labels age
 lab var age "Age"
 lab var coef "Expenditure"
-xtline coef, overlay name("Fig1", replace)
+xtline coef, overlay name("Fig1", replace) note("Nondurables in PSID include food, gasoline, utilities, transportation services, and child care." "It does not include other components used in Aguiar Hurst, such as tobacco, clothing,""personal care, domestic services, airfare, nondurable entertainment, gambling, business" "services, and chartiable giving") ytitle(, margin(0 2 0 0))
 restore
 
 ****************************************************************************************************
-** Figure 2a - Control for cohorts as in Aguiar and Hurst
+** Figure 2a - Work vs Non Work
 ****************************************************************************************************
 
-reg log_foodathomeexpenditure i.age i.year_born `family_controls'
+preserve
+
 tempfile results
+reg log_foodathomeexpenditure `reg_controls'
 regsave using `results', addlabel(lab, "Food at Home") replace
 
-reg log_workrelatedexpenditure i.age i.year_born `family_controls'
+* NOTE: workexpenditure_post05 looks closer to A-H, but only starts in 2005
+reg log_workexpenditure `reg_controls'
 regsave using `results', addlabel(lab, "Work Related") append
 
-reg log_nonwork_nondur_expenditure i.age i.year_born `family_controls'
+reg log_nonwork_nondur_expenditure `reg_controls'
 regsave using `results', addlabel(lab, "Non Work Related") append
 
-use `results', clear
+// keep if wave >= 2005
+// keep if year_born >= 1940 // aka maximum of age 65 in 2005
+// reg clothingexpenditure `reg_controls'
+// regsave using `results', addlabel(lab, "Clothing") append
+//// TODO: will need normalized year controls that are normalized starting in 2005
 
 * Find coefs by age
+use `results', clear
 gen is_age = strpos(var, "age")
 keep if is_age > 0
 drop is_age
@@ -170,6 +199,20 @@ xtset labels age
 lab var age "Age"
 lab var coef "Expenditure"
 xtline coef, overlay name("Fig2", replace)
+restore
 
+****************************************************************************************************
+** Figure 3a - Other categories
+** They use entertainemnt, utilities, housing services, other ND, domestic services
+****************************************************************************************************
+
+// utilityexpenditure, rent_imputed, 
+//
+//
+// * POST 2005 - perhaps need different normalized years for this
+// clothingexpen~e float   %9.0g                 Clothing Expenditure 2004
+// tripsexpendit~e float   %9.0g                 Trips Expenditure 2004
+// recreationexp~e float   %9.0g                 Other Recreation Expenditure 2004
+//
 
 }
