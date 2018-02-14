@@ -123,6 +123,9 @@ egen nonwork_nondur_expenditure    = rowtotal( /* healthinsuranceexpenditure hea
 											utilityexpenditure childcareexpenditure homeinsuranceexpenditure /// 
 											propertytaxexpenditure rent_imputed )
 
+										
+egen housingservicesexpenditure = rowtotal(rent_imputed homeinsuranceexpenditure propertytaxexpenditure)
+								
 ****************************************************************************************************
 ** Merge in CPI and make real
 ****************************************************************************************************
@@ -162,7 +165,7 @@ foreach var of varlist housingexpenditure mortgageexpenditure rentexpenditure //
 	expenditure_blundell expenditure_blundell_exhealth expenditure_blundell_exhous ///
 	expenditure_blundell_ex3 rent_imputed ///
 	expenditure_hurst expenditure_hurst_nonH workexpenditure ///
-	workexpenditure_post05 nonwork_nondur_expenditure {
+	workexpenditure_post05 nonwork_nondur_expenditure housingservicesexpenditure {
 	
 	* di "`var'"
 	replace `var' = 100 * `var' / CPI_all

@@ -40,12 +40,21 @@ keep if age >= 25 & age <= 75
 egen missings = rowmiss(foodexpenditure transportationexp utilityexpenditure rent_imputed)
 tab missings
 
+* Follow Aguiar and Hurst: bottom-code the expenditure data at $1 and then take logs (for smaller consumption categories)
+qui replace childcareexpenditure = 1 if childcareexpenditure < 1
+qui replace clothingexpenditure = 1 if clothingexpenditure < 1
+qui replace tripsexpenditure = 1 if tripsexpenditure < 1
+qui replace recreationexpenditure = 1 if recreationexpenditure < 1
+
 * Convert to logs
 local collapse_vars 
 foreach var of varlist expenditure_hurst expenditure_hurst_nonH ///
 	foodathomeexpenditure workexpenditure nonwork_nondur_expenditure ///
-	clothingexpenditure workexpenditure_post05 {
-	gen log_`var' = log(`var')
+	clothingexpenditure workexpenditure_post05 utilityexpenditure ///
+	housingservicesexpenditure childcareexpenditure ///
+	tripsexpenditure recreationexpenditure {
+	
+	qui gen log_`var' = log(`var')
 	local collapse_vars `collapse_vars' log_`var'
 }
 
@@ -103,7 +112,7 @@ xtline  log_clothingexpenditure, overlay name("Fig2a_clothing", replace) ///
 		title("Fig 2a. Clothing Expenditure") 
 }
 ****************************************************************************************************
-** Control for cohorts and normalized years as in Aguiar and Hurst
+** Aguiar and Hurst Version: Life cycle conditional on cohort and normalized years
 ****************************************************************************************************
 else{
 
@@ -119,13 +128,10 @@ foreach num of numlist 3/9 {
 	gen d_year_`num'=year_cat`num'+(1-`num')*year_cat2+(`num'-2)*year_cat1
 }
 
-gen married_dummy = married == 1
-
+gen married_dummy = married == 1 // just look at married or not (rather than divorced, never married, widowed, separated, etc)
 local family_controls i.married_dummy i.fsize i.children i.children0_2 i.children3_5 i.children6_13 i.children14_17m i.children14_17f i.children18_21m i.children18_21f 
 local reg_controls i.age i.year_born d_year* `family_controls' 
-
-* Technically numchild in AH includes all children, not just those under 17
-* Question - should i include divorce in marital?
+* Small technicality -- numchild in AH includes all children, whereas I just include those under 17 in the children variable
 
 * TODO: weights
 * TODO: add fixed effects?
@@ -206,13 +212,79 @@ restore
 ** They use entertainemnt, utilities, housing services, other ND, domestic services
 ****************************************************************************************************
 
-// utilityexpenditure, rent_imputed, 
-//
-//
-// * POST 2005 - perhaps need different normalized years for this
-// clothingexpen~e float   %9.0g                 Clothing Expenditure 2004
-// tripsexpendit~e float   %9.0g                 Trips Expenditure 2004
-// recreationexp~e float   %9.0g                 Other Recreation Expenditure 2004
-//
+preserve
+tempfile results
+reg log_utilityexpenditure `reg_controls'
+regsave using `results', addlabel(lab, "Utilities") replace
+
+reg log_housingservicesexpenditure `reg_controls' // includes rent, imputed rent (for owners), prop tax, and home insurance 
+regsave using `results', addlabel(lab, "Housing Services") append
+
+reg log_childcareexpenditure `reg_controls'
+regsave using `results', addlabel(lab, "Child Care Expenditure") append
+
+* Find coefs by age
+use `results', clear
+gen is_age = strpos(var, "age")
+keep if is_age > 0
+drop is_age
+destring var, replace ignore("b.age")
+rename var age
+
+* Plot results
+encode lab, gen(labels)
+xtset labels age
+lab var age "Age"
+lab var coef "Expenditure"
+xtline coef, overlay name("Fig3", replace)
+restore
+
+****************************************************************************************************
+** Fig 3a extension - Post 2005 Expenditure Categories
+****************************************************************************************************
+
+preserve
+
+* Select smaller sample
+keep if wave >= 2005
+// keep if year_born >= 1940 // aka maximum of age 65 in 2005
+
+* New year dummies, starting in 2005
+* where year dummies are normalized so that Ed_year=0 and Cov(d_year,trend)=0
+drop year_cat* d_year_*
+quietly tab wave, gen(year_cat)
+foreach num of numlist 3/6 {
+	gen d_year_`num'=year_cat`num'+(1-`num')*year_cat2+(`num'-2)*year_cat1
+}
+
+
+tempfile results
+reg log_workexpenditure_post05 `reg_controls'
+regsave using `results', addlabel(lab, "Work Related (incl clothing)") replace
+
+reg log_clothingexpenditure `reg_controls' // includes rent, imputed rent (for owners), prop tax, and home insurance 
+regsave using `results', addlabel(lab, "Clothing") append
+
+reg log_tripsexpenditure `reg_controls'
+regsave using `results', addlabel(lab, "Trips") append
+
+reg log_recreationexpenditure `reg_controls'
+regsave using `results', addlabel(lab, "Recreation") append
+
+* Find coefs by age
+use `results', clear
+gen is_age = strpos(var, "age")
+keep if is_age > 0
+drop is_age
+destring var, replace ignore("b.age")
+rename var age
+
+* Plot results
+encode lab, gen(labels)
+xtset labels age
+lab var age "Age"
+lab var coef "Expenditure"
+xtline coef, overlay name("Fig3_alt", replace)
+restore
 
 }
