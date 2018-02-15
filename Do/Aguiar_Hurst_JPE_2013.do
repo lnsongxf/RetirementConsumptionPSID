@@ -2,22 +2,8 @@ set more off
 global folder "C:\Users\STUDENT\Documents\GitHub\RetirementConsumptionPSID"
 use "$folder\Data\Intermediate\Basic-Panel.dta", clear
 
-* Switches
-global quintiles_definition 4    // Defines quintiles. Can be 1, 2, 3, or 4. My preference is 4. I think the next best option is 2
-global retirement_definition 0   // 0 is default (last job ended due to "Quit, Resigned, Retire" or "NA")
-                                 // 1 is loose (does not ask why last job ended) and 2 is strict (last job ended due to "Quit, Resigned, Retire" only)
-global ret_duration_definition 2 // Defines retirement year. Can be 1, 2, or 3. My preference is 3 (for the sharp income drop) although 2 is perhaps better when looking at consumption data (for smoothness)
-global graphs_by_quintile 1      // Graph by quintile. Can be 0 or 1
-global allow_kids_to_leave_hh 1  // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH 
-                                 // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
-								 
-global cohort_graphs 0           // plot graphs by age and cohort (1) or just age controlling for cohort (0) 
-								 
-* Sample selection: households with same husband-wife over time
-* qui do "$folder\Do\Sample-Selection.do"
-
-* Look for retirement transitions of the head
-* do "$folder\Do\Find-Retirements.do"
+* Switches							 
+global cohort_graphs 0           // plot graphs by age and cohort (1) or by age controlling for cohort and year (0) 
 
 * Generate aggregate consumption (following Blundell et al)
 qui do "$folder\Do\Consumption-Measures.do"
@@ -26,7 +12,7 @@ qui do "$folder\Do\Consumption-Measures.do"
 ** Aguiar and Hurst prep
 ****************************************************************************************************
 
-* cap ssc install regsave
+cap ssc install regsave
 
 keep if age >= 25 & age <= 75
 
@@ -52,7 +38,8 @@ foreach var of varlist expenditure_hurst expenditure_hurst_nonH ///
 	foodathomeexpenditure workexpenditure nonwork_nondur_expenditure ///
 	clothingexpenditure workexpenditure_post05 utilityexpenditure ///
 	housingservicesexpenditure childcareexpenditure ///
-	tripsexpenditure recreationexpenditure {
+	tripsexpenditure recreationexpenditure ///
+	transportationexpenditure foodawayfromhomeexpenditure {
 	
 	qui gen log_`var' = log(`var')
 	local collapse_vars `collapse_vars' log_`var'
@@ -74,7 +61,7 @@ drop if cohort == .
 // represents the coefficient on the corresponding age dummy from the estimation of equation 4, 
 // with age 25 being the omitted group.
 
-collapse  `collapse_vars' (count) c = log_expenditure_hurst (count) c_2005 = workrelatedexpenditure ///
+collapse  `collapse_vars' (count) c = log_expenditure_hurst (count) c_2005 = workexpenditure ///
 		 [pweight = family_weight], by(age cohort)
 		 
 keep if c >= 5000
@@ -131,7 +118,11 @@ foreach num of numlist 3/9 {
 gen married_dummy = married == 1 // just look at married or not (rather than divorced, never married, widowed, separated, etc)
 local family_controls i.married_dummy i.fsize i.children i.children0_2 i.children3_5 i.children6_13 i.children14_17m i.children14_17f i.children18_21m i.children18_21f 
 local reg_controls i.age i.year_born d_year* `family_controls' 
-* Small technicality -- numchild in AH includes all children, whereas I just include those under 17 in the children variable
+
+* Question: is it right to use family weights rather than cross sectional? [pweight = family_weight]
+
+* Small technicality:
+* numchild in AH includes all children, whereas I just include those under 17 in the children variable
 
 * TODO: weights
 * TODO: add fixed effects?
@@ -148,7 +139,7 @@ tempfile results
 reg log_expenditure_hurst `reg_controls'
 regsave using `results', addlabel(lab, "Nondurables") replace
 
-reg log_expenditure_hurst_nonH `reg_controls' 
+qui reg log_expenditure_hurst_nonH `reg_controls' 
 regsave using `results', addlabel(lab, "Nondurables w/out Housing") append
 
 preserve
@@ -179,10 +170,10 @@ reg log_foodathomeexpenditure `reg_controls'
 regsave using `results', addlabel(lab, "Food at Home") replace
 
 * NOTE: workexpenditure_post05 looks closer to A-H, but only starts in 2005
-reg log_workexpenditure `reg_controls'
+qui reg log_workexpenditure `reg_controls'
 regsave using `results', addlabel(lab, "Work Related") append
 
-reg log_nonwork_nondur_expenditure `reg_controls'
+qui reg log_nonwork_nondur_expenditure `reg_controls'
 regsave using `results', addlabel(lab, "Non Work Related") append
 
 // keep if wave >= 2005
@@ -208,19 +199,19 @@ xtline coef, overlay name("Fig2", replace)
 restore
 
 ****************************************************************************************************
-** Figure 3a - Other categories
+** Figure 3a - Smaller categories starting in 1999
 ** They use entertainemnt, utilities, housing services, other ND, domestic services
 ****************************************************************************************************
 
 preserve
 tempfile results
-reg log_utilityexpenditure `reg_controls'
+qui reg log_utilityexpenditure `reg_controls'
 regsave using `results', addlabel(lab, "Utilities") replace
 
-reg log_housingservicesexpenditure `reg_controls' // includes rent, imputed rent (for owners), prop tax, and home insurance 
+qui reg log_housingservicesexpenditure `reg_controls' // includes rent, imputed rent (for owners), prop tax, and home insurance 
 regsave using `results', addlabel(lab, "Housing Services") append
 
-reg log_childcareexpenditure `reg_controls'
+qui reg log_childcareexpenditure `reg_controls'
 regsave using `results', addlabel(lab, "Child Care Expenditure") append
 
 * Find coefs by age
@@ -236,11 +227,90 @@ encode lab, gen(labels)
 xtset labels age
 lab var age "Age"
 lab var coef "Expenditure"
-xtline coef, overlay name("Fig3", replace)
+xtline coef, overlay name("Fig3a", replace)
 restore
 
 ****************************************************************************************************
-** Fig 3a extension - Post 2005 Expenditure Categories
+** Figure 3b - Smaller categories starting in 1999
+** Transportation, food at home, food away from home
+****************************************************************************************************
+
+preserve
+tempfile results
+qui reg log_transportationexpenditure `reg_controls'
+regsave using `results', addlabel(lab, "Transportation") replace
+
+qui reg log_foodathomeexpenditure `reg_controls' 
+regsave using `results', addlabel(lab, "Food at home") append
+
+qui reg log_foodawayfromhomeexpenditure `reg_controls'
+regsave using `results', addlabel(lab, "Food away from home") append
+
+* Find coefs by age
+use `results', clear
+gen is_age = strpos(var, "age")
+keep if is_age > 0
+drop is_age
+destring var, replace ignore("b.age")
+rename var age
+
+* Plot results
+encode lab, gen(labels)
+xtset labels age
+lab var age "Age"
+lab var coef "Expenditure"
+xtline coef, overlay name("Fig3b", replace)
+restore
+
+****************************************************************************************************
+** Fig 3 extension - Post 2005 Expenditure Categories
+****************************************************************************************************
+
+preserve
+
+* Select smaller sample
+keep if wave >= 2005
+// keep if year_born >= 1940 // aka maximum of age 65 in 2005
+
+* New year dummies, starting in 2005
+* where year dummies are normalized so that Ed_year=0 and Cov(d_year,trend)=0
+drop year_cat* d_year_*
+quietly tab wave, gen(year_cat)
+foreach num of numlist 3/6 {
+	gen d_year_`num'=year_cat`num'+(1-`num')*year_cat2+(`num'-2)*year_cat1
+}
+
+tempfile results
+qui reg log_workexpenditure_post05 `reg_controls'
+regsave using `results', addlabel(lab, "Work Related (incl clothing)") replace
+
+qui reg log_clothingexpenditure `reg_controls' // includes rent, imputed rent (for owners), prop tax, and home insurance 
+regsave using `results', addlabel(lab, "Clothing") append
+
+qui reg log_tripsexpenditure `reg_controls'
+regsave using `results', addlabel(lab, "Trips") append
+
+qui reg log_recreationexpenditure `reg_controls'
+regsave using `results', addlabel(lab, "Recreation") append
+
+* Find coefs by age
+use `results', clear
+gen is_age = strpos(var, "age")
+keep if is_age > 0
+drop is_age
+destring var, replace ignore("b.age")
+rename var age
+
+* Plot results
+encode lab, gen(labels)
+xtset labels age
+lab var age "Age"
+lab var coef "Expenditure"
+xtline coef, overlay name("Fig3_alt", replace)
+restore
+
+****************************************************************************************************
+** Fig 3b extension - Post 2005 Expenditure Categories
 ****************************************************************************************************
 
 preserve
@@ -259,16 +329,16 @@ foreach num of numlist 3/6 {
 
 
 tempfile results
-reg log_workexpenditure_post05 `reg_controls'
+qui reg log_workexpenditure_post05 `reg_controls'
 regsave using `results', addlabel(lab, "Work Related (incl clothing)") replace
 
-reg log_clothingexpenditure `reg_controls' // includes rent, imputed rent (for owners), prop tax, and home insurance 
+qui reg log_clothingexpenditure `reg_controls' // includes rent, imputed rent (for owners), prop tax, and home insurance 
 regsave using `results', addlabel(lab, "Clothing") append
 
-reg log_tripsexpenditure `reg_controls'
+qui reg log_tripsexpenditure `reg_controls'
 regsave using `results', addlabel(lab, "Trips") append
 
-reg log_recreationexpenditure `reg_controls'
+qui reg log_recreationexpenditure `reg_controls'
 regsave using `results', addlabel(lab, "Recreation") append
 
 * Find coefs by age
