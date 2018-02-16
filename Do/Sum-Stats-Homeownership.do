@@ -12,10 +12,12 @@ global allow_kids_to_leave_hh 1 // When looking for stable households, what shou
 // drop if emp_status_head != 1 // only keep employed heads. Question: should I put this so early? ie to split up HH? or later?
 
 * Sample selection: households with same husband-wife over time
-do "$folder\Do\Sample-Selection.do"
+qui do "$folder\Do\Sample-Selection.do"
 
 * Generate aggregate consumption (following Blundell et al)
-do "$folder\Do\Consumption-Measures.do"
+qui do "$folder\Do\Consumption-Measures.do"
+
+* TODO: make income /wealth real 
 
 * Todo: try before or after sample selection
 
@@ -25,6 +27,18 @@ drop if housingstatus == 1 & housevalue < 10000
 
 * To do: try with or without these guys
 * drop if housingstatus == 8 // neither own nor rent
+
+****************************************************************************************************
+** Notes
+****************************************************************************************************
+
+* TODO: look at consumption behavior of those who are actually constrained by down payment / LTV requirement x years before buying
+
+* TODO: medians? Or drop the top 5%? / outliers?
+
+* TODO: look at poorer people rather than just the median -- wealth
+
+* TODO: make the wealth plot, taking out gifts
 
 ****************************************************************************************************
 ** Find home purchases
@@ -79,10 +93,10 @@ gen t_moved = year_moved + (month_moved-1)/12 // NOOOOO. Sometimes we observe on
 sort pid wave
 gen first_purchase = 1 if homeowner == 1 & L.runsum_homeowner == 0 // obs that are first observed owning a house
 replace first_purchase = . if age > 40 // older heads - might not be first time home buyers
-
-* Store the time that they moved if it's their first purchase
-gen t_firstpurchase_ = t_moved if first_purchase == 1
-replace t_firstpurchase_ = wave - 1 + (6/12) if first_purchase == 1 & t_firstpurchase == . // We do not have t_moved for everyone, so let's just guess that they moved the summer before this wave
+//
+// * Store the time that they moved if it's their first purchase
+// gen t_firstpurchase_ = t_moved if first_purchase == 1
+// replace t_firstpurchase_ = wave - 1 + (6/12) if first_purchase == 1 & t_firstpurchase == . // We do not have t_moved for everyone, so let's just guess that they moved the summer before this wave
 
 
 * TODO: this doesnt capture everyone. there are 1,579 cases where they have the home purchase year
@@ -90,12 +104,12 @@ replace t_firstpurchase_ = wave - 1 + (6/12) if first_purchase == 1 & t_firstpur
 
 
 * How to find the time before buying the home?
-gen t_v2 = .
-// replace t_v2 = -1 if F.first_purchase == 1 
+* replace t_v2 = -1 if F.first_purchase == 1
 
 * todo: should I just look at people who go from renting to owning?
 
 * Category 1: has info on both year_moved and month_moved - can get exact number of months between renting and moving
+sort pid wave
 tempvar time_survey time_moved time_bought
 gen `time_survey' = 12 * wave + month
 gen `time_moved' = 12 * year_moved + month_moved if first_purchase == 1
@@ -104,8 +118,11 @@ gen months_homeown = `time_survey' - `time_bought'
 gen t_homeown = floor(months_homeown / 12)
 gen q_homeown = floor(months_homeown / 3 )
 
+gen time_bought_y = `time_bought' / 12
 * Some contradictory individuals -- they still rent, but then next wave they say that they last moved before that wave
-* edit pid age wave month year_moved month_moved housingstatus rentexp mortgageexp housevalue months_homeown t_homeown q_homeown if F.first_purchase == 1 & months_homeown > 0 & months_homeown <= 24
+// edit pid age wave month year_moved month_moved housingstatus rentexp mortgageexp housevalue months_homeown t_homeown q_homeown time_bought_y if F.first_purchase == 1 & months_homeown > 0 & months_homeown <= 24
+// edit pid age wave month year_moved month_moved housingstatus rentexp mortgageexp housevalue months_homeown t_homeown q_homeown time_bought_y if pid == 961033
+
 replace months_homeown = -1 if F.first_purchase == 1 & months_homeown >= 0 // not yet bought a house
 replace t_homeown = -1      if F.first_purchase == 1 & months_homeown >= 0 // not yet bought a house
 replace q_homeown = -1      if F.first_purchase == 1 & months_homeown >= 0 // not yet bought a house
@@ -116,6 +133,8 @@ gen `year_bought_1' = year_moved if first_purchase == 1
 by pid, sort: egen `year_bought' = max(`year_bought_1')
 
 replace t_homeown = wave - `year_bought' if t_homeown == .
+
+* THESE PPL MAKE NO SENSE
 replace t_homeown = -1 if t_homeown == 0 & F.first_purchase == 1 // not yet bought a house
 
 // first wave owning should be
@@ -148,7 +167,7 @@ replace t_homeown = wave - `year_bought3' if t_homeown == .
 tab t_homeown 			if (first_purchase == 1 | F.first_purchase == 1) , missing
 tab t_homeownership 	if (first_purchase == 1 | F.first_purchase == 1) , missing
 
-edit pid age wave month year_moved month_moved housingstatus rentexp mortgageexp housevalue months_homeown t_homeown q_homeown if (first_purchase == 1 | F.first_purchase == 1) // & (year_moved == . & month_moved == .) 
+// edit pid age wave month year_moved month_moved housingstatus rentexp mortgageexp housevalue months_homeown t_homeown q_homeown if (first_purchase == 1 | F.first_purchase == 1) // & (year_moved == . & month_moved == .) 
 
 gen years_before_first_home = -1 * t_homeown if t_homeown < 0
 gen age_sq = age^2
@@ -156,7 +175,14 @@ gen age_sq = age^2
 * xtreg foodathomeexpenditure i.years_before_first_home children inc_fam educhead age age_sq i.married i.racehead, fe
 
 
-/*
+****************************************************************************************************
+** Looks at results with this new t_homeown variable
+****************************************************************************************************
+
+* TODO: lots fewer obs with t_homeown than t_homeownership... make a best guess for those with t_homeown missing
+
+preserve
+
 * Look at results
 // keep if tripsexp != . // only needed when looking at trips / recreation
 by pid, sort: egen min_t_homeown = min(t_homeown)
@@ -171,6 +197,7 @@ foreach var of varlist food*{
 
 collapse children fsize (mean) *expenditure* (count)c = foodexpenditure, by(t_homeown) // TODO: mean or median?
 tsset t_
+list
 tsline food*e if t_ <= 0 & t_ >= -4
 tsline food*eq if t_ <= 0 & t_ >= -4
 // tsline children fsize if t_ <= 0 & t_ >= -4
@@ -178,9 +205,7 @@ tsline food*eq if t_ <= 0 & t_ >= -4
 tsline tripsexpenditure recreationexpenditure if t_ <= 0 & t_ >= -4
 // tsline expenditure_blundell_eq_exH if t_ >= -4 & t_ <=0
 
-sdfdsf
-
-*/
+restore
 
 
 ****************************************************************************************************
@@ -258,8 +283,8 @@ preserve
 
 * TODO: try t_homeown rather than t_homeownership -- tried already but looks too choppy
 
-local time t_homeownership
-// local time t_homeown
+local time t_homeownership // original
+// local time t_homeown // new version 
 
 * Only keep those observed at least 6 years before home purchase
 by pid, sort: egen min_t = min(`time')
@@ -268,7 +293,7 @@ keep if min_t <= -6
 
 gen neither_rentown = housingstatus == 8
 
-collapse *wealth* inc_* homeequity homeowner housevalue mortgage1 mortgage2 *expenditure* neither_rentown (count) n = inc_fam /* c_to_i  (count) n = c_to_i */, by(`time')
+collapse (mean) *wealth* inc_* homeequity homeowner housevalue mortgage1 mortgage2 *expenditure* neither_rentown (count) n = inc_fam /* c_to_i  (count) n = c_to_i */, by(`time')
 drop if `time' == .
 drop if `time' < -6 | `time' > 0
 tsset `time'
@@ -283,7 +308,6 @@ tsline expenditure_blundell_eq_exH, name("expenditure_blundell_eq_exH1", replace
 tsline neither_rentown, name("neither_rentown", replace)
 
 restore
-
 
 
 
@@ -304,7 +328,14 @@ restore
 // hist c_to_i if t_homeownership == -4
 
 preserve
-collapse *wealth* inc_* homeequity homeowner housevalue mortgage1 mortgage2 *expenditure* /* c_to_i  (count) n = c_to_i */, by(t_homeownership)
+
+* Only keep those observed at least 4 years before home purchase
+by pid, sort: egen min_t = min(`time')
+tab min_t
+keep if min_t <= -4
+
+
+collapse (mean) *wealth* inc_* homeequity homeowner housevalue mortgage1 mortgage2 *expenditure* /* c_to_i  (count) n = c_to_i */, by(t_homeownership)
 drop if t_homeownership == .
 drop if t_homeownership < -4 | t_homeownership > 4
 tsset t_homeownership
@@ -349,3 +380,5 @@ tsline furnishingsexpenditure, name("furnishingsexpenditure", replace)
 
 * question: do we know when the marriage takes place? i just realized that a "wife" can transition to wife. and this will still be included in current sample
 restore
+
+
