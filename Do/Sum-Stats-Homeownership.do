@@ -8,6 +8,7 @@ use "$folder\Data\Intermediate\Basic-Panel.dta", clear
 * Switches
 global allow_kids_to_leave_hh 1 // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH 
                                 // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
+global collapse_graphs        0 // Do we want to see the graphs where we collapse by t_homeownership?
 
 // drop if emp_status_head != 1 // only keep employed heads. Question: should I put this so early? ie to split up HH? or later?
 
@@ -24,6 +25,15 @@ qui do "$folder\Do\Consumption-Measures.do"
 * These people have misreported something
 drop if housingstatus == 1 & housevalue == 0
 drop if housingstatus == 1 & housevalue < 10000
+
+* These people have a crazy change in wealth
+* TODO: what do Aguiar and Hurst do 
+sort pid wave
+gen change_wealth = (fam_wealth_real - L.fam_wealth_real) / L.fam_wealth_real
+drop if change_w > 100 & change_w != . & L.fam_wealth_real > 10000
+
+* These ppl also have a crazy change in wealth
+drop if fam_wealth_real - L.fam_wealth_real > 100 * inc_fam_real & fam_wealth != . & L.fam_wealth_real != . & inc_fam_real != .
 
 * To do: try with or without these guys
 * drop if housingstatus == 8 // neither own nor rent
@@ -187,6 +197,7 @@ gen age_sq = age^2
 
 * TODO: lots fewer obs with t_homeown than t_homeownership... make a best guess for those with t_homeown missing
 
+if $collapse_graphs == 1{
 preserve
 
 * Look at results
@@ -212,7 +223,7 @@ tsline tripsexpenditure recreationexpenditure if t_ <= 0 & t_ >= -4
 // tsline expenditure_blundell_eq_exH if t_ >= -4 & t_ <=0
 
 restore
-
+}
 
 ****************************************************************************************************
 ** Only keep those who are observed for at least n waves
@@ -286,6 +297,8 @@ keep if max_t >= 4
 ****************************************************************************************************
 ** Collapse (-6 to 0)
 ****************************************************************************************************
+
+if $collapse_graphs == 1{
 preserve
 
 * TODO: try t_homeown rather than t_homeownership -- tried already but looks too choppy
@@ -315,7 +328,7 @@ tsline expenditure_blundell_eq_exH, name("expenditure_blundell_eq_exH1", replace
 tsline neither_rentown, name("neither_rentown", replace)
 
 restore
-
+}
 
 
 ****************************************************************************************************
@@ -334,6 +347,7 @@ restore
 // gen c_to_i = expenditure_blundell_exhous / inc_fam
 // hist c_to_i if t_homeownership == -4
 
+if $collapse_graphs == 1{
 preserve
 
 * Only keep those observed at least 4 years before home purchase
@@ -387,7 +401,7 @@ tsline furnishingsexpenditure, name("furnishingsexpenditure", replace)
 
 * question: do we know when the marriage takes place? i just realized that a "wife" can transition to wife. and this will still be included in current sample
 restore
-
+}
 
 
 ****************************************************************************************************
@@ -421,7 +435,29 @@ gen log_expenditure_hurst_nonH = log(expenditure_hurst_nonH)
 egen age_cat = cut(age), at( 20(5)75 ) // icodes label
 * gen age_cat = age
 
-gen log_inc_fam = log(inc_fam)
+gen log_inc_fam_real = log(inc_fam_real)
+
+* Generate wealth categorical variable that we can interact with homeown_cat
+// collapse (mean) fam_wealth_real (median) med_fam_wealth_real = fam_wealth_real if homeowner == 0, by(age)
+// tsset age
+// keep if age <= 40
+// tsline *w*
+
+* Find mean wealth for renters under age 40
+sum fam_wealth_real if homeowner == 0 & age <= 40
+local mean_wealth_renters_pre40 = r(mean)
+
+* Create an indicator variable for HHs that start with wealth below that mean
+tempvar fam_wealth_real_wave1 fam_wealth_real_start min_year
+by pid, sort: egen `min_year' = min(wave)
+gen `fam_wealth_real_wave1' = fam_wealth_real if wave == `min_year'
+by pid, sort: egen `fam_wealth_real_start' = max(`fam_wealth_real_wave1')
+gen low_wealth_at_start = `fam_wealth_real_start' <= `mean_wealth_renters_pre40'
+
+tab low_wealth_at_start
+
+* TODO: this makes no sense. Perhaps drop ppl who have wealth grow like crazy
+* hist fam_wealth_real if low_wealth_at_start == 1
 
 
 ****************************************************************************************************
@@ -429,8 +465,8 @@ gen log_inc_fam = log(inc_fam)
 ****************************************************************************************************
 
 local family_controls i.married_dummy i.fsize i.children i.children0_2 i.children3_5 i.children6_13 i.children14_17m i.children14_17f i.children18_21m i.children18_21f 
-local reg_controls i.age_cat i.year_born d_year* `family_controls' // log_inc_fam
-* NOTE: including log_inc_fam above really changes things
+local reg_controls i.age_cat i.year_born d_year* `family_controls' // log_inc_fam_real
+* NOTE: including log_inc_fam_real above really changes things
 
 tempfile results
 
@@ -462,9 +498,9 @@ restore
 ** Panel with FE
 ****************************************************************************************************
 
-* NOTE: including log_inc_fam changes things a bit, but not too much, cause the fixed effect does a good job
+* NOTE: including log_inc_fam_real changes things a bit, but not too much, cause the fixed effect does a good job
 local family_controls i.married_dummy i.fsize i.children i.children0_2 i.children3_5 i.children6_13 i.children14_17m i.children14_17f i.children18_21m i.children18_21f 
-local reg_controls i.age_cat d_year* `family_controls' log_inc_fam // Remove i.year_born because we add fe
+local reg_controls i.age_cat d_year* `family_controls' log_inc_fam_real // Remove i.year_born because we add fe
 tempfile results
 
 xtreg log_expenditure_hurst `reg_controls', fe
@@ -503,16 +539,24 @@ replace homeown_cat = "right before purchase" if t_homeownership == -2
 replace homeown_cat = "after purchase" if t_homeownership >= 0 & t_homeownership != .
 encode  homeown_cat, gen(homeown_cat_dummy)
 
+gen long_before_purchase = t_homeownership <= -4
+gen right_before_purchase = t_homeownership == -2
+
 local family_controls i.married_dummy i.fsize i.children i.children0_2 i.children3_5 i.children6_13 i.children14_17m i.children14_17f i.children18_21m i.children18_21f 
-local reg_controls i.age_cat d_year* `family_controls' log_inc_fam // Remove i.year_born because we add fe
+local reg_controls i.age_cat d_year* `family_controls' log_inc_fam_real // Remove i.year_born because we add fe
 tempfile results
 
+* TODO: this xi thing is really messy... any cleaner way?
 * TODO: try without homeowner dummy
-xtreg log_expenditure_hurst `reg_controls' i.homeowner i.homeown_cat_dummy, fe
+char homeown_cat_dummy[omit] "after purchase"
+xi i.long_before_purchase*low_wealth_at_start i.right_before_purchase*low_wealth_at_start
+xtreg log_expenditure_hurst `reg_controls' i.homeowner _Ilong_befo_1 _IlonXlow_w_1 _Iright_bef_1 _IrigXlow_w_1, fe
 regsave using `results', addlabel(lab, "Nondurables") replace
 
-xtreg log_expenditure_hurst_nonH `reg_controls' i.homeowner i.homeown_cat_dummy, fe 
+xtreg log_expenditure_hurst_nonH `reg_controls' i.homeowner long_before_purchase#low_wealth_at_start right_before_purchase#low_wealth_at_start, fe 
 regsave using `results', addlabel(lab, "Nondurables w/out Housing") append
+
+* NOTE: seems the unknown category is collinear with the fixed effect -- so thats why it gets dropped
 
 preserve
 	* Find coefs by age
