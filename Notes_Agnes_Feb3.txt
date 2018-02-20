@@ -1,0 +1,130 @@
+
+Next steps on consumption and housing:
+
+- look at expenditure and wealth for those observed at time = -6 (n = 569 approx)
+- look at expenditure minus imputed rent for those HHs.... that is the approporiate definition of c in the model
+
+- can i get t=-1 and t=1 in the consumption graph? 
+- does the PSID ask "When did you buy your house?"
+- or should i use some other method?
+
+- do you observe movers in kilts nielson?
+- expenditure minus housing might be a better measure
+- also expenditure ex H EQ scale
+
+- look at medians rather than means? (or: drop those with really high exp in certain categories?)
+
+Agnes -- lets say we have two people with different housing utilities. one has mu = 0, the other has mu > 0.
+at age 25 (before buying a house) the one with mu > 0 will be saving at a higher rate
+at age 35 (after buying a house) the one with mu > 0 will still be saving at a higher rate (ASSUMING you cant get a non ammortizing mortgage)
+Will we necesarially see that the homeowner saves more than the renter? I suppose we might if the house impacts their utility :(
+
+- plot of LTV for homeowners with time
+
+----------
+
+TODO: ask Chris Carroll if he has a criticism of Bosworth
+
+
+
+
+----------
+
+Possible approach for paper with the Germans:
+
+-make equilibrium house prices and continuous housing in the model (with housing utility a fcn of size, rather than owner occupied status)
+-policy experiments:
+--impact of mortgage interest tax deduction on savings rates
+--impact of alternative down payment tax credit
+--impact of commitment device (akin to what they have in germany)
+--impact of allowing non-ammortizing loans
+--impact of a tax subsidy on non-ammortizing loans
+
+maybe those last two experiments are not needed -- yeah! too much work. skip those.
+--i wonder if a sufficiently large mortgage interest deduction could take us from 45% homeownership as in germany, to 68% homeownership as in US. if so, we're already studying a very large policy. one issue that might make this difficult is the increase in house prices. wouldnt more homes be constructed in that world?
+--also there are probably very interesting distributional implications in both worlds
+
+and question -- would CRNYU ever be okay with a behavioral paper?
+
+can the fact that renters never save be used as identification???
+(alt explanation: they're poor. but we control for that)
+
+----------
+TODO:
+
+read haurin et al 1997 -- Borrowing Constraints and the Tenure Choice of Young Households
+read Di Belsky Liu
+
+
+
+ The large number of households that applied for a mortgage with
+ liquid wealth in 1991 less than 10% of its predicted home value is
+ consistent with the evidence that many new homeowners receive gifts to
+ help with their down payments (Mayer & Engelhardt, 1996) or with the
+ fact that households do a majority of their saving for the down payment
+ in the year prior to home ownership (Haurin et al., 1997).
+
+
+---------
+The_social_and_private_micro_level_consequences_o.pdf
+
+
+ Engelhardt [55] finds that the consumption of food
+is depressed during the period that a household is saving for the down payment
+
+
+Engelhardt:
+ Finally, in a study of the
+ wealth accumulation of young households in the United States using the 1985-1990
+ waves of the National Longitudinal Survey of Youth (NLSY), Haurin, Hendershott,
+ and Wachter (1995) find that the vast majority of wealth accumulation for the down
+ payment occurs in the year prior to first home purchase
+
+>> but does this using a two year gap, comparing before buying the house with after buying the house
+
+---------
+
+Haurin, Donald R., Patric H. Hendershott, and Susan M. Wachter. "Wealth Accumulation
+and Housing Choices of Young Households: An Exploratory Investigation." National Bu
+reau of Economic Research Working Paper No. 5070 (1995), and forthcoming in the Jour
+nal of Housing Research
+http://www.nber.org/papers/w5629.pdf
+
+First, significant wealth accumulation occurs during the year of purchase of the
+house, Household wealth more than doubles for people becoming owners in all years
+except 1986 (50% increase). One explanation for this is the correlation of first ownership
+with the year of marriage during which the wealth of two individuals is combined (9°/0 of
+the sample married in the year they became a home owner). Wealth also increases by 33
+percent on average in the year before first ownership, when 7% of the sample married).
+Another explanation for the jump in wealth during the year of purchasing a home is gifis
+or inheritances. H-H-W find that the percentage of households receiving these in the year
+of first home ownership is significantly greater than that received by renters or existing
+owners. The mean size gifi is $5,224, and of those households that received a gift and
+purchased a house in the years 1988-90, the average value of the gift equaled 16% of the
+purchase price of their house. More than 60% of gifts received during the year of
+purchase were at least 5V0of the values of the houses, and more owners continue to
+receive gifis/inheritances than do renters, suggesting a pattern of continuing parental
+support for a few years after first home ownership.
+
+"household saving surges the nearer is the transition to ownership"
+
+---------
+
+Mayer, Chris and Gary Engelhardt. 1994. Glfis, Down Payments, and Housing
+Affordability. Working Paper, Federal Reserve Bank of Boston.
+
+https://www0.gsb.columbia.edu/faculty/cmayer/Gifts%20Downpayment.pdf
+
+
+
+---------
+Borrowing Constraints and the Tenure Choice of Young Households
+Haurin et al 1997
+
+Table 2 - 
+
+LTV no more than 95%
+
+Find that 58% of HHs are highly wealth constrained
+
+HH can be constrained by either income requirement or liquid wealth requirement. Suggests that these are equilibrium things. ie the HH can adjust its LTV until the other constraint doesnt bind. But not sure i understand fully -- you cant adjust your income by changing your LTV. (Unless you adjust the size of your house, but I dont think they are suggesting that.)

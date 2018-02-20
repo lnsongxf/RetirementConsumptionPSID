@@ -40,6 +40,12 @@ drop if housingstatus == 1 & housevalue < 10000
 
 * TODO: make the wealth plot, taking out gifts
 
+* Can create Di Belsky Liu type figure
+
+* What percent of down payment have they accumulated one wave before buying house?
+
+
+
 ****************************************************************************************************
 ** Find home purchases
 ****************************************************************************************************
@@ -54,6 +60,7 @@ gen homepurchase_                       = wave if homeowner == 1 & L.runsum_home
 * TODO: drop those who make the first observed home purchase when older than age 40
 * (we dont know for sure if they're a first time home buyer, but this helps)
 * This drops us down to 1,332 first time home purchases (previously 2,000)
+* TODO: WHATS THE IMPACT OF INCLUDING THIS?
 replace homepurchase_ = . if age > 40
 
 by pid, sort: egen homepurchase_year    = max(homepurchase_) // replicate this across waves
@@ -174,7 +181,6 @@ gen age_sq = age^2
 
 * xtreg foodathomeexpenditure i.years_before_first_home children inc_fam educhead age age_sq i.married i.racehead, fe
 
-
 ****************************************************************************************************
 ** Looks at results with this new t_homeown variable
 ****************************************************************************************************
@@ -217,9 +223,10 @@ restore
 * edit if mortgageexpenditure > 0 & t_homeownership < 0
 drop if mortgageexpenditure > 0 & t_homeownership < 0 // these people do not make sense
 
-by pid, sort: egen waves = count(wave)
-tab waves if homepurchase_ != .
-keep if waves >= 9
+* DO WE NEED TO DO THIS????
+* by pid, sort: egen waves = count(wave)
+* tab waves if homepurchase_ != .
+* keep if waves >= 9
 
 /*
 * Only keep those observed at least 4 years before home purchase
@@ -382,3 +389,144 @@ tsline furnishingsexpenditure, name("furnishingsexpenditure", replace)
 restore
 
 
+
+****************************************************************************************************
+** Aguiar and Hurst Version: life cycle consumption
+****************************************************************************************************
+
+* Aguiar Hurst restrict cohorts to those that have at least 10 years in the sample
+* Aka age 65 in 1980 (birth year >= 1915) and age 35 in 2003 (birth year <= 1968)
+* Should I also trim off the tails? 
+* Aka age 65 in 1999 (birth year >= 1934) and age 35 in 2015 (birth year <= 1980)
+* keep if year_born >= 1934 & year_born <= 1980
+
+* TODO: have the cutoff be 20 or 25?
+keep if age >= 20 & age <= 75
+
+* Create year dummies, where year dummies are normalized so that Ed_year=0 and Cov(d_year,trend)=0
+quietly tab wave, gen(year_cat)
+foreach num of numlist 3/9 {
+	gen d_year_`num'=year_cat`num'+(1-`num')*year_cat2+(`num'-2)*year_cat1
+}
+
+gen married_dummy = married == 1 // just look at married or not (rather than divorced, never married, widowed, separated, etc)
+gen log_expenditure_hurst = log(expenditure_hurst)
+gen log_expenditure_hurst_nonH = log(expenditure_hurst_nonH)
+
+* Question: is it right to use family weights rather than cross sectional? [pweight = family_weight]
+* TODO: weights
+* TODO: add fixed effects?
+
+* Create age categories (aka 5 year brackets)
+egen age_cat = cut(age), at( 20(5)75 ) // icodes label
+* gen age_cat = age
+
+gen log_inc_fam = log(inc_fam)
+
+
+****************************************************************************************************
+** Nondurables w and w/out housing (cross sectional)
+****************************************************************************************************
+
+local family_controls i.married_dummy i.fsize i.children i.children0_2 i.children3_5 i.children6_13 i.children14_17m i.children14_17f i.children18_21m i.children18_21f 
+local reg_controls i.age_cat i.year_born d_year* `family_controls' // log_inc_fam
+* NOTE: including log_inc_fam above really changes things
+
+tempfile results
+
+reg log_expenditure_hurst `reg_controls' 
+regsave using `results', addlabel(lab, "Nondurables") replace
+
+qui reg log_expenditure_hurst_nonH `reg_controls' 
+regsave using `results', addlabel(lab, "Nondurables w/out Housing") append
+
+preserve
+* Find coefs by age
+use `results', clear
+gen is_age = strpos(var, "age_cat")
+keep if is_age > 0
+drop is_age
+destring var, replace ignore("b.age_cat")
+rename var age
+
+* Plot results
+encode lab, gen(labels)
+xtset labels age
+lab var age "Age"
+lab var coef "Expenditure"
+xtline coef, overlay name("Fig1_apc", replace) title("Life Cycle Profile using APC") note("Nondurables in PSID include food, gasoline, utilities, transportation services, and child care." "It does not include other components used in Aguiar Hurst, such as tobacco, clothing,""personal care, domestic services, airfare, nondurable entertainment, gambling, business" "services, and chartiable giving") ytitle(, margin(0 2 0 0))
+restore
+
+****************************************************************************************************
+** Nondurables w and w/out housing
+** Panel with FE
+****************************************************************************************************
+
+* NOTE: including log_inc_fam changes things a bit, but not too much, cause the fixed effect does a good job
+local family_controls i.married_dummy i.fsize i.children i.children0_2 i.children3_5 i.children6_13 i.children14_17m i.children14_17f i.children18_21m i.children18_21f 
+local reg_controls i.age_cat d_year* `family_controls' log_inc_fam // Remove i.year_born because we add fe
+tempfile results
+
+xtreg log_expenditure_hurst `reg_controls', fe
+regsave using `results', addlabel(lab, "Nondurables") replace
+
+qui xtreg log_expenditure_hurst_nonH `reg_controls', fe 
+regsave using `results', addlabel(lab, "Nondurables w/out Housing") append
+
+preserve
+* Find coefs by age
+use `results', clear
+gen is_age = strpos(var, "age_cat")
+keep if is_age > 0
+drop is_age
+destring var, replace ignore("b.age_cat")
+rename var age
+
+* Plot results
+encode lab, gen(labels)
+xtset labels age
+lab var age "Age"
+lab var coef "Expenditure"
+xtline coef, overlay name("Fig1_fe", replace) title("Life Cycle Profile using FE") note("Nondurables in PSID include food, gasoline, utilities, transportation services, and child care." "It does not include other components used in Aguiar Hurst, such as tobacco, clothing,""personal care, domestic services, airfare, nondurable entertainment, gambling, business" "services, and chartiable giving") ytitle(, margin(0 2 0 0))
+restore
+
+****************************************************************************************************
+** Nondurables w and w/out housing
+** Panel with FE
+** Add dummies for time before and after home purchase
+****************************************************************************************************
+
+* Setup time to homeownership dummies
+gen     homeown_cat = "unknown" if t_homeownership == .
+replace homeown_cat = "long before purchase" if t_homeownership <= -4
+replace homeown_cat = "right before purchase" if t_homeownership == -2
+replace homeown_cat = "after purchase" if t_homeownership >= 0 & t_homeownership != .
+encode  homeown_cat, gen(homeown_cat_dummy)
+
+local family_controls i.married_dummy i.fsize i.children i.children0_2 i.children3_5 i.children6_13 i.children14_17m i.children14_17f i.children18_21m i.children18_21f 
+local reg_controls i.age_cat d_year* `family_controls' log_inc_fam // Remove i.year_born because we add fe
+tempfile results
+
+* TODO: try without homeowner dummy
+xtreg log_expenditure_hurst `reg_controls' i.homeowner i.homeown_cat_dummy, fe
+regsave using `results', addlabel(lab, "Nondurables") replace
+
+xtreg log_expenditure_hurst_nonH `reg_controls' i.homeowner i.homeown_cat_dummy, fe 
+regsave using `results', addlabel(lab, "Nondurables w/out Housing") append
+
+preserve
+	* Find coefs by age
+	use `results', clear
+	gen is_age = strpos(var, "age_cat")
+	keep if is_age > 0
+	drop is_age
+	destring var, replace ignore("b.age_cat")
+	rename var age
+	
+	* Plot results
+	encode lab, gen(labels)
+	xtset labels age
+	lab var age "Age"
+	lab var coef "Expenditure"
+	xtline coef, overlay name("Fig1_fe_housing", replace) title("Life Cycle Profile using FE & control for housing") note("Nondurables in PSID include food, gasoline, utilities, transportation services, and child care." "It does not include other components used in Aguiar Hurst, such as tobacco, clothing,""personal care, domestic services, airfare, nondurable entertainment, gambling, business" "services, and chartiable giving") ytitle(, margin(0 2 0 0))
+restore
