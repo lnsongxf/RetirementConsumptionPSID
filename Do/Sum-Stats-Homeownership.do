@@ -362,8 +362,10 @@ restore
 
 ****************************************************************************************************
 ** Nondurables w and w/out housing (cross sectional)
+** Median
 ****************************************************************************************************
 
+/*
 local family_controls i.married_dummy i.fsize i.children i.children0_2 i.children3_5 i.children6_13 i.children14_17m i.children14_17f i.children18_21m i.children18_21f 
 local reg_controls i.age_cat i.year_born d_year* `family_controls' // log_inc_fam_real
 * NOTE: including log_inc_fam_real above really changes things
@@ -393,7 +395,7 @@ lab var coef "Expenditure"
 xtline coef, overlay name("Fig1_apc_qreg", replace) title("Median Life Cycle Profile using APC") note("Nondurables in PSID include food, gasoline, utilities, transportation services, and child care." "It does not include other components used in Aguiar Hurst, such as tobacco, clothing,""personal care, domestic services, airfare, nondurable entertainment, gambling, business" "services, and chartiable giving") ytitle(, margin(0 2 0 0))
 restore
 
-
+*/
 
 
 
