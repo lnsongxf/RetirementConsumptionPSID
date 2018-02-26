@@ -1,0 +1,18 @@
+Cormac Convo Feb 15
+
+Next steps
+-drop cohort dummies, add fixed effects
+-Integrate APC results with previous work on the impact of retirement
+-Include a discontinuity for retirement (cannot have time trend around retirement due to fixed effects and time trend)
+
+Then look at heterogeneity in life cycle consumption profiles
+-Pat - I'm a bit concerned by downward trend in trips expenditure
+-What if we produce results based on "permanent income" quartiles? Define these quartiles by computing income percentile by age and year, then average over our observations for each HH
+
+Overall thought:
+-estimate life cycle model with necessities / luxuries
+
+Thoughts on housing regression. Three options
+- 1 - APC without fixed effect. Then add a "time to buying" dummy and discontinuity
+- 2 - AP with HH fixed effect. Add a dummy for "time to buying" -1 to -3 and another for -4 to -6
+- 3 - AP with HH fixed effect. Add "time to buying" as a continuous variable, plus "time to buying"^2

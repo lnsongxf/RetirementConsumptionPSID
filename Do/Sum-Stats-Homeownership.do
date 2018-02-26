@@ -1,7 +1,5 @@
 set more off
-* global folder "C:\Users\pedm\Documents\Research\Cormac\RetirementConsumptionPSID"
-* global folder "C:\Users\Person\Documents\GitHub\RetirementConsumptionPSID"
-global folder "C:\Users\STUDENT\Documents\GitHub\RetirementConsumptionPSID"
+global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 
 use "$folder\Data\Intermediate\Basic-Panel.dta", clear
 
@@ -38,6 +36,9 @@ drop if fam_wealth_real - L.fam_wealth_real > 100 * inc_fam_real & fam_wealth !=
 * To do: try with or without these guys
 * drop if housingstatus == 8 // neither own nor rent
 
+* Find first home purcahses (two alternative definitions)
+qui do "$folder\Do\Find-First-Home-Purchase.do"
+
 ****************************************************************************************************
 ** Notes
 ****************************************************************************************************
@@ -53,143 +54,6 @@ drop if fam_wealth_real - L.fam_wealth_real > 100 * inc_fam_real & fam_wealth !=
 * Can create Di Belsky Liu type figure
 
 * What percent of down payment have they accumulated one wave before buying house?
-
-
-
-****************************************************************************************************
-** Find home purchases
-****************************************************************************************************
-
-sort pid wave                                                // this is very important so that the runsum works correctly
-gen homeowner                           = housingstatus == 1 // housing status can be rent, own, or other
-by pid, sort: generate runsum_homeowner = sum(homeowner)     // will be 0 if they have never owned previously (in our sample)
-
-sort pid wave
-gen homepurchase_                       = wave if homeowner == 1 & L.runsum_homeowner == 0 // select the year that they are first observed owning a house
-
-* TODO: drop those who make the first observed home purchase when older than age 40
-* (we dont know for sure if they're a first time home buyer, but this helps)
-* This drops us down to 1,332 first time home purchases (previously 2,000)
-* TODO: WHATS THE IMPACT OF INCLUDING THIS?
-replace homepurchase_ = . if age > 40
-
-by pid, sort: egen homepurchase_year    = max(homepurchase_) // replicate this across waves
-gen t_homeownership                     = wave - homepurchase_year // duration of homeownership
-
-// we observe about 2000 home purchases during this time period
-// note: can get more transitions if we go back before 1999 (using old wealth data)
-// these observations are observed for at least 2 waves each
-// if we restrict ourselves to observations with at least 5 waves, we observe 1193 home purchases
-
-* TODO: can I get a better measure of home purchase year? for instance, do they ask people when they moved into their current house?
-
-
-* I wonder if it would be interesting to look at savings rates before / after getting either a home equity loan or HELOC
-tab type_mortgage2 wave
-* (2,136 year-wave observations with home equity loan, 334 year-wave obs with HELOC. plus maybe a few more if we look in type_mortgage1)
-
-****************************************************************************************************
-** TODO: Find home purchases more precisely
-****************************************************************************************************
-
-* Use information on when they last moved to figure out how many months ago they purchased their home
-
-lookfor month
-
-count if t_homeownership == 0
-
-tab year_moved // already very useful. but too bad there are missings here
-
-tab year_moved if t_homeownership == 0
-
-
-* Create time variable that stores both year and month (Jan = 0, Dec = 11/12)
-gen t_survey = wave + (month-1)/12
-gen t_moved = year_moved + (month_moved-1)/12 // NOOOOO. Sometimes we observe one but not the other. Do this later
-
-sort pid wave
-gen first_purchase = 1 if homeowner == 1 & L.runsum_homeowner == 0 // obs that are first observed owning a house
-replace first_purchase = . if age > 40 // older heads - might not be first time home buyers
-//
-// * Store the time that they moved if it's their first purchase
-// gen t_firstpurchase_ = t_moved if first_purchase == 1
-// replace t_firstpurchase_ = wave - 1 + (6/12) if first_purchase == 1 & t_firstpurchase == . // We do not have t_moved for everyone, so let's just guess that they moved the summer before this wave
-
-
-* TODO: this doesnt capture everyone. there are 1,579 cases where they have the home purchase year
-* but 2009 first time home purchases
-
-
-* How to find the time before buying the home?
-* replace t_v2 = -1 if F.first_purchase == 1
-
-* todo: should I just look at people who go from renting to owning?
-
-* Category 1: has info on both year_moved and month_moved - can get exact number of months between renting and moving
-sort pid wave
-tempvar time_survey time_moved time_bought
-gen `time_survey' = 12 * wave + month
-gen `time_moved' = 12 * year_moved + month_moved if first_purchase == 1
-by pid, sort: egen `time_bought' = max(`time_moved')
-gen months_homeown = `time_survey' - `time_bought'
-gen t_homeown = floor(months_homeown / 12)
-gen q_homeown = floor(months_homeown / 3 )
-
-gen time_bought_y = `time_bought' / 12
-* Some contradictory individuals -- they still rent, but then next wave they say that they last moved before that wave
-// edit pid age wave month year_moved month_moved housingstatus rentexp mortgageexp housevalue months_homeown t_homeown q_homeown time_bought_y if F.first_purchase == 1 & months_homeown > 0 & months_homeown <= 24
-// edit pid age wave month year_moved month_moved housingstatus rentexp mortgageexp housevalue months_homeown t_homeown q_homeown time_bought_y if pid == 961033
-
-replace months_homeown = -1 if F.first_purchase == 1 & months_homeown >= 0 // not yet bought a house
-replace t_homeown = -1      if F.first_purchase == 1 & months_homeown >= 0 // not yet bought a house
-replace q_homeown = -1      if F.first_purchase == 1 & months_homeown >= 0 // not yet bought a house
-
-* Category 2: has info on year_moved only - can get reasonable guess of years between renting and moving
-tempvar year_bought_1 year_bought
-gen `year_bought_1' = year_moved if first_purchase == 1
-by pid, sort: egen `year_bought' = max(`year_bought_1')
-
-replace t_homeown = wave - `year_bought' if t_homeown == .
-
-* THESE PPL MAKE NO SENSE
-replace t_homeown = -1 if t_homeown == 0 & F.first_purchase == 1 // not yet bought a house
-
-// first wave owning should be
-// 2013 - 2013 = 0
-// 2013 - 2012 = 1
-// 2013 - 2011 = 2
-//
-// last wave renting should be:
-// 2011 - 2013 // should be -2
-// 2011 - 2012 // should be -1
-// 2011 - 2011 // should be -1
-//
-// second to last wave renting should be
-// 2009 - 2013 = -4
-// 2009 - 2012 = -3
-// 2009 - 2011 = -2
-
-
-* Category 3: has info on neither - will just assume that they moved in the year in between
-tempvar year_bought3_temp year_bought3
-gen `year_bought3_temp' = wave - 1 if first_purchase == 1
-by pid, sort: egen `year_bought3' = max(`year_bought3_temp')
-replace t_homeown = wave - `year_bought3' if t_homeown == .
-
-
-// gen time_bought = `time_bought'
-// gen time_survey = `time_survey'
-//time_bought time_survey 
-
-tab t_homeown 			if (first_purchase == 1 | F.first_purchase == 1) , missing
-tab t_homeownership 	if (first_purchase == 1 | F.first_purchase == 1) , missing
-
-// edit pid age wave month year_moved month_moved housingstatus rentexp mortgageexp housevalue months_homeown t_homeown q_homeown if (first_purchase == 1 | F.first_purchase == 1) // & (year_moved == . & month_moved == .) 
-
-gen years_before_first_home = -1 * t_homeown if t_homeown < 0
-gen age_sq = age^2
-
-* xtreg foodathomeexpenditure i.years_before_first_home children inc_fam educhead age age_sq i.married i.racehead, fe
 
 ****************************************************************************************************
 ** Looks at results with this new t_homeown variable
@@ -426,6 +290,9 @@ foreach num of numlist 3/9 {
 gen married_dummy = married == 1 // just look at married or not (rather than divorced, never married, widowed, separated, etc)
 gen log_expenditure_hurst = log(expenditure_hurst)
 gen log_expenditure_hurst_nonH = log(expenditure_hurst_nonH)
+gen tripsexpenditure_no0 = tripsexpenditure
+replace tripsexpenditure_no0 = 1 if tripsexpenditure < 1
+gen log_tripsexpenditure = log(tripsexpenditure_no0)
 
 * Question: is it right to use family weights rather than cross sectional? [pweight = family_weight]
 * TODO: weights
@@ -494,6 +361,43 @@ xtline coef, overlay name("Fig1_apc", replace) title("Life Cycle Profile using A
 restore
 
 ****************************************************************************************************
+** Nondurables w and w/out housing (cross sectional)
+****************************************************************************************************
+
+local family_controls i.married_dummy i.fsize i.children i.children0_2 i.children3_5 i.children6_13 i.children14_17m i.children14_17f i.children18_21m i.children18_21f 
+local reg_controls i.age_cat i.year_born d_year* `family_controls' // log_inc_fam_real
+* NOTE: including log_inc_fam_real above really changes things
+
+tempfile results
+
+qreg log_expenditure_hurst `reg_controls' 
+regsave using `results', addlabel(lab, "Nondurables") replace
+
+qui qreg log_expenditure_hurst_nonH `reg_controls' 
+regsave using `results', addlabel(lab, "Nondurables w/out Housing") append
+
+preserve
+* Find coefs by age
+use `results', clear
+gen is_age = strpos(var, "age_cat")
+keep if is_age > 0
+drop is_age
+destring var, replace ignore("b.age_cat")
+rename var age
+
+* Plot results
+encode lab, gen(labels)
+xtset labels age
+lab var age "Age"
+lab var coef "Expenditure"
+xtline coef, overlay name("Fig1_apc_qreg", replace) title("Median Life Cycle Profile using APC") note("Nondurables in PSID include food, gasoline, utilities, transportation services, and child care." "It does not include other components used in Aguiar Hurst, such as tobacco, clothing,""personal care, domestic services, airfare, nondurable entertainment, gambling, business" "services, and chartiable giving") ytitle(, margin(0 2 0 0))
+restore
+
+
+
+
+
+****************************************************************************************************
 ** Nondurables w and w/out housing
 ** Panel with FE
 ****************************************************************************************************
@@ -530,6 +434,7 @@ restore
 ** Nondurables w and w/out housing
 ** Panel with FE
 ** Add dummies for time before and after home purchase
+** Then interact with wealth dummy... not working great.
 ****************************************************************************************************
 
 * Setup time to homeownership dummies
@@ -549,11 +454,17 @@ tempfile results
 * TODO: this xi thing is really messy... any cleaner way?
 * TODO: try without homeowner dummy
 char homeown_cat_dummy[omit] "after purchase"
-xi i.long_before_purchase*low_wealth_at_start i.right_before_purchase*low_wealth_at_start
-xtreg log_expenditure_hurst `reg_controls' i.homeowner _Ilong_befo_1 _IlonXlow_w_1 _Iright_bef_1 _IrigXlow_w_1, fe
+// xi i.long_before_purchase*low_wealth_at_start i.right_before_purchase*low_wealth_at_start
+// _Ilong_befo_1 _IlonXlow_w_1 _Iright_bef_1 _IrigXlow_w_1
+gen LongBefore_Wealthy    = long_before_purchase * (low_wealth_at_start==0)
+gen LongBefore_NotWealthy = long_before_purchase * low_wealth_at_start
+gen RightBefore_Wealthy   = right_before_purchase * (low_wealth_at_start==0)
+gen RightBefore_NotWealthy= right_before_purchase * low_wealth_at_start
+
+xtreg log_expenditure_hurst `reg_controls' i.homeowner LongB* RightB*, fe
 regsave using `results', addlabel(lab, "Nondurables") replace
 
-xtreg log_expenditure_hurst_nonH `reg_controls' i.homeowner long_before_purchase#low_wealth_at_start right_before_purchase#low_wealth_at_start, fe 
+xtreg log_expenditure_hurst_nonH `reg_controls' i.homeowner LongB* RightB*, fe 
 regsave using `results', addlabel(lab, "Nondurables w/out Housing") append
 
 * NOTE: seems the unknown category is collinear with the fixed effect -- so thats why it gets dropped
@@ -574,3 +485,86 @@ preserve
 	lab var coef "Expenditure"
 	xtline coef, overlay name("Fig1_fe_housing", replace) title("Life Cycle Profile using FE & control for housing") note("Nondurables in PSID include food, gasoline, utilities, transportation services, and child care." "It does not include other components used in Aguiar Hurst, such as tobacco, clothing,""personal care, domestic services, airfare, nondurable entertainment, gambling, business" "services, and chartiable giving") ytitle(, margin(0 2 0 0))
 restore
+
+****************************************************************************************************
+** Nondurables w and w/out housing
+** Panel with FE
+** Add dummies for time before and after home purchase
+** interact with dummy showing whether you got any gifts from parents
+****************************************************************************************************
+
+// * Setup time to homeownership dummies
+// gen     homeown_cat = "unknown" if t_homeownership == .
+// replace homeown_cat = "long before purchase" if t_homeownership <= -4
+// replace homeown_cat = "right before purchase" if t_homeownership == -2
+// replace homeown_cat = "after purchase" if t_homeownership >= 0 & t_homeownership != .
+// encode  homeown_cat, gen(homeown_cat_dummy)
+
+// gen long_before_purchase = t_homeownership <= -4
+// gen right_before_purchase = t_homeownership == -2
+gen after_purchase = t_homeownership >= 0 & t_homeownership != .
+
+* Create dummy for those without gifts from parents
+by pid, sort: egen value_gifts_allwaves = total(value_gifts)
+gen LongBefore_NoGifts    = long_before_purchase * (value_gifts_allwaves==0)
+gen RightBefore_NoGifts   = right_before_purchase * (value_gifts_allwaves==0)
+gen After_NoGifts         = after_purchase * (value_gifts_allwaves==0)
+
+* Clean up controls
+gen fsize_topcode = fsize
+gen children_topcode = children
+replace fsize_topcode = 5 if fsize > 5 & fsize != .
+replace children_topcode = 3 if children > 3 & children != .
+foreach var of varlist children0_2 children3_5 children6_13 children14_17m ///
+					   children14_17f children18_21m children18_21f{
+	replace `var' = 1 if `var'> 0 & `var' != .
+}
+
+local family_controls i.married_dummy i.fsize_topcode i.children_topcode i.children0_2 i.children3_5 i.children6_13 i.children14_17m i.children14_17f i.children18_21m i.children18_21f 
+local reg_controls i.age_cat d_year* `family_controls' log_inc_fam_real // Remove i.year_born because we add fe
+tempfile results
+
+// keep if value_gifts_allwaves==0
+xtreg log_expenditure_hurst `reg_controls' i.homeowner LongBefore_NoGifts RightBefore_NoGifts After_NoGifts, fe
+regsave using `results', addlabel(lab, "Nondurables") replace
+
+xtreg log_expenditure_hurst_nonH `reg_controls' i.homeowner LongBefore_NoGifts RightBefore_NoGifts After_NoGifts, fe 
+regsave using `results', addlabel(lab, "Nondurables w/out Housing") append
+
+* NOTE: seems the unknown category is collinear with the fixed effect -- so thats why it gets dropped
+
+preserve
+	* Find coefs by age
+	use `results', clear
+	gen is_age = strpos(var, "age_cat")
+	keep if is_age > 0
+	drop is_age
+	destring var, replace ignore("b.age_cat")
+	rename var age
+	
+	* Plot results
+	encode lab, gen(labels)
+	xtset labels age
+	lab var age "Age"
+	lab var coef "Expenditure"
+	xtline coef, overlay name("Fig1_fe_housing_no_gifts", replace) title("Life Cycle Profile using FE & control for housing") note("Nondurables in PSID include food, gasoline, utilities, transportation services, and child care." "It does not include other components used in Aguiar Hurst, such as tobacco, clothing,""personal care, domestic services, airfare, nondurable entertainment, gambling, business" "services, and chartiable giving") ytitle(, margin(0 2 0 0))
+restore
+
+
+
+
+* Next:
+* do similar plots but with wealth
+* do similar regressions but LAD not reg?
+
+* drop those with top 5% highest consumption? (by age group?)
+* perhaps try LAD regression without fixed effects? -- already tried this, now add the dummy i care about
+* follow Aguiar and Hurst methodology for dropping extreme observations
+* do the APC thing using net wealth and net liquid wealth
+* do the Di Belsky and Liu thing
+
+************
+
+qreg log_expenditure_hurst i.homeowner LongB* RightB*
+qreg log_expenditure_hurst `reg_controls' i.homeowner LongB* RightB*
+
