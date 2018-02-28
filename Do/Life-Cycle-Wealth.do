@@ -4,6 +4,9 @@
 ****************************************************************************************************
 
 set more off
+graph close
+set autotabgraphs on
+
 global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 
 use "$folder\Data\Intermediate\Basic-Panel.dta", clear
@@ -42,6 +45,16 @@ drop if fam_wealth_real - L.fam_wealth_real > 100 * inc_fam_real & fam_wealth !=
 
 * Find first home purcahses (two alternative definitions)
 qui do "$folder\Do\Find-First-Home-Purchase.do"
+
+****************************************************************************************************
+** Gifts / Inheritance
+****************************************************************************************************
+
+* Compute a running sum of gifts/inheritance for each HH
+sort pid wave                                                // this is very important so that the runsum works correctly
+by pid, sort: generate cummulative_gifts = sum(value_gifts_real)     // will be 0 if they have never gotten anything
+lab var cummulative_gifts "Cummulative gifts/inheritance (real) since 1999"
+* TODO: could include some reasonable rate of return on these gifts? dunno
 
 ****************************************************************************************************
 ** Setup APC
@@ -121,31 +134,38 @@ restore
 ** Simple means and medians by t_homeownership
 ****************************************************************************************************
 
-
-preserve
-	collapse (mean) fam_wealth_real fam_wealth_ex_home_real, by(t_homeownership)
-	keep if t_ <= 10 & t_ >= -10
-	tsset t_homeownership
-	tsline fam_w*, title("Mean Wealth") name("mean_wealth", replace)
-	graph export "$folder\Results\Wealth\mean_wealth_by_t_homeownership.pdf", as(pdf) replace
-restore
-
-preserve
-	collapse (median) fam_wealth_real fam_wealth_ex_home_real, by(t_homeownership)
-	keep if t_ <= 10 & t_ >= -10
-	tsset t_homeownership
-	tsline fam_w*, title("Median Wealth") name("median_wealth", replace)
-	graph export "$folder\Results\Wealth\median_wealth_by_t_homeownership.pdf", as(pdf) replace
-restore
+gen fam_wealth_ex_gifts_real = fam_wealth_real - cummulative_gifts
 
 preserve
 	by pid, sort: egen min_t_homeownership = min(t_homeownership)
 	keep if min_t_homeownership <= -6
 	tab t_homeownership
-	collapse (median) fam_wealth_real fam_wealth_ex_home_real, by(t_homeownership)
+	
+	collapse (mean) fam_wealth_real fam_wealth_ex_home_real, by(t_homeownership)
+	keep if t_ <= 10 & t_ >= -10
+	tsset t_homeownership
+	tsline fam_w*, title("Mean Wealth") name("mean_wealth", replace)
+// 	graph export "$folder\Results\Wealth\mean_wealth_by_t_homeownership.pdf", as(pdf) replace
+restore
+
+preserve
+	collapse (median) fam_wealth_real fam_wealth_ex_home_real fam_wealth_ex_gifts_real, by(t_homeownership)
 	keep if t_ <= 10 & t_ >= -10
 	tsset t_homeownership
 	tsline fam_w*, title("Median Wealth") name("median_wealth", replace)
+// 	graph export "$folder\Results\Wealth\median_wealth_by_t_homeownership.pdf", as(pdf) replace
+restore
+
+preserve
+	by pid, sort: egen min_t_homeownership = min(t_homeownership)
+	keep if min_t_homeownership <= -4
+	tab t_homeownership
+	
+	collapse (median) fam_wealth_real fam_wealth_ex_home_real fam_wealth_ex_gifts_real (count) n = fam_wealth_real, by(t_homeownership)
+	keep if t_ <= 10 & t_ >= -10
+	list t_ n
+	tsset t_homeownership
+	tsline fam_w*, title("Median Wealth") name("median_wealth_tneg4", replace)
 // 	graph export "$folder\Results\Wealth\median_wealth_by_t_homeownership.pdf", as(pdf) replace
 restore
 

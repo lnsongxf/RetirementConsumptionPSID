@@ -1,4 +1,11 @@
+****************************************************************************************************
+** Look at the impact of purchasing a home on consumption
+****************************************************************************************************
+
 set more off
+graph close
+set autotabgraphs on
+
 global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 
 use "$folder\Data\Intermediate\Basic-Panel.dta", clear
@@ -38,6 +45,8 @@ drop if fam_wealth_real - L.fam_wealth_real > 100 * inc_fam_real & fam_wealth !=
 
 * Find first home purcahses (two alternative definitions)
 qui do "$folder\Do\Find-First-Home-Purchase.do"
+
+drop if mortgageexpenditure > 0 & t_homeownership < 0 // these people do not make sense
 
 ****************************************************************************************************
 ** Notes
@@ -96,7 +105,6 @@ restore
 * drop people with positive mortgage expenditure but who do not own a house
 * all of these people responded "neither" to the rent or own question
 * edit if mortgageexpenditure > 0 & t_homeownership < 0
-drop if mortgageexpenditure > 0 & t_homeownership < 0 // these people do not make sense
 
 * DO WE NEED TO DO THIS????
 * by pid, sort: egen waves = count(wave)
@@ -232,7 +240,10 @@ tsline inc_fam inc_head inc_spouse /* inc_transfer inc_ss_fam */ , title("Income
 
 tsline homeowner, name("homeowner", replace) // woaw. was not expecting that 20% of people who buy a home are back to renting 2 years later
 
-tsline fam_wealth fam_wealth_ex_home homeequity bank_account_wealth stock_wealth homeequity, name("wealth", replace)
+tsline fam_wealth fam_wealth_ex_home homeequity bank_account_wealth stock_wealth homeequity, name("wealth", replace) title("Nominal Wealth")
+tsline fam_wealth_real fam_wealth_ex_home_real, name("wealth_real", replace) title("Real Wealth")
+
+sfsdf
 * TODO: will want to account for parental transfers
 * Unfortunately home equity barely increases between t = 2 and 10
 * HUGE jump in home equity at t = 0
@@ -552,6 +563,29 @@ preserve
 	xtline coef, overlay name("Fig1_fe_housing_no_gifts", replace) title("Life Cycle Profile using FE & control for housing") note("Nondurables in PSID include food, gasoline, utilities, transportation services, and child care." "It does not include other components used in Aguiar Hurst, such as tobacco, clothing,""personal care, domestic services, airfare, nondurable entertainment, gambling, business" "services, and chartiable giving") ytitle(, margin(0 2 0 0))
 restore
 
+****************************************************************************************************
+** Drop age from the regression -- why do I need this anyway?
+****************************************************************************************************
+
+local family_controls i.married_dummy i.fsize_topcode i.children_topcode /* i.children0_2 i.children3_5 i.children6_13 i.children14_17m i.children14_17f i.children18_21m i.children18_21f  */
+local reg_controls /*i.age_cat d_year* */ i.wave `family_controls' log_inc_fam_real // Remove i.year_born because we add fe
+
+
+xtreg log_expenditure_hurst `reg_controls'  LongBefore_NoGifts RightBefore_NoGifts After_NoGifts, fe
+
+xtreg log_expenditure_hurst `reg_controls' i.homeown_cat_dummy, fe
+
+xi i.t_homeownership
+xtreg log_expenditure_hurst `reg_controls' _It_*, fe
+
+
+*******************
+
+
+// keep if value_gifts_allwaves==0
+xtreg log_expenditure_hurst `reg_controls' i.homeowner LongBefore_NoGifts RightBefore_NoGifts After_NoGifts, fe
+
+xtreg log_expenditure_hurst_nonH `reg_controls' i.homeowner LongBefore_NoGifts RightBefore_NoGifts After_NoGifts, fe 
 
 
 
@@ -567,6 +601,12 @@ restore
 
 ************
 
+
+
+
+/*
 qreg log_expenditure_hurst i.homeowner LongB* RightB*
 qreg log_expenditure_hurst `reg_controls' i.homeowner LongB* RightB*
+*/ 
+
 

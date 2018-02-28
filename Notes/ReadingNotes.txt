@@ -1,0 +1,190 @@
+----
+
+1 - Banks, Blundell, and Tanner (1998). Is There a Retirement-Savings Puzzle?
+2 - Bernheim et al - Uses PSID to document retirement consumption puzzle
+3 - Aguiar and Hurst - Consumption versus Expenditure
+4 - Aguila Attanasio Meghir _ Changes in Consumption at Retirement Evidence from Panel Data
+5 - Hurd and Rohwedder - Heterogeneity in spending change at retirement
+6 - Aguiar, M. and E. Hurst “Consumption vs. Expenditure”, Journal of Political Economy, 2005.
+7 - Pagel
+8 - Scholz, Seshadri and Khitatrakun “Are Americans Saving “Optimally” for Retirement?”, JPE
+9 - Blundell, Pistaferri, Saporta-Eksten "Consumption Inequality and Family Labor Supply"
+
+
+
+
+
+----
+
+To read later:
+
+Hurst, Erik, and Frank Stafford, “Home Is Where the Equity Is: Mortgage Refinancing and Household Consumption,” Journal of Money,
+Credit, and Banking 36 (2004), 985–1014
+
+----
+
+2 - Bernheim et al - Uses PSID to document retirement consumption puzzle
+
+Bernheim, D., J. Skinner, and S. Weinberg, “What Accounts for the Variation in Retirement WealthAmong U.S. Households?”, American Economic Review, Vol. 91, 2001, 832-857.
+
+The primary data sample for our analysis consists of the set of all households
+surveyed in the Panel Study of Income Dynamics (PSID) with a transition to
+retirement between the years 1978 and 1990. We define nonretired households to
+be those with at least one member (head or spouse) working more than 1,500
+hours annually. We define a household to be retired if no member works more
+than 500 hours annually in the current year, or in any subsequent year for
+which data are available.
+
+We restricted the sample to households with transition periods of less than
+five year
+
+3,500 observations on 430 households
+
+----
+
+4 - Aguila Attanasio Meghir _ Changes in Consumption at Retirement Evidence from Panel Data
+
+Uses CEX. This allows you to observe each person for four quarters. Finds a drop in consumption in food, but no drop in consumption in overall expenditure (during the year that you retire)
+
+What if the drop in consumption only starts more than a year after you retire? That would be consistent with a temptation story. During the first year of retirement, you might still have enough to consume as much as you want
+
+They look at the household consumption response to the head of household retiring.
+
+----
+
+5 - Hurd and Rohwedder - Heterogeneity in spending change at retirement
+
+We begin with 439 retirement transitions among 50 to 70 year-olds where the
+responses to the question ‘‘Are you retired?’’ indicate a transition from not
+retired to retired. We impose the additional restriction that the respondent
+remained retired in the following wave if the respondent is observed in that
+following wave
+
+
+----
+
+
+
+7 - Pagel retirement consumption puzzle:
+
+Finally, we use the Panel Study of Income Dynamics (PSID) data from 1968-2015.
+The PSID is a nationally representative survey of households in the United
+States conducted by the University of Michigan. From 1968-1997, the PSID was
+administered annually, the PSID switched to a biennial survey format post
+1997. We follow Addoum (0) and extract consumption data from years prior to
+1997 and household finance data post 1997. Moreover, we follow the literature
+and use household food expenditures, the sum of food consumed at home and
+away, as a proxy for consumption. Because the PSID surveys households
+consecutively, we can also include individual fixed effects in our
+regressions. The results from the PSID analysis are consistent with our other
+results. The coefficients on consumption are negative and significant
+indicating that individuals consume less after retirement. Moreover, retired
+individuals increase their balances in savings and checking accounts, which
+corroborates our previous findings. Finally, individuals also hold more value
+in stocks and their overall wealth increases with and without accounting for
+equity. The results can be found in Table 12.
+
+Why does Addoum do that??????
+
+
+
+----
+
+
+
+Sample Selection in "Consumption Inequality and Family Labor Supply"
+Blundell, Pistaferri, Saporta-Eksten paper that uses PSID consumption data from 1999 to 2009
+https://www.econstor.eu/bitstream/10419/67323/1/727547445.pdf
+
+For our baseline specification we focus on non-SEO households with
+participating and married male household heads aged between 30 and 65.
+Whenever there is a change in family composition we drop the year of the
+change and treat the household unit as a new family starting with the
+observation following the change. We drop observations with missing values for
+state, education, race, labor earnings, hours, total consumption and total
+assets. We drop observations with wages that are lower than half the minimum
+wage in the state where the household resides. Finally, we drop observations
+for which consumption, wages or earnings of one of the earners show extreme
+"jumps" most likely due to measurement error. A "jump" is defined as an
+extremely positive (negative) change from t2 to t, followed by an extreme
+negative (positive) change from t to t+2. Formally, for each variable (say x),
+we construct the biennial log dierence 2 log (xt), and drop observation in
+the bottom 0.25 percent of the product 2 log (xt) 2 log (xt2)
+
+Before 1999, PSID collected data on very few consumption items, such as food,
+rent and child care. However, starting in 1999 consumption expenditures data
+cover many other nondurable and services consumption categories, including
+health expenditures, utilities, gasoline, car maintenance, transportation,
+education and child care. A few other consumption categories have been added
+starting in 2005 (such as clothing), however we do not use these categories to
+keep the consumption series consistent over time. The main items that are
+missing are clothing, recreation, alcohol and tobacco
+
+While rent is reported whenever the household rents a house, it is not
+reported for home owners. To construct a series of housing services for home
+owners we impute the rent expenditures for home owners using the self reported
+house price.20 We then aggregate all nondurable and services consumption
+categories to get the household consumption series.21 Descriptive statistics
+on the various components of aggregate consumption (nominal values) are
+reported in Table 1. A comparison of the main aggregates (total consumption,
+nondurables, and services) against the NIPA series is oered in Table 2. As
+shown in Table 2, taking into account that the PSID consumption categories
+that we use are meant to cover 70% of consumption expenditure, the coverage
+rate is remarkably good.
+
+[20] For our baseline measure we approximate the rent equivalent as 6% of the house price. See Poterba and Sinai (2008)
+[21] We treat missing values in the consumption (and asset) subcategories as zeros.
+
+Nondurables and services:
+"including health expenditures, utilities, gasoline, car maintenance, transportation, education, and child care"
+
+Consumption = Nondurable Cons + Services
+Nondurable cons = food at home + gasoline
+Services = food (away from home) + health insurance + health services + utilities + transportation + education + child care+ home insurance + rent (or rent equivalent)
+
+
+
+----
+
+Income, Consumption, and Leisure Inequality in the US, 1980–2010
+Orazio Attanasio, Erik Hurst, and Luigi Pistaferri
+
+Food consumption is the sum of food at home, food away from home,
+and the value of food stamps. The post-1997 consumption measure (or
+“70 percent measure” from now on) includes information on spending on
+utilities (electricity, heating, water, miscellaneous utilities); home insurance
+premiums; health (health insurance premiums, nursing care, doctor visits,
+prescriptions, other health spending); vehicle spending (vehicle insurance
+premiums, vehicle repairs, gasoline, parking); transportation (bus fares,
+taxi fares, other transportation expenses); education (tuition, other school
+expenses); and child care. To match the nondurable consumption definition
+from the CE, we also consider an alternative measure that excludes spending
+on education and health.
+
+----
+
+PSID Expenditure Data
+
+
+To expand the coverage of expenditure data in PSID, a series of new questions
+was added to the survey in 1999 to collect information regarding spending on
+healthcare, education, childcare, transportation, and utilities. Li et al.
+(2010) fnd that the PSID-measured consumption expenditures in these categories
+match fairly closely to those measured in the CE and account for 72 percent of
+total consumption expenditures measured in the CE.
+
+
+----
+
+QUESTIONS
+
+Question for Cormac: has anyone looked at this issue using the Kilts Nielsen Household Panel data? Might be useful because of its very fine consumption data
+Question for me: could I look for a drop in consumption around home purchase using Kilts Nielsen household panel?
+
+----
+
+Whats the right definition of nondurable consumption?
+Whats the best way to define the transition to retirement? Look at head or spouse or both?
+Whats the best way to define a household? Should we follow the household if the head changes?
+What empirical method to use? Costas uses DID given two periods, but mentions it might be good to use IV if more than 2 periods
+

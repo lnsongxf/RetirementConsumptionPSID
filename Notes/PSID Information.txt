@@ -1,0 +1,65 @@
+PSID Information
+
+Wealth:
+detailed information on households’
+financial asset holdings is reported as part of wealth
+supplements in 1984, 1989, 1994, and 1999 onward. Starting
+in 1989, the wealth supplements include data on households’
+so-called active saving, which captures their saving out of current
+income in various asset categories and excludes capital
+gains. These saving data are discussed in greater detail in the
+online appendix.
+
+Households’ active saving (Si
+t,t−1) is calculated following
+the approach in Juster et al. (2006). The exact method
+is outlined in the online appendix. Active saving measures
+households’ net contributions to various financial assets over
+time, and it excludes capital gains. For instance, households
+that pay off some of their outstanding mortgage principal
+have positive active saving. In contrast, increases in financial
+wealth due to stock price appreciation do not count as active
+saving.
+
+
+
+Consumption:
+Starting in 1999, the PSID recorded data on households’ mortgage payments, health expenditures,
+child care expenditures, utilities and transportation related expenses. Questions regarding expenditures on recreation, vacations, (minor) home repairs and household furnishings were added
+to the PSID starting in 2005.1 For simplicity, these expenditures will be referred to as “PSID
+consumption.” According to Charles et al. (2007) these data cover a large portion of household
+expenditures, although Cooper (2010) shows that they are still much less comprehensive than the
+measure of non-housing expenditures (NHE) used in the main analysis in the paper. Still, these
+data are reported by households rather than imputed, which potentially
+
+1) Large household home repair expenditures such as a kitchen remodeling are included as part of households’ saving in housing
+
+
+https://psidonline.isr.umich.edu/Guide/Quality/NewExpendituresInPSID.pdf
+
+Spending on categories included in the psid totals 
+$25,340, as measured by the ce in 2001. This figure accounts
+for 72 percent of total spending across all ce categories,
+including those not collected in the psid (not
+shown in tables). This spending gap falls largely into five
+categories not measured in the 1999, 2001, or 2003 psid
+waves: home repairs and maintenance ($1,200 in the 2001
+ce), household furnishing and equipment ($1,400), clothing
+and apparel ($1,300), trips and vacations ($1,300), and
+recreation and entertainment ($1,200). To capture spending
+on these items, questions were added to the 2005 and
+subsequent waves of the psid, with the goal of having the PSID 
+obtain a nearly comprehensive measurement of expenditures from 2005 onwards.
+
+
+
+
+
+Dynan paper on Debt Overhang:
+The PSID contains fairly extensive information about mortgages on primary residences as well as loans used to fnance motor vehicle purchases. Balances on other common types of household debt—such as credit cards, student loans, medical and legal bills, and loans from relatives—were reported as a group until 2011, when the questionnaire was changed to collect more detail.6 The PSID also provides some information about assets and about net equity in businesses, vehicles, and second homes, so that one can create a limited measure of households’ net worth.7 Data on expenditures on food and a few other items are available for most waves of the survey; questions about many more categories of spending were added between 1999 and 2005, such that a broad (although still not complete) measure of consumption can be constructed for the 2005, 2007, and 2009 waves. The special module on foreclosures and mortgage payment problems frst appeared in the 2009 survey. 
+
+Suggests about 8,000 obs in the 2009 survey
+
+
+Note: Krueger, Mitman chapter in Macro Handbook has more info on PSID consumption
+

@@ -1,0 +1,54 @@
+Todo: 
+
+DONE - mortgage wealth
+DONE - pension wealth
+DONE - include ss income
+
+
+How to define the household:
+-Baseline definition: new household if change in status of head/spouse (following Blundell)
+-Alternative definition (maybe include a switch) if any change in household composition
+-Also: make an indicator variable if adult kids enter/leave so we can use it as a control later on
+
+What is in transfer income?
+
+
+Replicate income graphs with consumption. Do it a few ways:
+-type of consumption (ie, look at all the sub categories)
+-type of people. ie, rank on social security income, 5 quintiles (SSI is a good measure of permanent income, since it's a lienar scale of past earnings. Look at SSI after retirement)
+- (Pat idea: rank based on wealth at time of retirement)
+
+---
+
+Regarding my idea about explaining the decline in household savings rates in the US:
+- Cormac mentioned an interesting finding that wealth has been going up during the past 30 years. This finding comes from Ludvig Straub. 
+- Though it's unclear whether Straub is looking at total wealth or wealth inequality. I should look into this.
+- Regarding the savings rate in the US, cormac mentions that the statistic is weighted based on wealth (so if the richest are saving more, it should be reflected in the stat)
+- So basically this might be a measurement issue. Is asset income included in income, when computing the stat about HH savings rates? It should be.
+- Maybe I can look into this and ask C Carroll?
+
+
+My reading of Straub:
+-model implies that wealth-to-GDP ratio increased by around 30%
+-doesnt mention much empirical evidence that this actually happened. but does cite Piketty and Zucman 2015
+
+---
+
+
+Issues:
+
+- the sample changes as ret_duration gets further away from zero --> might cause issues?
+- should I convert expenditure to real terms using the CPI? (when nominal expenditure is flat, real expenditure is declining)
+- when taking means by ret_duration, should I use weights? which weights would I use?
+- what do you think of the alternative definition of retirement used in that other study? IIRC the first year retired is when both the head and spouse work <500 hours pa
+- any issues due to changing composition of households? (ie, observe some HHs for a while before retirement, others for a while after retirement). should i just look at those who are on both sides for a while?
+
+---
+
+Findings:
+
+- trips expenditure goes up while clothing goes down
+- health expenditure goes up... though it's not exactly a clean jump
+- food expenditure looks flat... weird
+- blundell expenditure (equivalence scaled) actually goes up with duration of retirement
+- blundell expenditure goes up very slightly
