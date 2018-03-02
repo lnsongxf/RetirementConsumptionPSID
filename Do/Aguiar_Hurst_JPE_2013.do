@@ -1,5 +1,8 @@
 set more off
-global folder "C:\Users\STUDENT\Documents\GitHub\RetirementConsumptionPSID"
+graph close
+set autotabgraphs on
+
+global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 use "$folder\Data\Intermediate\Basic-Panel.dta", clear
 
 * Switches							 
@@ -155,8 +158,8 @@ rename var age
 encode lab, gen(labels)
 xtset labels age
 lab var age "Age"
-lab var coef "Expenditure"
-xtline coef, overlay name("Fig1", replace) note("Nondurables in PSID include food, gasoline, utilities, transportation services, and child care." "It does not include other components used in Aguiar Hurst, such as tobacco, clothing,""personal care, domestic services, airfare, nondurable entertainment, gambling, business" "services, and chartiable giving") ytitle(, margin(0 2 0 0))
+lab var coef "Log Expenditure Relative to Age 25"
+xtline coef, overlay name("Fig1", replace) note("Nondurables in PSID include food, gasoline, utilities, transportation services, and child care." "It does not include other components used in Aguiar Hurst, such as tobacco, clothing,""personal care, domestic services, airfare, nondurable entertainment, gambling, business" "services, and chartiable giving") title("Life Cycle Consumption") ytitle(, margin(0 2 0 0))
 restore
 
 ****************************************************************************************************
@@ -194,8 +197,8 @@ rename var age
 encode lab, gen(labels)
 xtset labels age
 lab var age "Age"
-lab var coef "Expenditure"
-xtline coef, overlay name("Fig2", replace)
+lab var coef "Log Expenditure Relative to Age 25"
+xtline coef, overlay name("Fig2", replace) title("Life Cycle Consumption: Work vs Non Work") ytitle(, margin(0 2 0 0))
 restore
 
 ****************************************************************************************************
@@ -226,8 +229,8 @@ rename var age
 encode lab, gen(labels)
 xtset labels age
 lab var age "Age"
-lab var coef "Expenditure"
-xtline coef, overlay name("Fig3a", replace)
+lab var coef "Log Expenditure Relative to Age 25"
+xtline coef, overlay name("Fig3a", replace) title("Life Cycle Consumption: Increasing Components") ytitle(, margin(0 2 0 0))
 restore
 
 ****************************************************************************************************
@@ -258,8 +261,8 @@ rename var age
 encode lab, gen(labels)
 xtset labels age
 lab var age "Age"
-lab var coef "Expenditure"
-xtline coef, overlay name("Fig3b", replace)
+lab var coef "Log Expenditure Relative to Age 25"
+xtline coef, overlay name("Fig3b", replace)  title("Life Cycle Consumption: Decreasing Components") ytitle(, margin(0 2 0 0))
 restore
 
 ****************************************************************************************************
@@ -305,8 +308,8 @@ rename var age
 encode lab, gen(labels)
 xtset labels age
 lab var age "Age"
-lab var coef "Expenditure"
-xtline coef, overlay name("Fig3_alt", replace)
+lab var coef "Log Expenditure Relative to Age 25"
+xtline coef, overlay name("Fig3_alt", replace)  title("Life Cycle Consumption: New PSID Measures") ytitle(, margin(0 2 0 0))
 restore
 
 ****************************************************************************************************
@@ -353,8 +356,8 @@ rename var age
 encode lab, gen(labels)
 xtset labels age
 lab var age "Age"
-lab var coef "Expenditure"
-xtline coef, overlay name("Fig3_alt", replace)
+lab var coef "Log Expenditure Relative to Age 25"
+xtline coef, overlay name("Fig3_alt2005", replace) title("Life Cycle Consumption: New PSID Measures") ytitle(, margin(0 2 0 0))
 restore
 
 }

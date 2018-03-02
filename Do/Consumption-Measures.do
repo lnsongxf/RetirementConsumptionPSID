@@ -20,7 +20,7 @@ replace rent_imputed = 0.06 * housevalue if housingstatus == 1
 local expenditure_blundell foodathomeexpenditure foodstamp gasolineexpenditure foodawayfromhomeexpenditure /// 
 healthinsuranceexpenditure healthservicesexpenditure utilityexpenditure ///
 transportation_blundell educationexpenditure childcareexpenditure /// 
-homeinsuranceexpenditure rent_imputed 
+homeinsuranceexpenditure rent_imputed
 
 egen transportation_blundell = rowtotal(`transportation_blundell')
 lab var transportation_blundell "Transportation Services (Blundell et al)"
@@ -29,7 +29,8 @@ lab var transportation_blundell "Transportation Services (Blundell et al)"
 egen expenditure_blundell          = rowtotal(`expenditure_blundell')
 gen expenditure_blundell_exhealth  = expenditure_blundell - healthservicesexpenditure - healthinsuranceexpenditure
 gen expenditure_blundell_exhous    = expenditure_blundell - rent_imputed - homeinsuranceexpenditure
-gen expenditure_blundell_ex3 = expenditure_blundell - educationexpenditure - childcareexpenditure - healthservicesexpenditure
+gen expenditure_blundell_exedu     = expenditure_blundell - educationexpenditure
+gen expenditure_blundell_ex3       = expenditure_blundell - educationexpenditure - childcareexpenditure - healthservicesexpenditure
 
 lab var expenditure_blundell_ex3 "Blundell Ex - Edu, Child Care, Health"
 lab var expenditure_blundell "Total Expenditure (Blundell et al)"
@@ -163,7 +164,7 @@ foreach var of varlist housingexpenditure mortgageexpenditure rentexpenditure //
 	educationexpenditure childcareexpenditure telephoneexpenditure ///
 	repairsexpenditure furnishingsexpenditure tripsexpenditure ///
 	expenditure_blundell expenditure_blundell_exhealth expenditure_blundell_exhous ///
-	expenditure_blundell_ex3 rent_imputed ///
+	expenditure_blundell_exedu expenditure_blundell_ex3 rent_imputed ///
 	expenditure_hurst expenditure_hurst_nonH workexpenditure ///
 	workexpenditure_post05 nonwork_nondur_expenditure housingservicesexpenditure {
 	

@@ -1,10 +1,12 @@
 set more off
-* global folder "C:\Users\pedm\Documents\Research\Cormac\RetirementConsumptionPSID"
-global folder "F:\Cormac Project January 18 2018 Backup\RetirementConsumptionPSID"
+graph close
+set autotabgraphs on
+
+global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 use "$folder\Data\Intermediate\Basic-Panel.dta", clear
 
 * Switches
-global quintiles_definition 4    // Defines quintiles. Can be 1, 2, 3, or 4. My preference is 4. I think the next best option is 2
+global quintiles_definition 2    // Defines quintiles. Can be 1, 2, 3, or 4. My preference is 4. I think the next best option is 2
 global retirement_definition 0   // 0 is default (last job ended due to "Quit, Resigned, Retire" or "NA")
                                  // 1 is loose (does not ask why last job ended) and 2 is strict (last job ended due to "Quit, Resigned, Retire" only)
 global ret_duration_definition 2 // Defines retirement year. Can be 1, 2, or 3. My preference is 3 (for the sharp income drop) although 2 is perhaps better when looking at consumption data (for smoothness)
@@ -53,6 +55,10 @@ if $quintiles_definition == 2{
 	** So the lowest quintile isn't made of households with the lowest permanent income
 	* hist max_inc_ss_fam if wave == max_year & retired == 1, name("hist_max", replace)
 	
+	* TEMPORARY FIX
+	* TODO: do something better with these people
+	drop if max_inc_ss_fam == 0
+	
 	* by pid, sort: egen max_retired = max(retired)
 	* sort pid wave
 	* edit pid wave age sex_head retired inc_ss_fam inc_ss_head if max_retired == 1 & quintile == 1
@@ -76,7 +82,7 @@ if $quintiles_definition == 2{
 
 }
 
-sdfsdf
+
 
 * Going forward, if we want to divide by max_inc_ss_fam quintiles, perhaps we drop households that retired young
 
@@ -211,15 +217,29 @@ if $graphs_by_quintile == 1{
 	lab var clothingexpenditure "Clothing"
 	lab var foodathomeexpenditure "Food at home"
 	lab var foodawayfromhomeexpenditure "Food away from home"
+	lab var expenditure_blundell_eq "Nondurable Consumption (Equivalence Scale)"
+	lab var workexpenditure "Work Related Expenditure" // excludes clothing
+	
+	xtline workexpenditure if (ret_duration != 10 | quintile != 3), byopts(title("Work Related Expenditure")) name("work_expenditure", replace) ylabel(#3)
+	graph export "$folder\Results\ConsumptionPostRetirement\work.pdf", as(pdf) replace
 
 	xtline expenditure_blundell, byopts(title("Blundell Expenditure")) name("expenditure_blundell", replace) ylabel(#3)
-	xtline expenditure_blundell_eq, byopts(title("Blundell Expenditure (Eq Scale)")) name("expenditure_blundell_eq", replace) ylabel(#3)
+	
+	xtline expenditure_blundell_eq, byopts(title("Nondurable Consumption") rescale) name("expenditure_blundell_eq", replace) ylabel(#3)
+	graph export "$folder\Results\ConsumptionPostRetirement\expenditure_blundell_eq.pdf", as(pdf) replace
+	
 	xtline expenditure_blundell_exhous, byopts(title("Blundell Expenditure Ex Housing")) name("expenditure_blundell_exhous", replace) ylabel(#3)
 	xtline expenditure_blundell_exhealth,  byopts(title("Blundell Expenditure Ex Health")) name("expenditure_blundell_exhealth", replace) ylabel(#3)
 
 	xtline foodawayfromhomeexpenditure foodathomeexpenditure, byopts(title("Food")) name("food", replace) ylabel(#3)
+	graph export "$folder\Results\ConsumptionPostRetirement\food.pdf", as(pdf) replace
+	
 	xtline taxiexpenditure, byopts(title("Taxis")) name("taxis", replace) ylabel(#3)
 	xtline recreationexpenditure clothingexpenditure tripsexpenditure, byopts(title("New Consumption Measures (Post 2005)") rescale ) name("newmeasures", replace) ylabel(#3)
+	
+	xtline tripsexpenditure, byopts( title("Vacations/Trips Expenditure") rescale ) name("trips", replace) ylabel(#3)
+	graph export "$folder\Results\ConsumptionPostRetirement\trips.pdf", as(pdf) replace
+	
 	xtline childcareexpenditure, byopts(title("Child care expenditure")) name("ccare", replace) ylabel(#3)
 
 	xtline educationexpenditure, byopts(title("Education Expenditure")) name("education", replace) ylabel(#3)

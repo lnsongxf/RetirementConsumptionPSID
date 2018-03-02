@@ -1,0 +1,127 @@
+\documentclass[11pt,onecolumn]{article}
+\usepackage{amsmath, amsthm, amssymb,lscape, natbib,epstopdf,
+	cases, bbm, indentfirst}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{colortbl}
+\usepackage[hang,small,bf]{caption}
+\usepackage{setspace}
+\usepackage{amsmath}
+\usepackage[nohead]{geometry}
+\usepackage[bottom]{footmisc}
+\usepackage{endnotes}
+\usepackage{rotating}
+\usepackage{xr}
+\usepackage{xr-hyper}
+\usepackage[backref = section]{hyperref}
+\usepackage[section]{placeins}
+\allowdisplaybreaks
+
+\definecolor{citec}{rgb}{0,0,.5}
+\definecolor{linkc}{rgb}{0,0,.6}
+\definecolor{bcolor}{rgb}{1,1,1}
+
+\hypersetup{
+	colorlinks = true,
+	urlcolor=linkc,
+	linkcolor=linkc,
+	citecolor = citec,
+	filecolor = linkc,
+	pdfauthor={Pat Moran}}
+
+\usepackage{pstricks}
+\usepackage{pstcol}
+
+\onehalfspacing
+
+%\input{tcilatex}
+\geometry{left=1in,right=1.25in,top=1in,bottom=1in}
+\interfootnotelinepenalty=10000
+
+
+
+\begin{document}
+	
+	%-------------------------------------------------
+	\title{Household spending, leisure and well-being in retirement}
+	\date{}
+	\maketitle
+
+
+A big area of controversy in economics is how households adjust their consumption and leisure decisions as they approach and enter into retirement. Previous research has documented significant drops in households' spending at retirement, which potentially indicates that they have under-saved in preparation for old age and therefore suffer a fall in living standards. However, other papers have suggested that, as the opportunity cost of leisure falls at retirement, households optimally switch leisure for consumption and therefore falls in spending do not reflect drops in living standards. This project aims to document the extent to which these changes in spending and time use differ across different types of households, and ultimately, to understand what drives these difference.
+
+\section{Life Cycle Consumption Dynamics}
+
+
+\begin{figure}[h]
+	% \caption{Life Cycle Consumption}
+	\centering
+	\includegraphics[width=0.9\textwidth]{../AguiarHurstReplication/Fig1.pdf}
+\end{figure}
+
+\pagebreak 
+We follow the method of Aguiar and Hurst (2013) to compute consumption dynamics in the Panel Study of Income Dynamics. These authors study the hump-shaped profile of nondurable expenditures and ask why nondurable expenditure declines during the second half of the life cycle, as seen in the red line of the first figure. The authors find that much of the decline is attributable to a decline in work related expenditures. This can be seen in the green line of the second figure.
+
+\begin{figure}[h]
+	%\caption{Life Cycle Consumption}
+	\centering
+	\includegraphics[width=0.7\textwidth]{../AguiarHurstReplication/Fig2.pdf}
+\end{figure}
+
+\begin{figure}[h]
+	%\caption{Life Cycle Consumption}
+	\centering
+	\includegraphics[width=0.7\textwidth]{../AguiarHurstReplication/Fig3a.pdf}
+\end{figure}
+
+\begin{figure}[h]
+	%\caption{Life Cycle Consumption}
+	\centering
+	\includegraphics[width=0.9\textwidth]{../AguiarHurstReplication/Fig3c.pdf}
+\end{figure}
+
+\begin{figure}[h]
+	%\caption{Life Cycle Consumption}
+	\centering
+	\includegraphics[width=0.9\textwidth]{../AguiarHurstReplication/Fig3b.pdf}
+\end{figure}
+
+
+
+
+\section{Consumption around Retirement}
+
+To explore the impact  of retirement, we compute mean consumption based on the retirement duration of the head of household (where the head retires at time zero). We explore the heterogeneous impact of retirement by quintiles based on social security income. 
+
+While nondurable consumption (scaled for family size) declines for most of the population, we actually observe an increase in consumption for those in the top quintile. Similar behavior is apparent for the category of work related expenditure (in this case, gasoline/transportation/food away from home) where a decline is observed for the bottom four quintiles, but not the top quintile. Much of this can be attributed to food away from home, which declines for the bottom four quintiles, but not the top quintile. Finally, when we look at expenditure on trips/vacations, we observe a similarly large increase for households in the top quintile. 
+
+\begin{figure}[h]
+	%\caption{Life Cycle Consumption}
+	\centering
+	\includegraphics[width=1\textwidth]{../ConsumptionPostRetirement/expenditure_blundell_eq.pdf}
+\end{figure}
+
+\begin{figure}[h]
+	%\caption{Life Cycle Consumption}
+	\centering
+	\includegraphics[width=0.9\textwidth]{../ConsumptionPostRetirement/work.pdf}
+\end{figure}
+
+
+\begin{figure}[h]
+	%\caption{Life Cycle Consumption}
+	\centering
+	\includegraphics[width=0.9\textwidth]{../ConsumptionPostRetirement/trips.pdf}
+\end{figure}
+
+\begin{figure}[h]
+	%\caption{Life Cycle Consumption}
+	\centering
+	\includegraphics[width=0.9\textwidth]{../ConsumptionPostRetirement/food.pdf}
+\end{figure}
+
+Of course, these are just simple averages for now. The next step will be to integrate this analysis with the method of Aguiar and Hurst. Then we can look at the impact of retirement on consumption while controlling for age, period, cohort, marital status, and family size effects. This will hopefully allow us to get a better picture of the heterogeneous impact of retirement.
+
+\end{document}
+              

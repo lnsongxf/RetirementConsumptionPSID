@@ -105,10 +105,12 @@ qreg log_expenditure_hurst ib100.t_homeownership_100 log_inc_fam_real i.married_
 
 char t_homeownership_100[omit] 100
 xi i.t_homeownership_100 i.married_dummy i.fsize_topcode i.children_topcode 
-qregpd log_expenditure_hurst log_inc_fam_real _I*, id(pid) fix(wave)
+qregpd log_expenditure_hurst log_inc_fam_real _I*, id(pid) fix(wave) q(50)
 * WOOHOO! Results are good
 * Though why no standard errors for the homeownership coefs?
 * consumption drops 5.7% 2 years before purchase. whereas just 4.5% 4 years before purchase
+
+sdfsdf
 */
 
 * An important aspects of this is the convergence of the MCMC algorithm. In really bad cases, output will not show standard errors because there is too little (or zero) variation in the parameter across draws. This might happen when the objective function is steppier, as sometimes happens at extreme quantiles. So, in your case, you might have trouble with the .99 quantile and even the .95 quantile. In development, these extreme situations gave us a few problems.
@@ -127,7 +129,7 @@ qregpd log_expenditure_hurst log_inc_fam_real _I*, id(pid) fix(wave)
 
 * Woaw! 536 people fall into this category... out of only 6000ish with t_homeownership != .
 tab age if expenditure_hurst > inc_fam_real & t_homeownership != .
-drop if expenditure_hurst >= inc_fam_real // & t_homeownership != .
+// drop if expenditure_hurst >= inc_fam_real // & t_homeownership != .
 
 xtreg log_expenditure_hurst ib100.t_homeownership_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe
 xtreg log_expenditure_hurst ib100.t_homeown_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe 
@@ -141,9 +143,8 @@ gen log_foodexpenditure = log(foodexpenditure)
 gen log_housingexpenditure = log(housingexpenditure)
 gen log_expenditure_blundell = log(expenditure_blundell)
 
-drop log_tripsexpenditure
-replace tripsexpenditure = 1 if tripsexpenditure == 0
-gen log_tripsexpenditure = log(tripsexpenditure )
+gen log_fooddeliveredexpenditure = log(fooddeliveredexpenditure)
+replace log_fooddeliveredexpenditure = 0 if fooddeliveredexpenditure < 1
 
 gen age_2 = age^2
 keep if age <= 40
@@ -155,12 +156,39 @@ xtreg log_furnishingsexpenditure age age_2 ib100.t_homeown_100 log_inc_fam_real 
 */
 
 * Looks pretty good!!! 
-* I think blundell expenditure makes more sense than hurst expenditure. it includes more subcomponenets
+* Blundell expenditure = AguiarHurst expenditure + healthinsuranceexpenditure + healthservicesexpenditure  
+* + educationexpenditure - fooddeliveredexpenditure - propertytaxexpenditure
+* Though I suppose education is kinda a durable good
 * Results are not significant but still broadly in line with our model
-xtreg log_expenditure_blundell age age_2  ib100.t_homeownership_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe
+* Question: do I mess it up if I add i.not_observed_buying?
+xtreg log_expenditure_blundell age age_2 ib100.t_homeownership_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe
+coefplot, keep(*t_homeown*) xline(0) name("blundell_homeownership", replace)
 xtreg log_expenditure_blundell age age_2 ib100.t_homeown_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe 
+coefplot, keep(*t_homeown*) xline(0) name("blundell", replace)
 
+* exclude education, health, child care
+* uh oh it's not as good...
+gen log_expenditure_blundell_ex3 = log(expenditure_blundell_ex3)
+xtreg log_expenditure_blundell_ex3 age age_2 ib100.t_homeownership_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe
+xtreg log_expenditure_blundell_ex3 age age_2 ib100.t_homeown_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe 
 
+* exclude edu only
+gen log_expenditure_blundell_exedu = log(expenditure_blundell_exedu)
+xtreg log_expenditure_blundell_exedu age age_2 ib100.t_homeownership_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe
+xtreg log_expenditure_blundell_exedu age age_2 ib100.t_homeown_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe 
+
+* interact with income at time of home purchase
+* results look good!
+cap drop bottom_half t_homeownership_100_bottom_half t_homeownership_100_top_half bottom_half_t0
+qui sum log_inc_fam_real if t_homeownership == 0, d
+gen bottom_half_t0 = log_inc_fam_real <= r(p50) if t_homeownership == 0
+by pid, sort: egen bottom_half = max(bottom_half_t0)
+replace bottom_half = 0 if bottom_half == .
+gen t_homeownership_100_bottom_half = t_homeownership_100 * bottom_half
+gen t_homeownership_100_top_half = t_homeownership_100 * (bottom_half == 0)
+
+xtreg log_expenditure_blundell_exedu i.age i.bottom_half ib100.t_homeownership_100_bottom_half ib100.t_homeownership_100_top_half log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe
+coefplot, keep(*t_homeownership_100_bottom_half) xline(0) name("bottomhalf", replace)
 
 
 sdfdsf
