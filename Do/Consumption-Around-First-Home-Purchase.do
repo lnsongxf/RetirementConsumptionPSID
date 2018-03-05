@@ -170,11 +170,13 @@ coefplot, keep(*t_homeown*) xline(0) name("blundell", replace)
 * uh oh it's not as good...
 gen log_expenditure_blundell_ex3 = log(expenditure_blundell_ex3)
 xtreg log_expenditure_blundell_ex3 age age_2 ib100.t_homeownership_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe
+coefplot, keep(*t_homeown*) xline(0) name("blundell_homeownership_ex3", replace)
 xtreg log_expenditure_blundell_ex3 age age_2 ib100.t_homeown_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe 
 
 * exclude edu only
 gen log_expenditure_blundell_exedu = log(expenditure_blundell_exedu)
 xtreg log_expenditure_blundell_exedu age age_2 ib100.t_homeownership_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe
+coefplot, keep(*t_homeown*) xline(0) name("blundell_homeownership_ex_edu", replace)
 xtreg log_expenditure_blundell_exedu age age_2 ib100.t_homeown_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe 
 
 * interact with income at time of home purchase

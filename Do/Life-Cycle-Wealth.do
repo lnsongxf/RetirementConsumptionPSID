@@ -112,12 +112,14 @@ gen log_inc_fam_real = log(inc_fam_real)
 ** Simple means and medians by age
 ****************************************************************************************************
 
-/*
+gen log_fam_wealth_real = log(fam_wealth_real)
+gen log_fam_wealth_ex_home_real = log(fam_wealth_ex_home_real)
+
 preserve
 	collapse (mean) log_fam_wealth_real log_fam_wealth_ex_home_real fam_wealth_real fam_wealth_ex_home_real, by(age_cat)
 	tsset age_cat
 	* tsline log_*, title("Mean Log Wealth") name("mean_log_wealth", replace)
-	tsline fam_w*, title("Mean Wealth") name("mean_wealth", replace)
+	tsline fam_w*, title("Mean Wealth") name("mean_wealth_by_age", replace)
 	graph export "$folder\Results\Wealth\mean_wealth_by_age.pdf", as(pdf) replace
 restore
 
@@ -125,10 +127,11 @@ preserve
 	collapse (median) log_fam_wealth_real log_fam_wealth_ex_home_real fam_wealth_real fam_wealth_ex_home_real, by(age_cat)
 	tsset age_cat
 	* tsline log_*, title("Median Log Wealth") name("median_log_wealth", replace)
-	tsline fam_w*, title("Median Wealth") name("median_wealth", replace)
+	tsline fam_w*, title("Median Wealth") name("median_wealth_by_age", replace)
 	graph export "$folder\Results\Wealth\median_wealth_by_age.pdf", as(pdf) replace
 restore
-*/
+
+* TODO: APC version of this?
 
 ****************************************************************************************************
 ** Simple means and medians by t_homeownership
