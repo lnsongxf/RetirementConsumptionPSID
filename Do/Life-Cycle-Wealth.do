@@ -80,6 +80,11 @@ gen married_dummy = married == 1 // just look at married or not (rather than div
 * gen log_fam_wealth_ex_home_real = log(fam_wealth_ex_home_real)
 gen log_inc_fam_real = log(inc_fam_real)
 
+* Normalize so that first home purchase == 100 (I do this because cannot have neg values  with indicator variable)
+gen t_homeownership_100 = t_homeownership + 100
+replace t_homeownership_100 = 92 if t_homeownership_100 < 92
+replace t_homeownership_100 = 1000 if t_homeownership == .
+
 ****************************************************************************************************
 ** Generate wealth categorical variable that we can interact with homeown_cat
 ****************************************************************************************************
@@ -172,12 +177,10 @@ preserve
 // 	graph export "$folder\Results\Wealth\median_wealth_by_t_homeownership.pdf", as(pdf) replace
 restore
 
-sdfsdf
 
 ****************************************************************************************************
 ** APC Plots (OLS)
-** Note: results look very different if I use log_! 
-** Cannot use log because many people have negative wealth... approx 18% of HHs
+** Note: cannot use log because many people have negative wealth... approx 18% of HHs
 ****************************************************************************************************
 
 local family_controls i.married_dummy i.fsize i.children i.children0_2 i.children3_5 ///
@@ -210,6 +213,67 @@ preserve
 	lab var coef "Change in Wealth Relative to Age 20-24"
 	xtline coef, overlay name("APC_fam_wealth", replace) title("Life Cycle Profile using APC") ytitle(, margin(0 2 0 0))
 restore
+
+*** 
+
+
+
+***
+
+* Now do it again, but add t_homeownership dummies
+* TODO TODO TODO TODO
+tempfile results
+
+reg fam_wealth_real i.t_homeownership_100 i.age_cat /* i.year_born */ d_year* `family_controls'
+// regsave using `results', addlabel(lab, "Fam Wealth") replace
+
+qui reg fam_wealth_ex_home_real `reg_controls' 
+regsave using `results', addlabel(lab, "Fam Wealth ex Housing") append
+
+// preserve
+// 	* Find coefs by age
+// 	use `results', clear
+// 	gen is_age = strpos(var, "age_cat")
+// 	keep if is_age > 0
+// 	drop is_age
+// 	destring var, replace ignore("b.age_cat")
+// 	rename var age
+//	
+// 	* Plot results
+// 	encode lab, gen(labels)
+// 	xtset labels age
+// 	lab var age "Age"
+// 	lab var coef "Change in Wealth Relative to Age 20-24"
+// 	xtline coef, overlay name("APC_fam_wealth", replace) title("Life Cycle Profile using APC") ytitle(, margin(0 2 0 0))
+// restore
+
+
+** March 6th
+** Potential wealth results
+
+local family_controls i.married_dummy i.fsize i.children i.children0_2 i.children3_5 ///
+		i.children6_13 i.children14_17m i.children14_17f i.children18_21m i.children18_21f 
+
+reg fam_wealth_real i.t_homeownership_100 i.wave if t_homeownership != ., nocon vce(robust)
+		
+reg fam_wealth_real i.t_homeownership_100 i.age_cat i.wave i.homepurchase_year `family_controls' if t_homeownership != ., nocon vce(robust)
+
+
+* Standard errors are so much better whenI do reg rather than xtreg
+* I wonder if that would help with consumption results too?
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ****************************************************************************************************
 ** APC Plots (LAD)
@@ -252,5 +316,9 @@ gen t_homeownership_trunc = t_homeownership
 replace t_homeownership_trunc = -10 if t_homeownership < -10
 replace t_homeownership_trunc = 10 if t_homeownership > 10 & t_homeownership != .
 xi i.t_homeownership_trunc
-qreg fam_wealth_ex_home_real i.age_cat _It*, wlsiter(100)
+
+
+qreg fam_wealth_real i.age_cat _It*, wlsiter(100)
+tempfile results
+regsave using `results', addlabel(lab, "Fam Wealth") replace
 

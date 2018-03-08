@@ -166,7 +166,8 @@ foreach var of varlist housingexpenditure mortgageexpenditure rentexpenditure //
 	expenditure_blundell expenditure_blundell_exhealth expenditure_blundell_exhous ///
 	expenditure_blundell_exedu expenditure_blundell_ex3 rent_imputed ///
 	expenditure_hurst expenditure_hurst_nonH workexpenditure ///
-	workexpenditure_post05 nonwork_nondur_expenditure housingservicesexpenditure {
+	workexpenditure_post05 nonwork_nondur_expenditure housingservicesexpenditure ///
+	expenditure_total_70 {
 	
 	* di "`var'"
 	replace `var' = 100 * `var' / CPI_all
