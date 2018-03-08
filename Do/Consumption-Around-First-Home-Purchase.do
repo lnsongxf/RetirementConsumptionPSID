@@ -201,8 +201,12 @@ coefplot, keep(*t_homeownership_100_bottom_half) xline(0) name("bottomhalf", rep
 * now just look at the people who had to take out a mortgage for their house
 * in other words, ignore the 10-15% of people with LTV = 0 when they buy
 * I am guessing those people got unreported help from mommy and daddy
+cap drop LTV ignore* t_homeownership_100_w*
+
 gen LTV = (mortgage1 + mortgage2) / housevalue if t_homeownership == 0
-gen ignore_t0 = (LTV == 0 | LTV < 0.5 | mortgage1 == 0 | LTV > 1) & t_homeownership == 0
+// gen ignore_t0 = (LTV == 0 | LTV < 0.1 | mortgage1 == 0 ) & t_homeownership == 0
+gen ignore_t0 = (LTV == 0 | LTV < 0.7 | mortgage1 == 0 | LTV > 1) & t_homeownership == 0
+
 by pid, sort: egen ignore = max(ignore_t0) 
 gen t_homeownership_100_w_mortgage = t_homeownership_100 * (ignore != 1)
 
@@ -213,30 +217,26 @@ tab t_homeownership_100_w_mortgage ignore
 * Significant drop at t = -2 compared to -4. But for some reason -6 and -8 are a bit low
 xtreg log_expenditure_blundell i.age ib100.t_homeownership_100_w_mortgage log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe vce(robust)
 coefplot, keep(*t_homeown*) xline(0) name("blundell_with_mort", replace)
+* export results
+coefplot, keep(94.t_homeownership_100_w_mortgage 96.t_homeownership_100_w_mortgage 98.t_homeownership_100_w_mortgage) ///
+	yline(0) name("blundell_with_mort_2", replace) vertical rename(94.t_homeownership_100_w_mortgage = "6 years before" 96.t_homeownership_100_w_mortgage = "4 years before" 98.t_homeownership_100_w_mortgage = "2 years before") ///
+	ytitle("Deviation in Log Nondurable Consumption", margin(0 5 0 0) ) graphregion(color(white))
+graph export "$folder\Results\ConsumptionBeforePurchase\Nondurable_consumption_before_purchase.pdf", as(pdf) replace
+
 
 xtreg log_expenditure_total_70 i.age ib100.t_homeownership_100_w_mortgage log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe vce(robust)
 coefplot, keep(*t_homeown*) xline(0) name("total_with_mort", replace)
 
-** Panel regressions (but now with fewer dummies)
-gen t_pre_100 = 96 if t_homeownership_100 <= 96
-replace t_pre_100 = 98 if t_homeownership_100 == 98
-replace t_pre_100 = 100 if t_homeownership_100 == 100
-replace t_pre_100 = 102 if t_homeownership_100 > 100 & t_homeownership_100 != .
-replace t_pre_100 = 0 if t_pre_100 == 0
-gen t_pre_100_w_mortgage = t_pre_100 * (ignore != 1)
-
-xtreg log_expenditure_blundell i.age ib100.t_pre_100_w_mortgage i.homeowner log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe vce(robust)
-coefplot, keep(*t_pre*) xline(0) name("blundell_with_mort_pre", replace)
-
-xtreg log_expenditure_total_70 i.age ib100.t_pre_100_w_mortgage i.homeowner log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe vce(robust)
-coefplot, keep(*t_pre*) xline(0) name("total_with_mort_pre", replace)
-
+// xtreg log_foodexpenditure i.age ib100.t_homeownership_100_w_mortgage log_inc_fam_real i.homeowner i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe vce(robust)
+// coefplot, keep(*t_homeown*) xline(0) name("food_with_mort", replace)
 
 
 ** Try it again but without FEs
 ** blundell_with_mort_no_fe LOOKS GOOD! Significant drop during 2 years before buying a house
 reg log_expenditure_blundell i.age ib100.t_homeownership_100_w_mortgage log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave
 coefplot, keep(*t_homeown*) xline(0) name("blundell_with_mort_no_fe", replace)
+// coefplot, keep(*t_homeownership_100_w_mortgage94*) xline(0) name("blundell_no_fe_export", replace)
+
 
 reg log_expenditure_total_70 i.age ib100.t_homeownership_100_w_mortgage log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave
 coefplot, keep(*t_homeown*) xline(0) name("total_with_mort_no_fe", replace)

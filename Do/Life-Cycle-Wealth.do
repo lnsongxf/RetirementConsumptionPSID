@@ -121,18 +121,28 @@ gen log_fam_wealth_real = log(fam_wealth_real)
 gen log_fam_wealth_ex_home_real = log(fam_wealth_ex_home_real)
 
 preserve
-	collapse (mean) log_fam_wealth_real log_fam_wealth_ex_home_real fam_wealth_real fam_wealth_ex_home_real, by(age_cat)
+	collapse (mean) log_fam_wealth_real log_fam_wealth_ex_home_real fam_wealth_real fam_wealth_ex_home_real fam_liq_wealth_real, by(age_cat)
 	tsset age_cat
 	* tsline log_*, title("Mean Log Wealth") name("mean_log_wealth", replace)
-	tsline fam_w*, title("Mean Wealth") name("mean_wealth_by_age", replace)
+	
+	lab var fam_wealth_real "Net Wealth" 
+	lab var fam_wealth_ex_home_real "Net Non-Housing Wealth"
+	lab var fam_liq_wealth_real "Net Liquid Wealth" 
+	lab var age_cat "Age"
+	
+	tsline fam_wealth_real /* fam_wealth_ex_home_real*/  fam_liq_wealth_real, title("Mean Wealth") name("mean_wealth_by_age", replace) ytitle("Real Wealth (1982 dollars)", margin(0 4 0 0) ) graphregion(color(white))
 	graph export "$folder\Results\Wealth\mean_wealth_by_age.pdf", as(pdf) replace
 restore
 
 preserve
-	collapse (median) log_fam_wealth_real log_fam_wealth_ex_home_real fam_wealth_real fam_wealth_ex_home_real, by(age_cat)
+	collapse (median) log_fam_wealth_real log_fam_wealth_ex_home_real fam_wealth_real fam_wealth_ex_home_real fam_liq_wealth_real, by(age_cat)
 	tsset age_cat
 	* tsline log_*, title("Median Log Wealth") name("median_log_wealth", replace)
-	tsline fam_w*, title("Median Wealth") name("median_wealth_by_age", replace)
+	lab var fam_wealth_real "Net Wealth" 
+	lab var fam_wealth_ex_home_real "Net Non-Housing Wealth"
+	lab var fam_liq_wealth_real "Net Liquid Wealth" 
+	lab var age_cat "Age"
+	tsline fam_wealth_real /* fam_wealth_ex_home_real*/  fam_liq_wealth_real, title("Median Wealth") name("median_wealth_by_age", replace) ytitle("Real Wealth (1982 dollars)", margin(0 4 0 0) ) graphregion(color(white))
 	graph export "$folder\Results\Wealth\median_wealth_by_age.pdf", as(pdf) replace
 restore
 
@@ -156,13 +166,37 @@ preserve
 // 	graph export "$folder\Results\Wealth\mean_wealth_by_t_homeownership.pdf", as(pdf) replace
 restore
 
+
 preserve
-	collapse (median) fam_wealth_real fam_wealth_ex_home_real fam_wealth_ex_gifts_real, by(t_homeownership)
-	keep if t_ <= 10 & t_ >= -10
+	collapse (median) fam_wealth_real fam_wealth_ex_home_real fam_wealth_ex_gifts_real fam_liq_wealth_real, by(t_homeownership)
 	tsset t_homeownership
-	tsline fam_w*, title("Median Wealth") name("median_wealth", replace)
-// 	graph export "$folder\Results\Wealth\median_wealth_by_t_homeownership.pdf", as(pdf) replace
+	keep if t_ <= 10 & t_ >= -10
+	tsline fam_w* fam_liq_wealth_real, title("Median Wealth") name("median_wealth", replace)
+	
+	* Prepare graph for export
+	keep if t_ <= 8 & t_ >= -8
+	lab var fam_wealth_real "Net Wealth"
+	lab var fam_wealth_ex_home_real "Net Non-Housing Wealth"
+	lab var fam_liq_wealth_real "Net Liquid Wealth" // TODO: check that it's actually liquid
+	lab var t_homeownership "Duration of Homeownership"
+	tsline fam_wealth_real /* fam_wealth_ex_home_real*/  fam_liq_wealth_real, title("Median Wealth") name("median_wealth_export", replace) ytitle("Real Wealth (1982 dollars)", margin(0 4 0 0) ) graphregion(color(white))
+ 	graph export "$folder\Results\Wealth\median_wealth_by_housing_duration.pdf", as(pdf) replace
 restore
+
+* Median wealth, exluding those who never got a mortgage
+gen LTV = (mortgage1 + mortgage2) / housevalue if t_homeownership == 0
+gen ignore_t0 = (LTV == 0 | LTV < 0.1 | mortgage1 == 0 ) & t_homeownership == 0
+// gen ignore_t0 = (LTV == 0 | LTV < 0.5 | mortgage1 == 0 | LTV > 1) & t_homeownership == 0
+by pid, sort: egen ignore = max(ignore_t0) 
+preserve
+	drop if ignore == 1
+	
+	collapse (median) fam_wealth_real fam_wealth_ex_home_real fam_wealth_ex_gifts_real fam_liq_wealth_real, by(t_homeownership)
+	keep if t_ <= 8 & t_ >= -8
+	tsset t_homeownership
+	tsline fam_w* fam_liq_wealth_real, title("Median Wealth") name("median_wealth_if_mortgaged", replace)
+restore
+
 
 preserve
 	by pid, sort: egen min_t_homeownership = min(t_homeownership)

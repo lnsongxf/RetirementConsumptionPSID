@@ -175,9 +175,19 @@ foreach var of varlist housingexpenditure mortgageexpenditure rentexpenditure //
 
 * NOTE: inc_fam remains nominal (though up above, expenditure categories are converted to real... not the best naming convention)
 gen inc_fam_real = 100 * inc_fam / CPI_all
+
+****************************************************************************************************
+** Wealth
+****************************************************************************************************
+
+* WARNING: this is not NET
+egen fam_liq_wealth = rowtotal(bank_account_wealth IRA_wealth stock_wealth)
+
+* Convert to real
 gen fam_wealth_real = 100 * fam_wealth / CPI_all
 gen fam_wealth_ex_home_real = 100 * fam_wealth_ex_home / CPI_all
 gen value_gifts_real = 100 * value_gifts / CPI_all
+gen fam_liq_wealth_real = 100 * fam_liq_wealth / CPI_all
 
 * TODO: perhaps down the road add expenditure_total* and inc_* 
 
