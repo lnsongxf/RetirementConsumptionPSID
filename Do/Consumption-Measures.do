@@ -14,12 +14,12 @@ parkingexpenditure bustrainexpenditure taxiexpenditure othertransexpenditure
 
 gen healthservicesexpenditure = healthcareexpenditure - healthinsuranceexpenditure // my best guess as to how Pistaferri et al define this variable
 
-gen rent_imputed = rentexpenditure 
+gen rent_imputed = rentexpenditure
 replace rent_imputed = 0.06 * housevalue if housingstatus == 1
 
-local expenditure_blundell foodathomeexpenditure foodstamp gasolineexpenditure foodawayfromhomeexpenditure /// 
+local expenditure_blundell foodathomeexpenditure foodstamp gasolineexpenditure foodawayfromhomeexpenditure ///
 healthinsuranceexpenditure healthservicesexpenditure utilityexpenditure ///
-transportation_blundell educationexpenditure childcareexpenditure /// 
+transportation_blundell educationexpenditure childcareexpenditure ///
 homeinsuranceexpenditure rent_imputed
 
 egen transportation_blundell = rowtotal(`transportation_blundell')
@@ -37,15 +37,15 @@ lab var expenditure_blundell "Total Expenditure (Blundell et al)"
 
 
 * /* Consumption */
-* egen ndcons 	= 	rsum(food fstmp gasoline), missing 
+* egen ndcons 	= 	rsum(food fstmp gasoline), missing
 * egen services 	= 	rsum(hinsurance nurse doctor prescription homeinsure electric heating water miscutils ///
-* 					carins carrepair parking busfare taxifare othertrans tuition otherschool childcare rent renteq fout), missing /* note that totalhealth is not used since the sub components are used */ 
+* 					carins carrepair parking busfare taxifare othertrans tuition otherschool childcare rent renteq fout), missing /* note that totalhealth is not used since the sub components are used */
 * egen totcons	= 	rsum(ndcons services), missing
 * egen tempr 		= 	rsum(rent renteq)
 * gen totcons_nh  =   totcons - tempr
 * drop tempr
 
-* Blundell et al include food stamps in food. 
+* Blundell et al include food stamps in food.
 * (The expenditure variables do not include the value of in-kind government
 * transfers. For example, the value of food stamps received by family units is
 * not included in estimates of food expenditures.)
@@ -66,9 +66,9 @@ lab var expenditure_blundell "Total Expenditure (Blundell et al)"
 local expenditure_total_70 foodexpenditure healthcareexpenditure utilityexpenditure ///
       transportationexpenditure educationexpenditure childcareexpenditure ///
 	  housingexpenditure
-	  
+
 	  * rent_imputed propertytaxexpenditure homeinsuranceexpenditure
-	  
+
 * I exclude housingexpenditure and replace it with rent_imputed propertytaxexpenditure homeinsuranceexpenditure
 
 * Starting in 2005, more comprehensive measure
@@ -99,14 +99,14 @@ egen expenditure_total_100         = rowtotal(`expenditure_total_100')
 // housing services are calculated as either rent paid (for renters) or the selfreported
 // rental equivalent of the respondent’s house (for homeowners).
 
-* PSID: we do same as AH but do not have tobacco, clothing and personal care, 
+* PSID: we do same as AH but do not have tobacco, clothing and personal care,
 * domestic services, airfare, nondurale entertainemtn, net gambling, business services, charitable giving
 
-local expenditure_hurst_nonH foodathomeexpenditure foodstamp foodawayfromhomeexpenditure /// 
+local expenditure_hurst_nonH foodathomeexpenditure foodstamp foodawayfromhomeexpenditure ///
 		fooddeliveredexpenditure gasolineexpenditure  utilityexpenditure ///
 		transportation_blundell childcareexpenditure
-		
-local expenditure_hurst `expenditure_hurst_nonH' propertytaxexpenditure homeinsuranceexpenditure rent_imputed 
+
+local expenditure_hurst `expenditure_hurst_nonH' propertytaxexpenditure homeinsuranceexpenditure rent_imputed
 
 egen expenditure_hurst      = rowtotal( `expenditure_hurst' )
 egen expenditure_hurst_nonH = rowtotal( `expenditure_hurst_nonH' )
@@ -121,12 +121,12 @@ egen expenditure_hurst_nonH = rowtotal( `expenditure_hurst_nonH' )
 egen workexpenditure               = rowtotal(transportation_blundell gasolineexpenditure foodawayfromhomeexpenditure ) // if wave >= 2005 // clothingexpenditure begins in 2005
 egen workexpenditure_post05        = rowtotal(transportation_blundell gasolineexpenditure foodawayfromhomeexpenditure clothingexpenditure ) // NOTE: only use 2005 onward
 egen nonwork_nondur_expenditure    = rowtotal( /* healthinsuranceexpenditure healthservicesexpenditure educationexpenditure*/ ///
-											utilityexpenditure childcareexpenditure homeinsuranceexpenditure /// 
+											utilityexpenditure childcareexpenditure homeinsuranceexpenditure ///
 											propertytaxexpenditure rent_imputed )
 
-										
+
 egen housingservicesexpenditure = rowtotal(rent_imputed homeinsuranceexpenditure propertytaxexpenditure)
-								
+
 ****************************************************************************************************
 ** Merge in CPI and make real
 ****************************************************************************************************
@@ -134,20 +134,20 @@ egen housingservicesexpenditure = rowtotal(rent_imputed homeinsuranceexpenditure
 
 gen year = wave - 1 // note that expenditure data is for year prior to interview
 merge m:1 year using "$folder\Data\Intermediate\CPI.dta"
-drop if _m == 2 
+drop if _m == 2
 drop year _m
 
 * Convert to real terms using individual index
-* WARNING: individual index might have different base year from CPI_all 
+* WARNING: individual index might have different base year from CPI_all
 * Can see base year in xlsx file with CPI data
 * (do not add/subtract real series without accounting for this)
 replace gasolineexpenditure = 100 * gasolineexpenditure / CPI_gasoline
 replace foodexpenditure = 100 * foodexpenditure / CPI_food
 replace foodstamp = 100 * foodstamp / CPI_food
 replace foodathomeexpenditure = 100 * foodathomeexpenditure / CPI_foodathome
-replace foodawayfromhomeexpenditure = 100 * foodawayfromhomeexpenditure / CPI_foodawayfromhome 
+replace foodawayfromhomeexpenditure = 100 * foodawayfromhomeexpenditure / CPI_foodawayfromhome
 replace fooddeliveredexpenditure = 100 * fooddeliveredexpenditure / CPI_food
-replace transportationexpenditure = 100 * transportationexpenditure / CPI_transportation 
+replace transportationexpenditure = 100 * transportationexpenditure / CPI_transportation
 replace transportation_blundell = 100 * transportation_blundell / CPI_transportation
 replace healthcareexpenditure = 100 * healthcareexpenditure / CPI_health
 replace healthinsuranceexpenditure = 100 * healthinsuranceexpenditure / CPI_health
@@ -168,7 +168,7 @@ foreach var of varlist housingexpenditure mortgageexpenditure rentexpenditure //
 	expenditure_hurst expenditure_hurst_nonH workexpenditure ///
 	workexpenditure_post05 nonwork_nondur_expenditure housingservicesexpenditure ///
 	expenditure_total_70 {
-	
+
 	* di "`var'"
 	replace `var' = 100 * `var' / CPI_all
 }
@@ -180,16 +180,25 @@ gen inc_fam_real = 100 * inc_fam / CPI_all
 ** Wealth
 ****************************************************************************************************
 
-* WARNING: this is not NET
-egen fam_liq_wealth = rowtotal(bank_account_wealth IRA_wealth stock_wealth)
+egen fam_liq_wealth = rowtotal(bank_account_wealth stock_wealth) // NOTE: Limitation: this is not net
+egen fam_liq_plus_housing_wealth = rowtotal(fam_liq_wealth homeequity)
+gen fam_wealth_ex_bus = fam_wealth - business_wealth // business_wealth is net
+gen fam_wealth_ex_bus_ira = fam_wealth - business_wealth - IRA_wealth // business_wealth is net
+
+
+* NOTE: I took out IRA wealth
+* TODO: say that mortgage debt is in housing, and all other debt is in liquid
 
 * Convert to real
 gen fam_wealth_real = 100 * fam_wealth / CPI_all
 gen fam_wealth_ex_home_real = 100 * fam_wealth_ex_home / CPI_all
 gen value_gifts_real = 100 * value_gifts / CPI_all
 gen fam_liq_wealth_real = 100 * fam_liq_wealth / CPI_all
+gen fam_LiqAndH_wealth_real = 100 * fam_liq_plus_housing_wealth / CPI_all // liquid and housing wealth only
+gen fam_wealth_ex_bus_real = 100 * fam_wealth_ex_bus / CPI_all
+gen fam_wealth_ex_bus_ira_real = 100 * fam_wealth_ex_bus_ira / CPI_all
 
-* TODO: perhaps down the road add expenditure_total* and inc_* 
+* TODO: perhaps down the road add expenditure_total* and inc_*
 
 
 ****************************************************************************************************

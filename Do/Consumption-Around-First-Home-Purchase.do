@@ -226,6 +226,13 @@ graph export "$folder\Results\ConsumptionBeforePurchase\Nondurable_consumption_b
 
 xtreg log_expenditure_total_70 i.age ib100.t_homeownership_100_w_mortgage log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe vce(robust)
 coefplot, keep(*t_homeown*) xline(0) name("total_with_mort", replace)
+* export results
+coefplot, keep(94.t_homeownership_100_w_mortgage 96.t_homeownership_100_w_mortgage 98.t_homeownership_100_w_mortgage) ///
+	yline(0) name("total_with_mort_2", replace) vertical rename(94.t_homeownership_100_w_mortgage = "6 years before" 96.t_homeownership_100_w_mortgage = "4 years before" 98.t_homeownership_100_w_mortgage = "2 years before") ///
+	ytitle("Deviation in Log Consumption", margin(0 5 0 0) ) graphregion(color(white))
+graph export "$folder\Results\ConsumptionBeforePurchase\Total_consumption_before_purchase.pdf", as(pdf) replace
+
+
 
 // xtreg log_foodexpenditure i.age ib100.t_homeownership_100_w_mortgage log_inc_fam_real i.homeowner i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe vce(robust)
 // coefplot, keep(*t_homeown*) xline(0) name("food_with_mort", replace)
@@ -241,6 +248,32 @@ coefplot, keep(*t_homeown*) xline(0) name("blundell_with_mort_no_fe", replace)
 reg log_expenditure_total_70 i.age ib100.t_homeownership_100_w_mortgage log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave
 coefplot, keep(*t_homeown*) xline(0) name("total_with_mort_no_fe", replace)
 
+
+****************************************************************************************************
+** Look at rent expenditure
+****************************************************************************************************
+
+** Gen log rent and select those before buying a home
+gen log_rentexpenditure  = log(rentexpenditure)
+replace log_rentexpenditure = log(1) if rentexpenditure == 0
+gen t_homeownership_before = t_homeownership_100 if t_homeownership_100 < 100
+replace t_homeownership_before = 1000 if t_homeownership_before == . & homeowner == 0
+replace t_homeownership_before = 94 if t_homeownership_before == 92
+gen freehousing = housingstatus == 8
+
+** Cross sectional reg
+reg log_rentexpenditure i.age ib1000.t_homeownership_before log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave if homeowner == 0, vce(robust)
+coefplot, keep(*t_homeown*) xline(0) name("rent_no_fe", replace)
+** WOAW! Rent expenditure is 30% higher 6 years before buying home, relative to 2 years before buying home
+
+xtreg log_rentexpenditure i.age ib1000.t_homeownership_before log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe vce(robust)
+coefplot, keep(*t_homeown*) xline(0) name("rent_with_fe", replace)
+
+logit freehousing i.age ib1000.t_homeownership_before log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave  i.sex_head
+margins i.age, atmeans
+margins i.t_homeownership_before, atmeans
+
+* TODO: plot these results  -- theyre pretty good!
 
 sdfdsf
 

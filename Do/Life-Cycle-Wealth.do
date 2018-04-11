@@ -11,8 +11,9 @@ global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 
 use "$folder\Data\Intermediate\Basic-Panel.dta", clear
 
+
 * Switches
-global allow_kids_to_leave_hh 1 // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH 
+global allow_kids_to_leave_hh 1 // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH
                                 // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
 
 * drop if emp_status_head != 1 // only keep employed heads. Question: should I put this so early? ie to split up HH? or later?
@@ -23,7 +24,7 @@ qui do "$folder\Do\Sample-Selection.do"
 * Generate aggregate consumption (following Blundell et al)
 qui do "$folder\Do\Consumption-Measures.do"
 
-* TODO: make income / wealth real 
+* TODO: make income / wealth real
 
 * Todo: try before or after sample selection
 
@@ -32,7 +33,7 @@ drop if housingstatus == 1 & housevalue == 0
 drop if housingstatus == 1 & housevalue < 10000
 
 * These people have a crazy change in wealth
-* TODO: what do Aguiar and Hurst do 
+* TODO: what do Aguiar and Hurst do
 sort pid wave
 gen change_wealth = (fam_wealth_real - L.fam_wealth_real) / L.fam_wealth_real
 drop if change_w > 100 & change_w != . & L.fam_wealth_real > 10000
@@ -121,30 +122,36 @@ gen log_fam_wealth_real = log(fam_wealth_real)
 gen log_fam_wealth_ex_home_real = log(fam_wealth_ex_home_real)
 
 preserve
-	collapse (mean) log_fam_wealth_real log_fam_wealth_ex_home_real fam_wealth_real fam_wealth_ex_home_real fam_liq_wealth_real, by(age_cat)
+	collapse (mean) log_fam_wealth_real log_fam_wealth_ex_home_real fam_wealth_real fam_wealth_ex_home_real fam_liq_wealth_real fam_LiqAndH_wealth_real fam_wealth_ex_bus_real fam_wealth_ex_bus_ira_real, by(age_cat)
 	tsset age_cat
 	* tsline log_*, title("Mean Log Wealth") name("mean_log_wealth", replace)
-	
-	lab var fam_wealth_real "Net Wealth" 
+
+	lab var fam_wealth_real "Net Wealth"
 	lab var fam_wealth_ex_home_real "Net Non-Housing Wealth"
-	lab var fam_liq_wealth_real "Net Liquid Wealth" 
+	lab var fam_liq_wealth_real "Net Liquid Wealth"
+	lab var fam_LiqAndH_wealth_real "Net Liquid + Housing Wealth"
 	lab var age_cat "Age"
-	
-	tsline fam_wealth_real /* fam_wealth_ex_home_real*/  fam_liq_wealth_real, title("Mean Wealth") name("mean_wealth_by_age", replace) ytitle("Real Wealth (1982 dollars)", margin(0 4 0 0) ) graphregion(color(white))
+
+	tsline fam_wealth_real fam_LiqAndH_wealth_real /* fam_wealth_ex_home_real*/  fam_liq_wealth_real fam_wealth_ex_bus_real fam_wealth_ex_bus_ira_real, title("Mean Wealth") name("mean_wealth_by_age", replace) ytitle("Real Wealth (1982 dollars)", margin(0 4 0 0) ) graphregion(color(white))
 	graph export "$folder\Results\Wealth\mean_wealth_by_age.pdf", as(pdf) replace
 restore
 
+
 preserve
-	collapse (median) log_fam_wealth_real log_fam_wealth_ex_home_real fam_wealth_real fam_wealth_ex_home_real fam_liq_wealth_real, by(age_cat)
+	collapse (median) log_fam_wealth_real log_fam_wealth_ex_home_real fam_wealth_real fam_wealth_ex_home_real fam_liq_wealth_real fam_LiqAndH_wealth_real fam_wealth_ex_bus_real fam_wealth_ex_bus_ira_real, by(age_cat)
 	tsset age_cat
 	* tsline log_*, title("Median Log Wealth") name("median_log_wealth", replace)
-	lab var fam_wealth_real "Net Wealth" 
+	lab var fam_wealth_real "Net Wealth"
 	lab var fam_wealth_ex_home_real "Net Non-Housing Wealth"
-	lab var fam_liq_wealth_real "Net Liquid Wealth" 
+	lab var fam_liq_wealth_real "Net Liquid Wealth"
+	lab var fam_LiqAndH_wealth_real "Net Liquid + Housing Wealth"
 	lab var age_cat "Age"
-	tsline fam_wealth_real /* fam_wealth_ex_home_real*/  fam_liq_wealth_real, title("Median Wealth") name("median_wealth_by_age", replace) ytitle("Real Wealth (1982 dollars)", margin(0 4 0 0) ) graphregion(color(white))
+
+	tsline fam_wealth_real fam_LiqAndH_wealth_real /* fam_wealth_ex_home_real*/  fam_liq_wealth_real fam_wealth_ex_bus_real fam_wealth_ex_bus_ira_real, title("Median Wealth") name("median_wealth_by_age", replace) ytitle("Real Wealth (1982 dollars)", margin(0 4 0 0) ) graphregion(color(white))
 	graph export "$folder\Results\Wealth\median_wealth_by_age.pdf", as(pdf) replace
 restore
+
+sdfsdf
 
 * TODO: APC version of this?
 
@@ -158,7 +165,7 @@ preserve
 	by pid, sort: egen min_t_homeownership = min(t_homeownership)
 	keep if min_t_homeownership <= -6
 	tab t_homeownership
-	
+
 	collapse (mean) fam_wealth_real fam_wealth_ex_home_real, by(t_homeownership)
 	keep if t_ <= 10 & t_ >= -10
 	tsset t_homeownership
@@ -172,25 +179,43 @@ preserve
 	tsset t_homeownership
 	keep if t_ <= 10 & t_ >= -10
 	tsline fam_w* fam_liq_wealth_real, title("Median Wealth") name("median_wealth", replace)
-	
+
 	* Prepare graph for export
 	keep if t_ <= 8 & t_ >= -8
 	lab var fam_wealth_real "Net Wealth"
 	lab var fam_wealth_ex_home_real "Net Non-Housing Wealth"
 	lab var fam_liq_wealth_real "Net Liquid Wealth" // TODO: check that it's actually liquid
 	lab var t_homeownership "Duration of Homeownership"
-	tsline fam_wealth_real /* fam_wealth_ex_home_real*/  fam_liq_wealth_real, title("Median Wealth") name("median_wealth_export", replace) ytitle("Real Wealth (1982 dollars)", margin(0 4 0 0) ) graphregion(color(white))
+	tsline fam_wealth_real /* fam_wealth_ex_home_real*/  fam_liq_wealth_real, title("Median Wealth") name("median_wealth_export", replace) ytitle("Real Wealth (1982 dollars)", margin(0 4 0 0) ) graphregion(color(white)) recast(connected)
  	graph export "$folder\Results\Wealth\median_wealth_by_housing_duration.pdf", as(pdf) replace
 restore
+
+
+
+preserve
+	collapse (median) fam_wealth_real fam_wealth_ex_home_real fam_wealth_ex_gifts_real fam_liq_wealth_real, by(t_homeown)
+	tsset t_homeown
+	keep if t_ <= 10 & t_ >= -10
+	tsline fam_w* fam_liq_wealth_real, title("Median Wealth") name("median_wealth_t_homeown1", replace)
+
+	* Prepare graph for export
+	keep if t_ <= 8 & t_ >= -8
+	lab var fam_wealth_real "Net Wealth"
+	lab var fam_wealth_ex_home_real "Net Non-Housing Wealth"
+	lab var fam_liq_wealth_real "Net Liquid Wealth" // TODO: check that it's actually liquid
+	lab var t_homeown "Duration of Homeownership"
+	tsline fam_wealth_real /* fam_wealth_ex_home_real*/  fam_liq_wealth_real, title("Median Wealth") name("median_wealth_t_homeown", replace) ytitle("Real Wealth (1982 dollars)", margin(0 4 0 0) ) graphregion(color(white)) recast(connected)
+restore
+
 
 * Median wealth, exluding those who never got a mortgage
 gen LTV = (mortgage1 + mortgage2) / housevalue if t_homeownership == 0
 gen ignore_t0 = (LTV == 0 | LTV < 0.1 | mortgage1 == 0 ) & t_homeownership == 0
 // gen ignore_t0 = (LTV == 0 | LTV < 0.5 | mortgage1 == 0 | LTV > 1) & t_homeownership == 0
-by pid, sort: egen ignore = max(ignore_t0) 
+by pid, sort: egen ignore = max(ignore_t0)
 preserve
 	drop if ignore == 1
-	
+
 	collapse (median) fam_wealth_real fam_wealth_ex_home_real fam_wealth_ex_gifts_real fam_liq_wealth_real, by(t_homeownership)
 	keep if t_ <= 8 & t_ >= -8
 	tsset t_homeownership
@@ -202,7 +227,7 @@ preserve
 	by pid, sort: egen min_t_homeownership = min(t_homeownership)
 	keep if min_t_homeownership <= -4
 	tab t_homeownership
-	
+
 	collapse (median) fam_wealth_real fam_wealth_ex_home_real fam_wealth_ex_gifts_real (count) n = fam_wealth_real, by(t_homeownership)
 	keep if t_ <= 10 & t_ >= -10
 	list t_ n
@@ -218,17 +243,17 @@ restore
 ****************************************************************************************************
 
 local family_controls i.married_dummy i.fsize i.children i.children0_2 i.children3_5 ///
-		i.children6_13 i.children14_17m i.children14_17f i.children18_21m i.children18_21f 
+		i.children6_13 i.children14_17m i.children14_17f i.children18_21m i.children18_21f
 
 local reg_controls i.age_cat i.year_born d_year* `family_controls' // log_inc_fam_real
 * NOTE: including log_inc_fam_real above really changes things
 
 tempfile results
 
-reg fam_wealth_real `reg_controls' 
+reg fam_wealth_real `reg_controls'
 regsave using `results', addlabel(lab, "Fam Wealth") replace
 
-qui reg fam_wealth_ex_home_real `reg_controls' 
+qui reg fam_wealth_ex_home_real `reg_controls'
 regsave using `results', addlabel(lab, "Fam Wealth ex Housing") append
 
 preserve
@@ -239,7 +264,7 @@ preserve
 	drop is_age
 	destring var, replace ignore("b.age_cat")
 	rename var age
-	
+
 	* Plot results
 	encode lab, gen(labels)
 	xtset labels age
@@ -248,7 +273,7 @@ preserve
 	xtline coef, overlay name("APC_fam_wealth", replace) title("Life Cycle Profile using APC") ytitle(, margin(0 2 0 0))
 restore
 
-*** 
+***
 
 
 
@@ -261,7 +286,7 @@ tempfile results
 reg fam_wealth_real i.t_homeownership_100 i.age_cat /* i.year_born */ d_year* `family_controls'
 // regsave using `results', addlabel(lab, "Fam Wealth") replace
 
-qui reg fam_wealth_ex_home_real `reg_controls' 
+qui reg fam_wealth_ex_home_real `reg_controls'
 regsave using `results', addlabel(lab, "Fam Wealth ex Housing") append
 
 // preserve
@@ -272,7 +297,7 @@ regsave using `results', addlabel(lab, "Fam Wealth ex Housing") append
 // 	drop is_age
 // 	destring var, replace ignore("b.age_cat")
 // 	rename var age
-//	
+//
 // 	* Plot results
 // 	encode lab, gen(labels)
 // 	xtset labels age
@@ -286,10 +311,10 @@ regsave using `results', addlabel(lab, "Fam Wealth ex Housing") append
 ** Potential wealth results
 
 local family_controls i.married_dummy i.fsize i.children i.children0_2 i.children3_5 ///
-		i.children6_13 i.children14_17m i.children14_17f i.children18_21m i.children18_21f 
+		i.children6_13 i.children14_17m i.children14_17f i.children18_21m i.children18_21f
 
 reg fam_wealth_real i.t_homeownership_100 i.wave if t_homeownership != ., nocon vce(robust)
-		
+
 reg fam_wealth_real i.t_homeownership_100 i.age_cat i.wave i.homepurchase_year `family_controls' if t_homeownership != ., nocon vce(robust)
 
 
@@ -314,7 +339,7 @@ reg fam_wealth_real i.t_homeownership_100 i.age_cat i.wave i.homepurchase_year `
 ****************************************************************************************************
 
 local family_controls i.married_dummy i.fsize i.children i.children0_2 i.children3_5 ///
-		i.children6_13 i.children14_17m i.children14_17f i.children18_21m i.children18_21f 
+		i.children6_13 i.children14_17m i.children14_17f i.children18_21m i.children18_21f
 
 * For some reason, seems not to converge when I include cohort, period, and family effects
 local reg_controls i.age_cat // i.year_born d_year* `family_controls' // log_inc_fam_real
@@ -336,7 +361,7 @@ preserve
 	drop is_age
 	destring var, replace ignore("b.age_cat")
 	rename var age
-	
+
 	* Plot results
 	encode lab, gen(labels)
 	xtset labels age
@@ -355,4 +380,3 @@ xi i.t_homeownership_trunc
 qreg fam_wealth_real i.age_cat _It*, wlsiter(100)
 tempfile results
 regsave using `results', addlabel(lab, "Fam Wealth") replace
-
