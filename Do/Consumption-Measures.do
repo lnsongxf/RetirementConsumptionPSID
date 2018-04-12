@@ -181,7 +181,7 @@ gen inc_fam_real = 100 * inc_fam / CPI_all
 ****************************************************************************************************
 
 egen fam_liq_wealth = rowtotal(bank_account_wealth stock_wealth) // NOTE: Limitation: this is not net
-egen fam_liq_plus_housing_wealth = rowtotal(fam_liq_wealth homeequity)
+egen fam_liq_plus_housing_wealth = rowtotal(fam_liq_wealth homeequity other_real_estate_wealth)
 gen fam_wealth_ex_bus = fam_wealth - business_wealth // business_wealth is net
 gen fam_wealth_ex_bus_ira = fam_wealth - business_wealth - IRA_wealth // business_wealth is net
 

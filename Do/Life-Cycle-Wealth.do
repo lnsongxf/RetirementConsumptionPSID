@@ -11,12 +11,28 @@ global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 
 use "$folder\Data\Intermediate\Basic-Panel.dta", clear
 
-
 * Switches
 global allow_kids_to_leave_hh 1 // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH
                                 // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
 
 * drop if emp_status_head != 1 // only keep employed heads. Question: should I put this so early? ie to split up HH? or later?
+
+
+****************************************************************************************************
+** Drop top 1% wealthiest by 10 year age brackets
+****************************************************************************************************
+* TODO
+
+/*egen age_cat = cut(age), at( 20(10)80 ) // icodes label*/
+
+
+
+/*drop age_cat*/
+
+****************************************************************************************************
+** Sample selection
+****************************************************************************************************
+
 
 * Sample selection: households with same husband-wife over time
 qui do "$folder\Do\Sample-Selection.do"
@@ -35,11 +51,11 @@ drop if housingstatus == 1 & housevalue < 10000
 * These people have a crazy change in wealth
 * TODO: what do Aguiar and Hurst do
 sort pid wave
-gen change_wealth = (fam_wealth_real - L.fam_wealth_real) / L.fam_wealth_real
+/*gen change_wealth = (fam_wealth_real - L.fam_wealth_real) / L.fam_wealth_real
 drop if change_w > 100 & change_w != . & L.fam_wealth_real > 10000
 
 * These ppl also have a crazy change in wealth
-drop if fam_wealth_real - L.fam_wealth_real > 100 * inc_fam_real & fam_wealth != . & L.fam_wealth_real != . & inc_fam_real != .
+drop if fam_wealth_real - L.fam_wealth_real > 100 * inc_fam_real & fam_wealth != . & L.fam_wealth_real != . & inc_fam_real != .*/
 
 * To do: try with or without these guys
 * drop if housingstatus == 8 // neither own nor rent

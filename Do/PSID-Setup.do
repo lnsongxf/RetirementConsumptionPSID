@@ -598,9 +598,9 @@ psid use
 	// This variable is constructed as sum of values of seven asset types
 	// (S503, S505, S509, S511, S513, S515, S519) net of
 	// debt value (S507) plus value of home equity.
-	// S503 = business wealth - NOT LIQUID
+	// S503 = NET business wealth - NOT LIQUID
 	// S505 = checking/savings
-	// S509 = other real estate - NOT LIQUID
+	// S509 = NET other real estate - NOT LIQUID -- W2.If you sold all that and paid off any debts on it, how much would you realize on it?
 	// S511 = stocks
 	// S513 = vehicles - NOT LIQUID
 	// S515 = "other assets" - NOT LIQUID (???)
@@ -652,6 +652,18 @@ psid use
 
 	|| business_debt
 	[13]ER58157 [15]ER65354
+
+	// W2.If you sold all that and paid off any debts on it, how much would you realize on it?
+	|| other_real_estate_wealth // NET
+	// [84]S109 [89]S209 [94]S309
+	[99]S409 [01]S509 [03]S609 [05]S709 [07]S809 [09]ER46950 [11]ER52354
+
+	|| other_real_estate_value
+	[13]ER58165 [15]ER65362
+
+	|| other_real_estate_debt
+	[13]ER58167 [15]ER65364
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// HOUSING
@@ -1085,6 +1097,10 @@ replace year_born       = . if year_born == 9999
 * Compute net business wealth for 2013 and 2015
 replace business_wealth = business_value - business_debt if wave >= 2013
 drop business_value business_debt
+
+* Compute net "other real estate wealth" for 2013 and 2015
+replace other_real_estate_wealth = other_real_estate_value - other_real_estate_debt if wave >= 2013
+drop other_real_estate_value other_real_estate_debt
 
 * Clean up the year_moved variable (coding is different in 1999 and 2001)
 replace year_moved = 1997 if year_moved == 1 & wave == 1999
