@@ -157,11 +157,13 @@ gen divorced_2015 = married == 4
 
 
 reg log_fam_wealth_real years_owning years_owning2 log_average_income log_init_wealth total_gifts i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_2015 i.divorced_2015 i.region i.metro_2015 change_kids
-outreg2 using "DiBelskyLiu_Reg.xls", ctitle(Model A) excel replace noaster
+qui outreg2 using "DiBelskyLiu_Reg.xls", ctitle(Model A) excel replace nose noaster
+qui outreg2 using "DiBelskyLiu_Means.xls", ctitle(Model A) excel replace nose noaster sum
 
 * Years owning as dummy
 qui reg log_fam_wealth_real i.years_owning log_average_income log_init_wealth total_gifts i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_2015 i.divorced_2015 i.region i.metro_2015 change_kids
-outreg2 using "DiBelskyLiu_Reg.xls", ctitle(Model A Dummy) excel noaster
+qui outreg2 using "DiBelskyLiu_Reg.xls", ctitle(Model A Dummy) excel nose noaster
+qui outreg2 using "DiBelskyLiu_Means.xls", ctitle(Model A Dummy) excel nose noaster sum
 
 ****************************************************************************************************
 ** Regression (Model B)
@@ -172,7 +174,13 @@ outreg2 using "DiBelskyLiu_Reg.xls", ctitle(Model A Dummy) excel noaster
 egen init_wealth_quant = xtile(log_init_wealth), n(4)
 
 reg log_fam_wealth_real years_owning years_owning2 log_average_income total_gifts i.init_wealth_quant i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_2015 i.divorced_2015 i.region i.metro_2015 change_kids
-outreg2 using "DiBelskyLiu_Reg.xls", ctitle(Model B) excel noaster
+qui outreg2 using "DiBelskyLiu_Reg.xls", ctitle(Model B) excel nose noaster
+qui outreg2 using "DiBelskyLiu_Means.xls", ctitle(Model B) excel nose noaster sum
 
 qui reg log_fam_wealth_real i.years_owning log_average_income total_gifts i.init_wealth_quant i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_2015 i.divorced_2015 i.region i.metro_2015 change_kids
-outreg2 using "DiBelskyLiu_Reg.xls", ctitle(Model B Dummy) excel noaster
+qui outreg2 using "DiBelskyLiu_Reg.xls", ctitle(Model B Dummy) excel nose noaster
+qui outreg2 using "DiBelskyLiu_Means.xls", ctitle(Model B Dummy) excel nose noaster sum
+
+****************************************************************************************************
+** Means for each variable
+****************************************************************************************************
