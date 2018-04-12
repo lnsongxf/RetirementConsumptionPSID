@@ -16,6 +16,8 @@ global allow_kids_to_leave_hh 1 // When looking for stable households, what shou
 
 * drop if emp_status_head != 1 // only keep employed heads. Question: should I put this so early? ie to split up HH? or later?
 
+global allow_hh_present_for_part 1
+
 * cap ssc install outreg2
 * cap ssc install egenmore
 
@@ -28,6 +30,10 @@ global allow_kids_to_leave_hh 1 // When looking for stable households, what shou
 qui do "$folder\Do\Sample-Selection.do"
 local file_suffix
 *local file_suffix _unstable_coupes // only use this if we do not restrict ourselves to same husband-wife pairs
+
+if $allow_hh_present_for_part == 1{
+  local file_suffix _HH_partially_present
+}
 
 xtset pid wave, delta(2) // specify that we have data every other year
 
@@ -143,9 +149,15 @@ gen change_kids = end_kids - init_kids
 ** Select Sample
 ****************************************************************************************************
 
-keep if min_year == 1999 & max_year == 2015
-keep if wave == 2015
-* TODO: relax the min_year == 1999 restriction
+if $allow_hh_present_for_part == 0{
+  keep if min_year == 1999 & max_year == 2015
+  keep if wave == 2015
+}
+
+* relax the min_year == 1999 restriction
+if $allow_hh_present_for_part == 1{
+  keep if wave == max_year
+}
 
 ****************************************************************************************************
 ** Regression (Model A)
@@ -157,18 +169,18 @@ gen log_fam_wealth_real = log(fam_wealth_real) // wealth in final period
 replace log_fam_wealth_real = log(1) if log_fam_wealth_real == .
 replace log_init_wealth = log(1) if log_init_wealth == .
 
-gen married_2015 = married == 1
-gen divorced_2015 = married == 4
+gen married_end = married == 1
+gen divorced_end = married == 4
 
-/*inspect log_fam_wealth_real years_owning years_owning2 log_average_income log_init_wealth total_gifts black init_HS init_some_college init_college_plus educ_improvement init_age married_2015 divorced_2015 region metro_2015 change_kids*/
+/*inspect log_fam_wealth_real years_owning years_owning2 log_average_income log_init_wealth total_gifts black init_HS init_some_college init_college_plus educ_improvement init_age married_end divorced_end region metro_2015 change_kids*/
 
 
-reg log_fam_wealth_real years_owning years_owning2 log_average_income log_init_wealth total_gifts i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_2015 i.divorced_2015 i.region i.metro_2015 change_kids
+reg log_fam_wealth_real years_owning years_owning2 log_average_income log_init_wealth total_gifts i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_end i.divorced_end i.region i.metro_2015 change_kids
 qui outreg2 using "DiBelskyLiu_Reg`file_suffix'.xls", ctitle(Model A) excel replace nose noaster
 qui outreg2 using "DiBelskyLiu_Means`file_suffix'.xls", ctitle(Model A) excel replace nose noaster sum
 
 * Years owning as dummy
-qui reg log_fam_wealth_real i.years_owning log_average_income log_init_wealth total_gifts i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_2015 i.divorced_2015 i.region i.metro_2015 change_kids
+qui reg log_fam_wealth_real i.years_owning log_average_income log_init_wealth total_gifts i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_end i.divorced_end i.region i.metro_2015 change_kids
 qui outreg2 using "DiBelskyLiu_Reg`file_suffix'.xls", ctitle(Model A Dummy) excel nose noaster
 qui outreg2 using "DiBelskyLiu_Means`file_suffix'.xls", ctitle(Model A Dummy) excel nose noaster sum
 
@@ -180,11 +192,11 @@ qui outreg2 using "DiBelskyLiu_Means`file_suffix'.xls", ctitle(Model A Dummy) ex
 
 egen init_wealth_quant = xtile(log_init_wealth), n(4)
 
-reg log_fam_wealth_real years_owning years_owning2 log_average_income total_gifts i.init_wealth_quant i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_2015 i.divorced_2015 i.region i.metro_2015 change_kids
+reg log_fam_wealth_real years_owning years_owning2 log_average_income total_gifts i.init_wealth_quant i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_end i.divorced_end i.region i.metro_2015 change_kids
 qui outreg2 using "DiBelskyLiu_Reg`file_suffix'.xls", ctitle(Model B) excel nose noaster
 qui outreg2 using "DiBelskyLiu_Means`file_suffix'.xls", ctitle(Model B) excel nose noaster sum
 
-qui reg log_fam_wealth_real i.years_owning log_average_income total_gifts i.init_wealth_quant i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_2015 i.divorced_2015 i.region i.metro_2015 change_kids
+qui reg log_fam_wealth_real i.years_owning log_average_income total_gifts i.init_wealth_quant i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_end i.divorced_end i.region i.metro_2015 change_kids
 qui outreg2 using "DiBelskyLiu_Reg`file_suffix'.xls", ctitle(Model B Dummy) excel nose noaster
 qui outreg2 using "DiBelskyLiu_Means`file_suffix'.xls", ctitle(Model B Dummy) excel nose noaster sum
 
