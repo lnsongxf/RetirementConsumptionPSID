@@ -26,6 +26,10 @@ global allow_kids_to_leave_hh 1 // When looking for stable households, what shou
 
 * Sample selection: households with same husband-wife over time
 qui do "$folder\Do\Sample-Selection.do"
+local file_suffix
+*local file_suffix _unstable_coupes // only use this if we do not restrict ourselves to same husband-wife pairs
+
+xtset pid wave, delta(2) // specify that we have data every other year
 
 * Generate aggregate consumption (following Blundell et al)
 qui do "$folder\Do\Consumption-Measures.do"
@@ -84,7 +88,9 @@ count if min_year == 1999 & max_year == 2015 & wave == 2015
 gen owner = housingstatus == 1
 sort pid wave
 by pid, sort: egen total_waves_as_owner = total(owner)
+
 gen years_owning = 2 * total_waves_as_owner
+replace years_owning = years_owning - 1 if years_owning > 0
 gen years_owning2 = years_owning ^ 2
 
 * Average income 1999-2015
@@ -158,13 +164,13 @@ gen divorced_2015 = married == 4
 
 
 reg log_fam_wealth_real years_owning years_owning2 log_average_income log_init_wealth total_gifts i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_2015 i.divorced_2015 i.region i.metro_2015 change_kids
-qui outreg2 using "DiBelskyLiu_Reg.xls", ctitle(Model A) excel replace nose noaster
-qui outreg2 using "DiBelskyLiu_Means.xls", ctitle(Model A) excel replace nose noaster sum
+qui outreg2 using "DiBelskyLiu_Reg`file_suffix'.xls", ctitle(Model A) excel replace nose noaster
+qui outreg2 using "DiBelskyLiu_Means`file_suffix'.xls", ctitle(Model A) excel replace nose noaster sum
 
 * Years owning as dummy
 qui reg log_fam_wealth_real i.years_owning log_average_income log_init_wealth total_gifts i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_2015 i.divorced_2015 i.region i.metro_2015 change_kids
-qui outreg2 using "DiBelskyLiu_Reg.xls", ctitle(Model A Dummy) excel nose noaster
-qui outreg2 using "DiBelskyLiu_Means.xls", ctitle(Model A Dummy) excel nose noaster sum
+qui outreg2 using "DiBelskyLiu_Reg`file_suffix'.xls", ctitle(Model A Dummy) excel nose noaster
+qui outreg2 using "DiBelskyLiu_Means`file_suffix'.xls", ctitle(Model A Dummy) excel nose noaster sum
 
 ****************************************************************************************************
 ** Regression (Model B)
@@ -175,12 +181,12 @@ qui outreg2 using "DiBelskyLiu_Means.xls", ctitle(Model A Dummy) excel nose noas
 egen init_wealth_quant = xtile(log_init_wealth), n(4)
 
 reg log_fam_wealth_real years_owning years_owning2 log_average_income total_gifts i.init_wealth_quant i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_2015 i.divorced_2015 i.region i.metro_2015 change_kids
-qui outreg2 using "DiBelskyLiu_Reg.xls", ctitle(Model B) excel nose noaster
-qui outreg2 using "DiBelskyLiu_Means.xls", ctitle(Model B) excel nose noaster sum
+qui outreg2 using "DiBelskyLiu_Reg`file_suffix'.xls", ctitle(Model B) excel nose noaster
+qui outreg2 using "DiBelskyLiu_Means`file_suffix'.xls", ctitle(Model B) excel nose noaster sum
 
 qui reg log_fam_wealth_real i.years_owning log_average_income total_gifts i.init_wealth_quant i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_2015 i.divorced_2015 i.region i.metro_2015 change_kids
-qui outreg2 using "DiBelskyLiu_Reg.xls", ctitle(Model B Dummy) excel nose noaster
-qui outreg2 using "DiBelskyLiu_Means.xls", ctitle(Model B Dummy) excel nose noaster sum
+qui outreg2 using "DiBelskyLiu_Reg`file_suffix'.xls", ctitle(Model B Dummy) excel nose noaster
+qui outreg2 using "DiBelskyLiu_Means`file_suffix'.xls", ctitle(Model B Dummy) excel nose noaster sum
 
 ****************************************************************************************************
 ** Means for each variable
