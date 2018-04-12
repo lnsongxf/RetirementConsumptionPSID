@@ -2,30 +2,28 @@ dur         =1:20;
 %% Di et al. MODELs on our sample (1999-2015)
 %  LogW = alpha + beta_h * H + beta_sh * SH + beta_c * C
 %% COEFFICIENTS FROM THEIR ESTIMATION 
-alpha   = [  nan     % MODEL 1
-             nan     % MODEL 2
+alpha   = [-13.99    % MODEL 1
+           -14.34    % MODEL 2
            -8.5778]; % Di Belseky Liu MODEL B
        
-beta_h  = [   nan
-              nan
+beta_h  = [  0.412
+             0.416
            0.79478];  
        
-beta_hs = [   nan
-              nan
-           -0.0183]; 
+beta_hs = [-0.0164
+           -0.0168
+           -0.0500]; 
     
          % MODEL 1    MODEL 2    DBL MODEL 2 
-beta_c  = [  nan        nan      1.40880    ;...  % Average annual income 1989?2001 (log)    
-             nan         0           0      ;...  % Net wealth 1989 (log)
-             nan        nan      0.23708    ;...  % Savings tendency between 1984 and 1994
-             nan        nan      0.00001279 ;...  % Total inheritance and settlement payment received between 1989 and 2001
-             nan        nan      0.6572     ;...  % Ever selected itemizing deduction in tax filings between 1989 and 2001  
-             nan        nan      0.40858    ;...  % High school
-             nan        nan      0.01880    ;...  % Age of household head in 1989
-             nan        nan      0.24488    ;...  % Percentage of time as a married couple hh
-             nan        nan     -0.0000909  ;...  % Change in the number of children in household, 1989?2001
-             nan        nan      0.10545    ;...  % South
-             nan        nan      0.10545    ]';    % Other metro
+beta_c  = [ 1.966     2.006      1.40880     ;...   % Average annual income 1999-2015 (log)    
+            0.205         0          0       ;...   % Net wealth 1999 (log)
+            1.19e-05  1.16e-05   0.00001279  ;...   % Total inheritance and settlement payment received between 1989 and 2001
+            0.210     0.179      0.40858     ;...   % High school
+            0.00474   0.00507    0.01880     ;...   % Age of household head in 1999
+             0            0      0.24488     ;...   % Percentage of time as a married couple hh
+            0.0780    0.0776    -0.0000909   ;...   % Change in the number of children in household, 1999-2015
+            0.599     0.598      0.10545     ;...   % Region 3 in our case South
+            -0.704       nan      0.17547    ]';    % Metro in our case // Other metro
            
            
            
@@ -36,20 +34,18 @@ beta_c  = [  nan        nan      1.40880    ;...  % Average annual income 1989?2
 %      (white, HS grad, South, Not in Large, Other Metro, Used itemized
 %      dedeuction, top wealth quartile, not divorced)
 
-C =       [nan  10.40096     % Average annual income 1989?2001 (log)    
-           nan  6.223710     % Net wealth 1989 (log)
-           nan  -0.01526     % Savings tendency between 1984 and 1994
-           nan  5646.987     % Total inheritance and settlement payment received between 1989 and 2001
-           nan     1         % Ever selected itemizing deduction in tax filings between 1989 and 2001  
-           nan     1         % High school
-           nan  39.77445     % Age of household head in 1989
-           nan  0.443339     % Percentage of time as a married couple hh
-           nan  0.124606     % Change in the number of children in household, 1989?2001
-           nan     1         % South
-           nan     1];       % Other metro
+C =       [9.772  10.40096     % Average annual income 1999-2001 (log)    
+           6.760  6.223710     % Net wealth 1999 (log)
+           5649   5646.987     % Total inheritance and settlement payment received between 1999 and 2015
+           1       1           % High school
+           39.02  39.77445     % Age of household head in 1999
+           0      0.443339     % Percentage of time as a married couple hh
+           -0.490  0.124606    % Change in the number of children in household, 1999-2001
+            1     1            % South
+            1     1];          % Other metro
 
  beta_c_times_C = [beta_c(1:2,:)*C(:,1)
-                   beta_c(3,:)*C(:,1)];
+                   beta_c(3,:)*C(:,2)];
 %% DEPENDENT VARIABLES FOR OWNERS
 LogW   = nan(3, length(dur));
 wealth = nan(3, length(dur));
