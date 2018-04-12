@@ -153,6 +153,44 @@ psid use
 	[99]ER13009 [01]ER17012 [03]ER21016 [05]ER25016 [07]ER36016 [09]ER42016
 	[11]ER47316 [13]ER53016 [15]ER60016
 
+	// Geographical Region of the 2015 Interview
+	|| region
+	// [68]V361 [69]V876 [70]V1572 [71]V2284 [72]V2911 [73]V3279 [74]V3699
+	// [75]V4178 [76]V5054 [77]V5633 [78]V6180 [79]V6773 [80]V7419 [81]V8071
+	// [82]V8695 [83]V9381 [84]V11028 [85]V12379 [86]V13631 [87]V14678 [88]V16152
+	// [89]V17538 [90]V18889 [91]V20189 [92]V21495 [93]V23327 [94]ER4157E
+	// [95]ER6997E [96]ER9248E [97]ER12221E
+	[99]ER16430 [01]ER20376 [03]ER24143 [05]ER28042 [07]ER41032 [09]ER46974
+	[11]ER52398 [13]ER58215 [15]ER65451
+
+	// 1,089 	12.04 	1 	Northeast
+	// 2,227 	24.61 	2 	North Central
+	// 4,070 	44.98 	3 	South
+	// 1,590 	17.57 	4 	West
+	// 19 	.21 	5 	Alaska, Hawaii
+	// 53 	.59 	6 	Foreign country
+
+	// RURAL-URBAN CODE (BEALE-COLLAPSED)
+	// || metro
+	// [94]ER4157F [95]ER6997F [96]ER9248F [97]ER12221F
+	// [99]ER16431C [01]ER20377C [03]ER24144A [05]ER28043A [07]ER41033A [09]ER46975A
+	// [11]ER52399A [13]ER58216
+	// 2,554 	28.18 	1 	Central counties of metropolitan areas of 1 million population or more
+	// 1,321 	14.58 	2 	Fringe counties of metropolitan areas of 1 million population or more
+	// 2,321 	25.61 	3 	Counties in metropolitan areas of 250 thousand to 1 million population
+	// 640 	7.06 	4 	Counties in metropolitan areas of less than 250 thousand population
+	// 303 	3.34 	5 	Urban population of 20,000 or more, adjacent to metropolitan area
+	// 294 	3.24 	6 	Urban population of 20,000 or more, not adjacent to a metropolitan area
+	// 583 	6.43 	7 	Urban population of fewer than 20,000, adjacent to a metropolitan area
+	// 759 	8.37 	8 	Urban population of fewer than 20,000, not adjacent to a metropolitan area
+	// 237 	2.62 	9 	Completely rural
+
+	// NOTE: in 2015 they change the coding... annoying
+	|| metro_2015
+	[15]ER65452	
+	// 7,542 	83.36 	1 	Metropolitan area (Beale-Ross Code ER654523= 1-3)
+	// 1,453 	16.06 	2 	Non-metropolitan area (Beale-Ross Code ER654523= 4-9)
+
 	//////////////////////////////////////////////////////////////////////////
 	// EMPLOYMENT STATUS (HEAD)
 	//////////////////////////////////////////////////////////////////////////
