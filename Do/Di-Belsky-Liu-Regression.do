@@ -7,7 +7,7 @@ graph close
 set autotabgraphs on
 
 global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
-cd "$folder\Results" // where to save outreg2 results
+cd "$folder\Results\Graphs_for_Paper" // where to save outreg2 results
 use "$folder\Data\Intermediate\Basic-Panel.dta", clear
 
 * Switches
@@ -122,6 +122,7 @@ gen end_college_plus = end_educ >= 16
 * Improvement in educ between 1999 and 2015
 gen educ_improvement = end_educ - init_educ
 replace educ_improvement = 0 if educ_improvement == .
+replace educ_improvement = (educ_improvement > 0) // make it a dummy as in Di Belsky Liu
 
 * Kids
 gen init_kids_ = children if wave == min_year
