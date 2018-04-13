@@ -62,12 +62,13 @@ sigma_varnames = cat(1, B.textdata(2:end, 1) )
 % X = diag(Xi) repeated m times
 
 %% Simulate
-[n, k] = size(X_input);  % n: obs k: regressors
-m      = k-3;            % eqns
+n = 10 % obs
+k = 8   % regressors
+m = 5   % eqns
 
 % Xi = n x k
 % X_input = ones(n, k) % TODO: from stata
-X_input = [ [eye(5); eye(5)], zeros(10,2), ones(10,1)];
+X_input = [ [eye(5); eye(5)], zeros(10,2), ones(10,1)]
 
 X_t = X_input;
 age_t = X_input(:, m+1);
@@ -78,12 +79,12 @@ if m == 5
 end
 
 betaa = A.data';
+Var_Cov = [1     0.03   0.001  0.8  0.02
+           0.5   1      0.2    0.07 0
+           0.1   0.2    1      0.9   ];
+epslion_t = getCorrelatedSchocks(n, m, VarCov);
 
-Var_Cov   = B.data;       
-epsilon_t = getCorrelatedSchocks(n, m, Var_Cov);
-epsilon_t = reshape(epsilon_t, n*m,1);
-
-Y = BigX * betaa + epsilon_t;
+Y = BigX * betaa;
 
 % BigX = nm x km
 % beta = km x 1
