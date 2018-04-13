@@ -137,10 +137,10 @@ replace t_homeownership_100 = 1000 if t_homeownership == .
 gen log_fam_wealth_real = log(fam_wealth_real)
 gen log_fam_wealth_ex_home_real = log(fam_wealth_ex_home_real)
 
+* Mean
 preserve
 	collapse (mean) log_fam_wealth_real log_fam_wealth_ex_home_real fam_wealth_real fam_wealth_ex_home_real fam_liq_wealth_real fam_LiqAndH_wealth_real fam_wealth_ex_bus_real fam_wealth_ex_bus_ira_real fam_liq_housing_IRA_real fam_liq_housing_IRA_bus_real, by(age_cat)
 	tsset age_cat
-	* tsline log_*, title("Mean Log Wealth") name("mean_log_wealth", replace)
 
 	lab var fam_liq_wealth_real "Liquid Wealth"
 	lab var fam_LiqAndH_wealth_real "Liquid + Housing"
@@ -154,11 +154,10 @@ preserve
 	graph export "$folder\Results\Wealth\mean_wealth_by_age.pdf", as(pdf) replace
 restore
 
-
+* Median
 preserve
 	collapse (median) log_fam_wealth_real log_fam_wealth_ex_home_real fam_wealth_real fam_wealth_ex_home_real fam_liq_wealth_real fam_LiqAndH_wealth_real fam_liq_housing_IRA_real fam_liq_housing_IRA_bus_real fam_wealth_ex_bus_real fam_wealth_ex_bus_ira_real, by(age_cat)
 	tsset age_cat
-	* tsline log_*, title("Median Log Wealth") name("median_log_wealth", replace)
 
 	lab var fam_liq_wealth_real "Liquid Wealth"
 	lab var fam_LiqAndH_wealth_real "Liquid + Housing"
@@ -172,8 +171,75 @@ preserve
 	graph export "$folder\Results\Wealth\median_wealth_by_age.pdf", as(pdf) replace
 restore
 
-sdfsdf
+****************************************************************************************************
+** Simple means and medians by age EXCLUDING TOP 1%
+****************************************************************************************************
 
+* Find top x% by age
+by age, sort: egen p95 = pctile(fam_wealth_real), p(95)
+by age, sort: egen p99 = pctile(fam_wealth_real), p(99)
+* TODO: try this with a dif measure of wealth ?
+
+* Plot the 95th and 99th percentiles
+preserve
+	keep age p95 p99
+	duplicates drop
+	sort age
+	list
+	tsset age
+	tsline p95 p99
+restore
+
+* Flag observations in the top x%
+gen top_95_ = fam_wealth_real >= p95 & fam_wealth_real != .
+gen top_99_ = fam_wealth_real >= p99 & fam_wealth_real != .
+
+* Flag HHs with any observation in the top x%
+by pid, sort: egen top_95 = max(top_95_)
+by pid, sort: egen top_99 = max(top_99_)
+
+tab top_95
+tab top_99
+
+* Plot while excluding those in top 1% in any wave
+preserve
+	drop if top_99 == 1
+
+	collapse (mean) log_fam_wealth_real log_fam_wealth_ex_home_real fam_wealth_real fam_wealth_ex_home_real fam_liq_wealth_real fam_LiqAndH_wealth_real fam_wealth_ex_bus_real fam_wealth_ex_bus_ira_real fam_liq_housing_IRA_real fam_liq_housing_IRA_bus_real, by(age_cat)
+	tsset age_cat
+
+	lab var fam_liq_wealth_real "Liquid Wealth"
+	lab var fam_LiqAndH_wealth_real "Liquid + Housing"
+	lab var fam_liq_housing_IRA_real "Liquid + Housing + IRA"
+	lab var fam_liq_housing_IRA_bus_real "Liquid + Housing + IRA + Bus"
+	lab var fam_wealth_real "Net Wealth"
+
+	lab var age_cat "Age"
+
+	tsline fam_liq_wealth_real fam_LiqAndH_wealth_real fam_liq_housing_IRA_real fam_liq_housing_IRA_bus_real fam_wealth_real /* fam_wealth_ex_bus_real fam_wealth_ex_bus_ira_real */, title("Mean Wealth (Drop Top 1%)") name("mean_wealth_by_age_drop_top1", replace) ytitle("Real Wealth (2015 dollars)", margin(0 4 0 0) ) graphregion(color(white)) ylabel( #3 )
+	graph export "$folder\Results\Wealth\mean_wealth_by_age_drop_top1.pdf", as(pdf) replace
+restore
+
+* Plot while excluding those in top 5% in any wave
+preserve
+	drop if top_95 == 1
+
+	collapse (mean) log_fam_wealth_real log_fam_wealth_ex_home_real fam_wealth_real fam_wealth_ex_home_real fam_liq_wealth_real fam_LiqAndH_wealth_real fam_wealth_ex_bus_real fam_wealth_ex_bus_ira_real fam_liq_housing_IRA_real fam_liq_housing_IRA_bus_real, by(age_cat)
+	tsset age_cat
+
+	lab var fam_liq_wealth_real "Liquid Wealth"
+	lab var fam_LiqAndH_wealth_real "Liquid + Housing"
+	lab var fam_liq_housing_IRA_real "Liquid + Housing + IRA"
+	lab var fam_liq_housing_IRA_bus_real "Liquid + Housing + IRA + Bus"
+	lab var fam_wealth_real "Net Wealth"
+
+	lab var age_cat "Age"
+
+	tsline fam_liq_wealth_real fam_LiqAndH_wealth_real fam_liq_housing_IRA_real fam_liq_housing_IRA_bus_real fam_wealth_real /* fam_wealth_ex_bus_real fam_wealth_ex_bus_ira_real */, title("Mean Wealth (Drop Top 5%)") name("mean_wealth_by_age_drop_top5", replace) ytitle("Real Wealth (2015 dollars)", margin(0 4 0 0) ) graphregion(color(white)) ylabel( #3 )
+	graph export "$folder\Results\Wealth\mean_wealth_by_age_drop_top5.pdf", as(pdf) replace
+restore
+
+sdfsdf
 * TODO: APC version of this?
 
 ****************************************************************************************************

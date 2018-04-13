@@ -218,8 +218,6 @@ else if $add_cubic == 1{
 ** Regression (Model A)
 ****************************************************************************************************
 
-
-
 gen married_end = married == 1
 gen divorced_end = married == 4
 
@@ -254,3 +252,7 @@ qui outreg2 using "DiBelskyLiu_Means`file_suffix'.xls", ctitle(Model B Dummy) ex
 di "See Results in:"
 di "DiBelskyLiu_Reg`file_suffix'.xls"
 di "DiBelskyLiu_Means`file_suffix'.xls"
+
+* NOTE: in the previous results, we were using wealth as measured in 1982-1984 real dollars.
+* As of April 13, we updated wealth to 2015 dollars, so the results will be slightly different next time we run these regressions
+* NOTE: when we plot the results , we just scale up from 1982-84 dollars to 2015 dollars
