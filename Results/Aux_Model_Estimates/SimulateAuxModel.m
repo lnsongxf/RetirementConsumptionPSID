@@ -1,6 +1,6 @@
 clear; clc; close all;
-%cd 'C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID\Results\Aux_Model_Estimates'
-cd '/Users/agneskaa/Documents/RetirementConsumptionPSID/Results/Aux_Model_Estimates'
+cd 'C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID\Results\Aux_Model_Estimates'
+% cd '/Users/agneskaa/Documents/RetirementConsumptionPSID/Results/Aux_Model_Estimates'
 
 A = importdata('coefs.txt');
 B = importdata('sigma.txt');
@@ -48,6 +48,8 @@ ids = ids(1:5, :);
 % X = diag(Xi) repeated m times
 
 %% Prepare simulation
+X_input = X0;
+
 [n, k] = size(X_input);  % n: obs k: regressors
 m      = k-3;            % eqns
 index_housing = 1; % index of housing (linear probability model)
@@ -55,7 +57,6 @@ index_housing = 1; % index of housing (linear probability model)
 % Xi = n x k
 % X_input = ones(n, k) % TODO: from stata
 % X_input = [ [eye(5); eye(5)], zeros(10,2), ones(10,1)];
-X_input = X0;
 
 %% Run once
 
