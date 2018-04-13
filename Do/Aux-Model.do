@@ -94,4 +94,5 @@ keep if F.sample == 1 & age <= 30 & wave == min_year // first observation for ea
 count
 keep pid `endog_vars' age age_sq
 order pid `endog_vars' age age_sq
+gen cons = 1
 export delimited using "$folder/Results/Aux_Model_Estimates/InitData.csv", replace
