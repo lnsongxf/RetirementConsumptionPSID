@@ -18,6 +18,10 @@ global allow_kids_to_leave_hh 1 // When looking for stable households, what shou
 
 global allow_hh_present_for_part 1
 
+global analyze_liquid_wealth 1
+
+global add_cubic 1
+
 * cap ssc install outreg2
 * cap ssc install egenmore
 
@@ -145,6 +149,13 @@ by pid, sort: egen end_kids = max(end_kids_)
 
 gen change_kids = end_kids - init_kids
 
+by pid, sort: egen metro_mode = mode(metro_pre2015)
+
+gen large_metro = metro_mode == 1 | metro_mode == 2
+gen other_metro = metro_mode == 3 | metro_mode == 4
+gen small_city  = metro_mode == 5 | metro_mode == 6 | metro_mode == 7 | metro_mode ==  8
+
+
 ****************************************************************************************************
 ** Select Sample
 ****************************************************************************************************
@@ -152,35 +163,75 @@ gen change_kids = end_kids - init_kids
 if $allow_hh_present_for_part == 0{
   keep if min_year == 1999 & max_year == 2015
   keep if wave == 2015
+
+  local metro_var i.metro_2015
 }
 
 * relax the min_year == 1999 restriction
 if $allow_hh_present_for_part == 1{
   keep if wave == max_year
+
+  gen dif = max_year - min_year
+  tab dif
+  keep if dif >= 4
+
+  /*local metro_var large_metro other_metro small_city*/
+  drop if metro == 0
+  local metro_var i.metro
+}
+
+****************************************************************************************************
+** Wealth data
+****************************************************************************************************
+
+
+if $analyze_liquid_wealth == 0{
+  gen log_fam_wealth_real = log(fam_wealth_real) // wealth in final period
+
+  * Deal with missing values due to negative or zero wealth
+  replace log_fam_wealth_real = log(1) if log_fam_wealth_real == .
+
+  local dep_var log_fam_wealth_real
+}
+else if $analyze_liquid_wealth == 1{
+  gen log_fam_liq_wealth_real = log(fam_liq_wealth_real) // wealth in final period
+
+  * Deal with missing values due to negative or zero wealth
+  replace log_fam_liq_wealth_real = log(1) if log_fam_liq_wealth_real == .
+
+  local dep_var log_fam_liq_wealth_real
+  local file_suffix `file_suffix'_liquid
+}
+
+replace log_init_wealth = log(1) if log_init_wealth == .
+
+
+if $add_cubic == 0{
+  local cubic
+}
+else if $add_cubic == 1{
+  gen years_owning3 = years_owning^3
+  local cubic years_owning3
 }
 
 ****************************************************************************************************
 ** Regression (Model A)
 ****************************************************************************************************
 
-gen log_fam_wealth_real = log(fam_wealth_real) // wealth in final period
 
-* Deal with missing values due to negative or zero wealth
-replace log_fam_wealth_real = log(1) if log_fam_wealth_real == .
-replace log_init_wealth = log(1) if log_init_wealth == .
 
 gen married_end = married == 1
 gen divorced_end = married == 4
 
-/*inspect log_fam_wealth_real years_owning years_owning2 log_average_income log_init_wealth total_gifts black init_HS init_some_college init_college_plus educ_improvement init_age married_end divorced_end region metro_2015 change_kids*/
+inspect years_owning years_owning2 `cubic' log_average_income log_init_wealth total_gifts black init_HS init_some_college init_college_plus educ_improvement init_age married_end divorced_end region metro_2015 change_kids
 
 
-reg log_fam_wealth_real years_owning years_owning2 log_average_income log_init_wealth total_gifts i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_end i.divorced_end i.region i.metro_2015 change_kids
+reg `dep_var' years_owning years_owning2 `cubic' log_average_income log_init_wealth total_gifts i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_end i.divorced_end i.region `metro_var' change_kids
 qui outreg2 using "DiBelskyLiu_Reg`file_suffix'.xls", ctitle(Model A) excel replace nose noaster
 qui outreg2 using "DiBelskyLiu_Means`file_suffix'.xls", ctitle(Model A) excel replace nose noaster sum
 
 * Years owning as dummy
-qui reg log_fam_wealth_real i.years_owning log_average_income log_init_wealth total_gifts i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_end i.divorced_end i.region i.metro_2015 change_kids
+qui reg `dep_var' i.years_owning log_average_income log_init_wealth total_gifts i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_end i.divorced_end i.region `metro_var' change_kids
 qui outreg2 using "DiBelskyLiu_Reg`file_suffix'.xls", ctitle(Model A Dummy) excel nose noaster
 qui outreg2 using "DiBelskyLiu_Means`file_suffix'.xls", ctitle(Model A Dummy) excel nose noaster sum
 
@@ -192,14 +243,14 @@ qui outreg2 using "DiBelskyLiu_Means`file_suffix'.xls", ctitle(Model A Dummy) ex
 
 egen init_wealth_quant = xtile(log_init_wealth), n(4)
 
-reg log_fam_wealth_real years_owning years_owning2 log_average_income total_gifts i.init_wealth_quant i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_end i.divorced_end i.region i.metro_2015 change_kids
+reg `dep_var' years_owning years_owning2 `cubic' log_average_income total_gifts i.init_wealth_quant i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_end i.divorced_end i.region `metro_var' change_kids
 qui outreg2 using "DiBelskyLiu_Reg`file_suffix'.xls", ctitle(Model B) excel nose noaster
 qui outreg2 using "DiBelskyLiu_Means`file_suffix'.xls", ctitle(Model B) excel nose noaster sum
 
-qui reg log_fam_wealth_real i.years_owning log_average_income total_gifts i.init_wealth_quant i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_end i.divorced_end i.region i.metro_2015 change_kids
+qui reg `dep_var' i.years_owning log_average_income total_gifts i.init_wealth_quant i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_end i.divorced_end i.region `metro_var' change_kids
 qui outreg2 using "DiBelskyLiu_Reg`file_suffix'.xls", ctitle(Model B Dummy) excel nose noaster
 qui outreg2 using "DiBelskyLiu_Means`file_suffix'.xls", ctitle(Model B Dummy) excel nose noaster sum
 
-****************************************************************************************************
-** Means for each variable
-****************************************************************************************************
+di "See Results in:"
+di "DiBelskyLiu_Reg`file_suffix'.xls"
+di "DiBelskyLiu_Means`file_suffix'.xls"

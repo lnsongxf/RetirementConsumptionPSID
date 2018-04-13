@@ -1,7 +1,6 @@
 set more off
 clear all
-// global folder "C:\Users\pedm\Documents\Research\Cormac\RetirementConsumptionPSID"
-/*global folder "C:\Users\STUDENT\Documents\GitHub\RetirementConsumptionPSID"*/
+
 global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 
 ****************************************************************************************************
@@ -171,10 +170,10 @@ psid use
 	// 53 	.59 	6 	Foreign country
 
 	// RURAL-URBAN CODE (BEALE-COLLAPSED)
-	// || metro
+	|| metro_pre2015
 	// [94]ER4157F [95]ER6997F [96]ER9248F [97]ER12221F
-	// [99]ER16431C [01]ER20377C [03]ER24144A [05]ER28043A [07]ER41033A [09]ER46975A
-	// [11]ER52399A [13]ER58216
+	[99]ER16431C [01]ER20377C [03]ER24144A [05]ER28043A [07]ER41033A [09]ER46975A
+	[11]ER52399A [13]ER58216
 	// 2,554 	28.18 	1 	Central counties of metropolitan areas of 1 million population or more
 	// 1,321 	14.58 	2 	Fringe counties of metropolitan areas of 1 million population or more
 	// 2,321 	25.61 	3 	Counties in metropolitan areas of 250 thousand to 1 million population
@@ -187,7 +186,7 @@ psid use
 
 	// NOTE: in 2015 they change the coding... annoying
 	|| metro_2015
-	[15]ER65452	
+	[15]ER65452
 	// 7,542 	83.36 	1 	Metropolitan area (Beale-Ross Code ER654523= 1-3)
 	// 1,453 	16.06 	2 	Non-metropolitan area (Beale-Ross Code ER654523= 4-9)
 
@@ -1135,6 +1134,11 @@ replace year_born       = . if year_born == 9999
 * Compute net business wealth for 2013 and 2015
 replace business_wealth = business_value - business_debt if wave >= 2013
 drop business_value business_debt
+
+* Standardize the metro area
+gen metro     = 1 if metro_pre2015 <= 3
+replace metro = 2 if metro_pre2015 > 3 & metro_pre2015 <= 9
+replace metro = metro_2015 if wave == 2015
 
 * Compute net "other real estate wealth" for 2013 and 2015
 replace other_real_estate_wealth = other_real_estate_value - other_real_estate_debt if wave >= 2013
