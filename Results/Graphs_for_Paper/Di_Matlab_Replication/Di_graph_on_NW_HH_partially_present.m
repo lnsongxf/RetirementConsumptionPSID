@@ -1,35 +1,42 @@
+%% REGRESSUION RESULTS FOR NET WEALTH
 dur         = 1:1:15;
 dummy_dur   = 1:2:15;
 %% Di et al. MODELs on our sample (1999-2015)
-%  LogW = alpha + beta_h * H + beta_sh * SH + beta_c * C
+%  LogW = alpha + beta_h * H + beta_sh * SH + beta_ht*TH+ beta_c * C
 %% When we use dummies for duration  
 %  LogW = alpha + beta_h * H + beta_sh * SH + beta_c * C + Gamma * D
 %  where beta_h = 0, beta_sh =0, gamma is the coeff for each dur dummies 
 %% COEFFICIENTS FROM THEIR ESTIMATION 
-alpha   = [-13.61      % MODEL A
-           -14.05      % MODEL A Dummy
-           -14.02      % MODEL B
-           -14.37      % MODEL B Dummy 
+alpha   = [-10.80      % MODEL A
+           -10.68      % MODEL A Dummy
+           -11.44      % MODEL B
+           -11.32      % MODEL B Dummy 
             -8.5778];  % Di Belseky Liu MODEL B
        
-beta_h  = [  0.441     % MODEL A 
+beta_h  = [  1.092     % MODEL A 
              0         % MODEL A Dummy
-             0.445     % MODEL B
+             1.098     % MODEL B
              0         % MODEL B Dummy
              0.79478]; % Di Belseky Liu MODEL B  
        
-beta_hs = [ -0.0191    % MODEL A
+beta_hs = [ -0.133     % MODEL A
              0         % MODEL A Dummy
-            -0.0195    % MODEL B
+            -0.134     % MODEL B
              0         % MODEL B Dummy
             -0.0500];  % Di Belseky Liu MODEL B
+        
+beta_ht = [  0.0051    % MODEL A
+             0         % MODEL A Dummy
+             0.0051    % MODEL B
+             0         % MODEL B Dummy
+             0];       % Di Belseky Liu MODEL B        
 
         
 %           D1     D3      D5      D7      D9      D11      D13      D15           
 Gamma   = [ 0      0       0       0       0       0        0        0      % MODEL A
-            2.009  1.059   1.563   2.622   3.094   1.751    2.951    2.522  % MODEL A Dummy
+            1.958  2.225   2.534   2.540   2.916   3.151    3.515    3.096  % MODEL A Dummy
             0      0       0       0       0       0        0        0      % MODEL B
-            2.023  1.084   1.553   2.632   3.109   1.772    2.923    2.503  % MODEL B Dummy
+            1.952  2.244   2.551   2.555   2.939   3.158    3.564    3.112  % MODEL B Dummy
             0      0       0       0       0       0        0        0];    % Di Belseky Liu MODEL B         
 
         
@@ -37,18 +44,18 @@ Gamma   = [ 0      0       0       0       0       0        0        0      % MO
          %         |  DUMMY   |          |  DUMMY   |
          % MODEL A |  MODEL A |  MODEL B |  MODEL B |  DBL MODEL B 
          %---------------------------------------------------------
-beta_c  = [ 1.937     1.955      1.982      1.993      1.40880     ;...   % Average annual income 1999-2015 (log)    
-            0.202     0.199      0          0          0           ;...   % Net wealth 1999 (log)
+beta_c  = [ 1.468     1.447      1.531      1.509      1.40880     ;...   % Average annual income 1999-2015 (log)    
+            0.271     0.268      0          0          0           ;...   % Net wealth 1999 (log)
             0         0          0          0          0.23708     ;...   % Savings tendency between 1984 and 1994
-            1.17e-05  1.22e-05   1.15e-05   1.19e-05   1.2790e-05  ;...   % Total inheritance and settlement payment received between 1989 and 2001
+            6.59e-06  6.90e-06   6.96e-06   7.28e-06   1.2790e-05  ;...   % Total inheritance and settlement payment received between 1989 and 2001
             0         0          0          0          0.6572      ;...   % Ever selected itemizing deduction in tax filings between 1989 and 2001  
-            0.206     0.190      0.176      0.159      0.40858     ;...   % High school
-            0.00530   0.00699    0.00578    0.00718    0.01880     ;...   % Age of household head in 1999
+           -7.32e-05  0.0051    -0.0013     0.00359    0.40858     ;...   % High school
+            0.0127    0.0137     0.0146     0.0156     0.01880     ;...   % Age of household head in 1999
             0         0          0          0          0.24488     ;...   % Percentage of time as a married couple hh
-            0.0681    0.0575     0.0682     0.0567    -9.09e-05    ;...   % Change in the number of children in household, 1999-2015
-            0         0          2.166      2.138      0           ;...   % Being in top quart of wealth dist. in 1999
-            0.591     0.653      0.588      0.652      0.10545     ;...   % South
-           -0.731    -0.660     -0.755     -0.681      0.17547     ]';    % Metro in our case // Other metro
+            0.160     0.158      0.160      0.159     -9.09e-05    ;...   % Change in the number of children in household, 1999-2015
+            0         0          2.594      2.572      0           ;...   % Being in top quart of wealth dist. in 1999
+            0.631     0.586      0.620      0.576      0.10545     ;...   % South
+            0.301     0.263      0.312      0.274      0.17547     ]';    % Metro in our case // Other metro
            
 
 [height_beta_c, width_beta_c] = size(beta_c);  
@@ -61,15 +68,15 @@ beta_c  = [ 1.937     1.955      1.982      1.993      1.40880     ;...   % Aver
 %      dedeuction, top wealth quartile, not divorced)
 
            % OURS    % DI ETAL
-C =       [9.772      10.40096     % Average annual income 1999-2001 (log)    
-           6.760      6.223710     % Net wealth 1999 (log)
+C =       [9.657      10.40096     % Average annual income 1999-2001 (log)    
+           5.912      6.223710     % Net wealth 1999 (log)
            0         -0.01526      % Savings tendency between 1984 and 1994
-        5649       5646.987        % Total inheritance and settlement payment received between 1999 and 2015
+        3162       5646.987        % Total inheritance and settlement payment received between 1999 and 2015
            0          1            % Ever selected itemizing deduction in tax filings between 199 and 2015  
            1          1            % High school
-          39.02      39.77445      % Age of household head in 1999
+          34.22      39.77445      % Age of household head in 1999
            0          0.443339     % Percentage of time as a married couple hh
-          -0.490      0.124606     % Change in the number of children in household, 1999-2001
+           0.031      0.124606     % Change in the number of children in household, 1999-2001
            1          0            % Being in top quart of wealth dist. in 1999
            1          1            % Region: South
            1          1       ];   % Other metro
@@ -87,10 +94,10 @@ d = length(dummy_dur);
 for i=1:1:height_beta_c % # of models
   if i==2 || i==4       % Models where years owning is dummy
      LogW(i,1:d)            = (alpha(i)+beta_c_times_C(i))*ones(size(dummy_dur)) +  ones(size(dummy_dur)).*Gamma(i, :);
-     LogW_rent(i,1:d)       = (alpha(i)+beta_c_times_C_rent(i))*ones(size(dummy_dur));
+     LogW_rent(i,1:d)       = (alpha(i)+beta_c_times_C(i))*ones(size(dummy_dur));
   else    
-     LogW(i,:)              = (alpha(i)+beta_c_times_C(i))*ones(size(dur)) +  beta_h(i) * dur + beta_hs(i) * dur.^2;
-     LogW_rent(i,:)         = (alpha(i)+beta_c_times_C_rent(i))*ones(size(dur));
+     LogW(i,:)              = (alpha(i)+beta_c_times_C(i))*ones(size(dur)) +  beta_h(i) * dur + beta_hs(i) * dur.^2 + beta_ht(i) * dur.^3;
+     LogW_rent(i,:)         = (alpha(i)+beta_c_times_C(i))*ones(size(dur));
   end
      wealth(i,:)            = exp(LogW(i,:));
      wealth_rent(i,:)       = exp(LogW_rent(i,:));
@@ -98,7 +105,7 @@ for i=1:1:height_beta_c % # of models
 end
 
 
-figure(1)
+figure(3)
 hold on
 for i=1:2:height_beta_c
 plot(dur,Wealth_Difference(i,:))
@@ -107,15 +114,21 @@ hleg=legend('Model A','Model B','Model Di et al.');
 set(hleg,'Location','northeast','FontSize',12);
 ylabel('Wealth Difference between Owners and Renters','FontSize',14)
 xlabel('Duration of Homeownership','FontSize',14)
-title("Models with Quadratic Duration")
+title("Models with Cubic Duration")
 
-figure(2)
+figure(4)
 hold on
 for i=2:2:height_beta_c-1
-plot(dummy_dur,Wealth_Difference(i,1:d))
+plot(dummy_dur(1:d-1),Wealth_Difference(i,1:d-1))
 end
 hleg=legend('Model A Dummy','Model B Dummy');
 set(hleg,'Location','northeast','FontSize',12);
 ylabel('Wealth Difference between Owners and Renters','FontSize',14)
 xlabel('Duration of Homeownership','FontSize',14)
 title("Models with Dummies for Duration")
+
+% To Excel 
+diff_ = length(dur) - length(dummy_dur);
+tt = table(dur', [dummy_dur'; zeros(diff_,1)], Wealth_Difference(1,:)',  Wealth_Difference(2,:)' , Wealth_Difference(3,:)', Wealth_Difference(4,:)', Wealth_Difference(5,:)');
+tt.Properties.VariableNames= {'Duration', 'Duration_Dummy', 'NW_Model_A', 'NW_Model_A_Dummy', 'NW_Model_B', 'NW_Model_B_Dummy','NW_Model_Di_et_al' };
+writetable(tt,'Matlab_Results.xlsx','Sheet',1)

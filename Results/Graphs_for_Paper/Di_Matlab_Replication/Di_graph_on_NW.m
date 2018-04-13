@@ -83,14 +83,14 @@ wealth            = nan(height_beta_c, length(dur));
 LogW_rent         = nan(height_beta_c, length(dur));
 wealth_rent       = nan(height_beta_c, length(dur));
 Wealth_Difference = nan(height_beta_c, length(dur));
-for i=1:1:height_beta_c % no of models
-  if i==2 || i==4
-      
-     LogW(i,1:size(dummy_dur))      = (alpha(i)+beta_c_times_C(i))*ones(size(dummy_dur)) +  dummy_dur.*Gamma(i, :);
-     LogW_rent(i,1:size(dummy_dur)) = (alpha(i)+beta_c_times_C_rent(i))*ones(size(dummy_dur));
+d = length(dummy_dur);
+for i=1:1:height_beta_c % # of models
+  if i==2 || i==4       % Models where years owning is dummy
+     LogW(i,1:d)            = (alpha(i)+beta_c_times_C(i))*ones(size(dummy_dur)) +  ones(size(dummy_dur)).*Gamma(i, :);
+     LogW_rent(i,1:d)       = (alpha(i)+beta_c_times_C(i))*ones(size(dummy_dur));
   else    
      LogW(i,:)              = (alpha(i)+beta_c_times_C(i))*ones(size(dur)) +  beta_h(i) * dur + beta_hs(i) * dur.^2;
-     LogW_rent(i,:)         = (alpha(i)+beta_c_times_C_rent(i))*ones(size(dur));
+     LogW_rent(i,:)         = (alpha(i)+beta_c_times_C(i))*ones(size(dur));
   end
      wealth(i,:)            = exp(LogW(i,:));
      wealth_rent(i,:)       = exp(LogW_rent(i,:));
@@ -103,7 +103,19 @@ hold on
 for i=1:2:height_beta_c
 plot(dur,Wealth_Difference(i,:))
 end
-hleg=legend('Model A','Model A Dummy','Model B','Model B Dummy','Model Di et al.');
+hleg=legend('Model A','Model B','Model Di et al.');
 set(hleg,'Location','northeast','FontSize',12);
 ylabel('Wealth Difference between Owners and Renters','FontSize',14)
 xlabel('Duration of Homeownership','FontSize',14)
+title("Models with Quadratic Duration")
+
+figure(2)
+hold on
+for i=2:2:height_beta_c-1
+plot(dummy_dur,Wealth_Difference(i,1:d))
+end
+hleg=legend('Model A Dummy','Model B Dummy');
+set(hleg,'Location','northeast','FontSize',12);
+ylabel('Wealth Difference between Owners and Renters','FontSize',14)
+xlabel('Duration of Homeownership','FontSize',14)
+title("Models with Dummies for Duration")
