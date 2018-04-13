@@ -138,32 +138,37 @@ gen log_fam_wealth_real = log(fam_wealth_real)
 gen log_fam_wealth_ex_home_real = log(fam_wealth_ex_home_real)
 
 preserve
-	collapse (mean) log_fam_wealth_real log_fam_wealth_ex_home_real fam_wealth_real fam_wealth_ex_home_real fam_liq_wealth_real fam_LiqAndH_wealth_real fam_wealth_ex_bus_real fam_wealth_ex_bus_ira_real, by(age_cat)
+	collapse (mean) log_fam_wealth_real log_fam_wealth_ex_home_real fam_wealth_real fam_wealth_ex_home_real fam_liq_wealth_real fam_LiqAndH_wealth_real fam_wealth_ex_bus_real fam_wealth_ex_bus_ira_real fam_liq_housing_IRA_real fam_liq_housing_IRA_bus_real, by(age_cat)
 	tsset age_cat
 	* tsline log_*, title("Mean Log Wealth") name("mean_log_wealth", replace)
 
+	lab var fam_liq_wealth_real "Liquid Wealth"
+	lab var fam_LiqAndH_wealth_real "Liquid + Housing"
+	lab var fam_liq_housing_IRA_real "Liquid + Housing + IRA"
+	lab var fam_liq_housing_IRA_bus_real "Liquid + Housing + IRA + Bus"
 	lab var fam_wealth_real "Net Wealth"
-	lab var fam_wealth_ex_home_real "Net Non-Housing Wealth"
-	lab var fam_liq_wealth_real "Net Liquid Wealth"
-	lab var fam_LiqAndH_wealth_real "Net Liquid + Housing Wealth"
+
 	lab var age_cat "Age"
 
-	tsline fam_wealth_real fam_LiqAndH_wealth_real /* fam_wealth_ex_home_real*/  fam_liq_wealth_real fam_wealth_ex_bus_real fam_wealth_ex_bus_ira_real, title("Mean Wealth") name("mean_wealth_by_age", replace) ytitle("Real Wealth (1982 dollars)", margin(0 4 0 0) ) graphregion(color(white))
+	tsline fam_liq_wealth_real fam_LiqAndH_wealth_real fam_liq_housing_IRA_real fam_liq_housing_IRA_bus_real fam_wealth_real /* fam_wealth_ex_bus_real fam_wealth_ex_bus_ira_real */, title("Mean Wealth") name("mean_wealth_by_age", replace) ytitle("Real Wealth (2015 dollars)", margin(0 4 0 0) ) graphregion(color(white)) ylabel( #3 )
 	graph export "$folder\Results\Wealth\mean_wealth_by_age.pdf", as(pdf) replace
 restore
 
 
 preserve
-	collapse (median) log_fam_wealth_real log_fam_wealth_ex_home_real fam_wealth_real fam_wealth_ex_home_real fam_liq_wealth_real fam_LiqAndH_wealth_real fam_wealth_ex_bus_real fam_wealth_ex_bus_ira_real, by(age_cat)
+	collapse (median) log_fam_wealth_real log_fam_wealth_ex_home_real fam_wealth_real fam_wealth_ex_home_real fam_liq_wealth_real fam_LiqAndH_wealth_real fam_liq_housing_IRA_real fam_liq_housing_IRA_bus_real fam_wealth_ex_bus_real fam_wealth_ex_bus_ira_real, by(age_cat)
 	tsset age_cat
 	* tsline log_*, title("Median Log Wealth") name("median_log_wealth", replace)
+
+	lab var fam_liq_wealth_real "Liquid Wealth"
+	lab var fam_LiqAndH_wealth_real "Liquid + Housing"
+	lab var fam_liq_housing_IRA_real "Liquid + Housing + IRA"
+	lab var fam_liq_housing_IRA_bus_real "Liquid + Housing + IRA + Bus"
 	lab var fam_wealth_real "Net Wealth"
-	lab var fam_wealth_ex_home_real "Net Non-Housing Wealth"
-	lab var fam_liq_wealth_real "Net Liquid Wealth"
-	lab var fam_LiqAndH_wealth_real "Net Liquid + Housing Wealth"
+
 	lab var age_cat "Age"
 
-	tsline fam_wealth_real fam_LiqAndH_wealth_real /* fam_wealth_ex_home_real*/  fam_liq_wealth_real fam_wealth_ex_bus_real fam_wealth_ex_bus_ira_real, title("Median Wealth") name("median_wealth_by_age", replace) ytitle("Real Wealth (1982 dollars)", margin(0 4 0 0) ) graphregion(color(white))
+	tsline fam_liq_wealth_real fam_LiqAndH_wealth_real  fam_liq_housing_IRA_real fam_liq_housing_IRA_bus_real fam_wealth_real /* fam_wealth_ex_bus_real fam_wealth_ex_bus_ira_real */, title("Median Wealth") name("median_wealth_by_age", replace) ytitle("Real Wealth (2015 dollars)", margin(0 4 0 0) ) graphregion(color(white)) ylabel( #3 )
 	graph export "$folder\Results\Wealth\median_wealth_by_age.pdf", as(pdf) replace
 restore
 

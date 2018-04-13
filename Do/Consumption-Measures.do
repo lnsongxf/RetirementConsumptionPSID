@@ -141,19 +141,19 @@ drop year _m
 * WARNING: individual index might have different base year from CPI_all
 * Can see base year in xlsx file with CPI data
 * (do not add/subtract real series without accounting for this)
-replace gasolineexpenditure = 100 * gasolineexpenditure / CPI_gasoline
-replace foodexpenditure = 100 * foodexpenditure / CPI_food
-replace foodstamp = 100 * foodstamp / CPI_food
-replace foodathomeexpenditure = 100 * foodathomeexpenditure / CPI_foodathome
+replace gasolineexpenditure         = 100 * gasolineexpenditure / CPI_gasoline
+replace foodexpenditure             = 100 * foodexpenditure / CPI_food
+replace foodstamp                   = 100 * foodstamp / CPI_food
+replace foodathomeexpenditure       = 100 * foodathomeexpenditure / CPI_foodathome
 replace foodawayfromhomeexpenditure = 100 * foodawayfromhomeexpenditure / CPI_foodawayfromhome
-replace fooddeliveredexpenditure = 100 * fooddeliveredexpenditure / CPI_food
-replace transportationexpenditure = 100 * transportationexpenditure / CPI_transportation
-replace transportation_blundell = 100 * transportation_blundell / CPI_transportation
-replace healthcareexpenditure = 100 * healthcareexpenditure / CPI_health
-replace healthinsuranceexpenditure = 100 * healthinsuranceexpenditure / CPI_health
-replace healthservicesexpenditure = 100 * healthservicesexpenditure / CPI_health
-replace clothingexpenditure = 100 * clothingexpenditure / CPI_apparel
-replace recreationexpenditure = 100 * recreationexpenditure / CPI_recreation
+replace fooddeliveredexpenditure    = 100 * fooddeliveredexpenditure / CPI_food
+replace transportationexpenditure   = 100 * transportationexpenditure / CPI_transportation
+replace transportation_blundell     = 100 * transportation_blundell / CPI_transportation
+replace healthcareexpenditure       = 100 * healthcareexpenditure / CPI_health
+replace healthinsuranceexpenditure  = 100 * healthinsuranceexpenditure / CPI_health
+replace healthservicesexpenditure   = 100 * healthservicesexpenditure / CPI_health
+replace clothingexpenditure         = 100 * clothingexpenditure / CPI_apparel
+replace recreationexpenditure       = 100 * recreationexpenditure / CPI_recreation
 
 * Convert to real terms using CPI_all
 foreach var of varlist housingexpenditure mortgageexpenditure rentexpenditure ///
@@ -180,26 +180,32 @@ gen inc_fam_real = 100 * inc_fam / CPI_all
 ** Wealth
 ****************************************************************************************************
 
-egen fam_liq_wealth = rowtotal(bank_account_wealth stock_wealth) // NOTE: Limitation: this is not net
+egen fam_liq_wealth              = rowtotal(bank_account_wealth stock_wealth) // NOTE: Limitation: this is not net
 egen fam_liq_plus_housing_wealth = rowtotal(fam_liq_wealth homeequity other_real_estate_wealth)
-gen fam_wealth_ex_bus = fam_wealth - business_wealth // business_wealth is net
-gen fam_wealth_ex_bus_ira = fam_wealth - business_wealth - IRA_wealth // business_wealth is net
+egen fam_liq_housing_IRA         = rowtotal(fam_liq_wealth homeequity other_real_estate_wealth IRA_wealth)
+egen fam_liq_housing_IRA_bus     = rowtotal(fam_liq_wealth homeequity other_real_estate_wealth IRA_wealth business_wealth)
+gen fam_wealth_ex_bus            = fam_wealth - business_wealth // business_wealth is net
+gen fam_wealth_ex_bus_ira        = fam_wealth - business_wealth - IRA_wealth // business_wealth is net
 
 
 * NOTE: I took out IRA wealth
 * TODO: say that mortgage debt is in housing, and all other debt is in liquid
 
-* Convert to real
-gen fam_wealth_real = 100 * fam_wealth / CPI_all
-gen fam_wealth_ex_home_real = 100 * fam_wealth_ex_home / CPI_all
-gen value_gifts_real = 100 * value_gifts / CPI_all
-gen fam_liq_wealth_real = 100 * fam_liq_wealth / CPI_all
-gen fam_LiqAndH_wealth_real = 100 * fam_liq_plus_housing_wealth / CPI_all // liquid and housing wealth only
-gen fam_wealth_ex_bus_real = 100 * fam_wealth_ex_bus / CPI_all
-gen fam_wealth_ex_bus_ira_real = 100 * fam_wealth_ex_bus_ira / CPI_all
+* Convert to real with base = 2015
+gen fam_wealth_real              = 100 * fam_wealth / CPI_all_base_2015
+gen fam_wealth_ex_home_real      = 100 * fam_wealth_ex_home / CPI_all_base_2015
+gen value_gifts_real             = 100 * value_gifts / CPI_all_base_2015
+gen fam_liq_wealth_real          = 100 * fam_liq_wealth / CPI_all_base_2015
+gen fam_LiqAndH_wealth_real      = 100 * fam_liq_plus_housing_wealth / CPI_all_base_2015 // liquid and housing wealth only
+gen fam_wealth_ex_bus_real       = 100 * fam_wealth_ex_bus / CPI_all_base_2015
+gen fam_wealth_ex_bus_ira_real   = 100 * fam_wealth_ex_bus_ira / CPI_all_base_2015
+gen fam_liq_housing_IRA_real     = 100 * fam_liq_housing_IRA / CPI_all_base_2015
+gen fam_liq_housing_IRA_bus_real = 100 * fam_liq_housing_IRA_bus / CPI_all_base_2015
 
 * TODO: perhaps down the road add expenditure_total* and inc_*
 
+* NOTE: wealth is now in 2015 dollars whereas most other categories are 1982 -- WARNING!!!
+* TODO: convert others to 2015 dollars
 
 ****************************************************************************************************
 ** Equivalence scale

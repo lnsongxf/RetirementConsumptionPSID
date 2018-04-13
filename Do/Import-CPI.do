@@ -1,6 +1,5 @@
 set more off
-* global folder "C:\Users\pedm\Documents\Research\Cormac\RetirementConsumptionPSID"
-global folder "F:\Cormac Project January 18 2018 Backup\RetirementConsumptionPSID"
+global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 
 
 clear
@@ -27,4 +26,22 @@ rename Gasolinealltypes CPI_gasoline
 
 destring *, replace
 
+save "$folder\Data\Intermediate\CPI.dta", replace
+
+* Import CPI all with base = 2015
+clear
+import excel "$folder\Data\Raw\CPI_2015.xls", sheet("Sheet1")  firstrow
+rename Year year
+drop CPI_all_base_1982
+drop ratio
+tempfile newcpi
+save `newcpi', replace
+
+* Merge in CPI all with base = 2015
+use  "$folder\Data\Intermediate\CPI.dta", clear
+merge 1:1 year using `newcpi'
+drop _merge
+* gen ratio = CPI_all_base_2015 / CPI_all
+* tsset year
+* tsline ratio
 save "$folder\Data\Intermediate\CPI.dta", replace
