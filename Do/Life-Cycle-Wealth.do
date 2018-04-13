@@ -17,18 +17,6 @@ global allow_kids_to_leave_hh 1 // When looking for stable households, what shou
 
 * drop if emp_status_head != 1 // only keep employed heads. Question: should I put this so early? ie to split up HH? or later?
 
-
-****************************************************************************************************
-** Drop top 1% wealthiest by 10 year age brackets
-****************************************************************************************************
-* TODO
-
-/*egen age_cat = cut(age), at( 20(10)80 ) // icodes label*/
-
-
-
-/*drop age_cat*/
-
 ****************************************************************************************************
 ** Sample selection
 ****************************************************************************************************
@@ -216,7 +204,7 @@ preserve
 
 	lab var age_cat "Age"
 
-	tsline fam_liq_wealth_real fam_LiqAndH_wealth_real fam_liq_housing_IRA_real fam_liq_housing_IRA_bus_real fam_wealth_real /* fam_wealth_ex_bus_real fam_wealth_ex_bus_ira_real */, title("Mean Wealth (Drop Top 1%)") name("mean_wealth_by_age_drop_top1", replace) ytitle("Real Wealth (2015 dollars)", margin(0 4 0 0) ) graphregion(color(white)) ylabel( #3 )
+	tsline fam_liq_wealth_real fam_LiqAndH_wealth_real fam_liq_housing_IRA_real fam_liq_housing_IRA_bus_real fam_wealth_real , title("Mean Wealth (Drop Top 1%)") name("mean_wealth_by_age_drop_top1", replace) ytitle("Real Wealth (2015 dollars)", margin(0 4 0 0) ) graphregion(color(white)) ylabel( #3 )
 	graph export "$folder\Results\Wealth\mean_wealth_by_age_drop_top1.pdf", as(pdf) replace
 restore
 
@@ -235,7 +223,7 @@ preserve
 
 	lab var age_cat "Age"
 
-	tsline fam_liq_wealth_real fam_LiqAndH_wealth_real fam_liq_housing_IRA_real fam_liq_housing_IRA_bus_real fam_wealth_real /* fam_wealth_ex_bus_real fam_wealth_ex_bus_ira_real */, title("Mean Wealth (Drop Top 5%)") name("mean_wealth_by_age_drop_top5", replace) ytitle("Real Wealth (2015 dollars)", margin(0 4 0 0) ) graphregion(color(white)) ylabel( #3 )
+	tsline fam_liq_wealth_real fam_LiqAndH_wealth_real fam_liq_housing_IRA_real fam_liq_housing_IRA_bus_real fam_wealth_real , title("Mean Wealth (Drop Top 5%)") name("mean_wealth_by_age_drop_top5", replace) ytitle("Real Wealth (2015 dollars)", margin(0 4 0 0) ) graphregion(color(white)) ylabel( #3 )
 	graph export "$folder\Results\Wealth\mean_wealth_by_age_drop_top5.pdf", as(pdf) replace
 restore
 

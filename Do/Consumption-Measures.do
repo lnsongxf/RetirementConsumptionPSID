@@ -155,6 +155,9 @@ replace healthservicesexpenditure   = 100 * healthservicesexpenditure / CPI_heal
 replace clothingexpenditure         = 100 * clothingexpenditure / CPI_apparel
 replace recreationexpenditure       = 100 * recreationexpenditure / CPI_recreation
 
+* Convert to 2015 real dollars
+gen expenditure_exH_real_2015       = 100 * expenditure_blundell_exhous / CPI_all_base_2015
+
 * Convert to real terms using CPI_all
 foreach var of varlist housingexpenditure mortgageexpenditure rentexpenditure ///
 	propertytaxexpenditure homeinsuranceexpenditure utilityexpenditure ///
@@ -174,7 +177,8 @@ foreach var of varlist housingexpenditure mortgageexpenditure rentexpenditure //
 }
 
 * NOTE: inc_fam remains nominal (though up above, expenditure categories are converted to real... not the best naming convention)
-gen inc_fam_real = 100 * inc_fam / CPI_all
+gen inc_fam_real      = 100 * inc_fam / CPI_all
+gen inc_fam_real_2015 = 100 * inc_fam / CPI_all_base_2015
 
 ****************************************************************************************************
 ** Wealth
