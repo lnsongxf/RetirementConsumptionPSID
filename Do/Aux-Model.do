@@ -76,7 +76,7 @@ foreach var of varlist consumption liq_wealth housing_wealth income{
 sureg (`endog_vars' = L.(`endog_vars') age age_sq)
 
 matrix list e(b) // coefs
-mat coefs = e(b)'
+mat coefs = e(b)
 // matrix list e(V) // variance-covariance matrix of the estimators
 // mat list e(Sigma) // sigma hat = covariance matrix of the residuals
 mat sigma = e(Sigma)
