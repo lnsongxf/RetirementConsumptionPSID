@@ -1,5 +1,6 @@
 clear; clc; close all;
-cd 'C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID\Results\Aux_Model_Estimates'
+%cd 'C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID\Results\Aux_Model_Estimates'
+cd '/Users/agneskaa/Documents/RetirementConsumptionPSID/Results/Aux_Model_Estimates'
 
 A = importdata('coefs.txt');
 B = importdata('sigma.txt');
@@ -46,17 +47,17 @@ ids = ids(1:5, :);
 % 
 % X = diag(Xi) repeated m times
 
-%% Simulate
-% n = 10; % obs
-k = 8;   % regressors
-m = 5;   % eqns
+%% Prepare simulation
+[n, k] = size(X_input);  % n: obs k: regressors
+m      = k-3;            % eqns
 index_housing = 1; % index of housing (linear probability model)
 
 % Xi = n x k
 % X_input = ones(n, k) % TODO: from stata
-% X_input = [ [eye(5); eye(5)], zeros(10,2), ones(10,1)]
-
+% X_input = [ [eye(5); eye(5)], zeros(10,2), ones(10,1)];
 X_input = X0;
+
+%% Run once
 
 X_t = X_input;
 age_t = X_input(:, m+1);
@@ -68,7 +69,11 @@ if m == 5
 end
 
 
-Y = BigX * betaa;
+Var_Cov   = B.data;       
+epsilon_t = getCorrelatedSchocks(n, m, Var_Cov);
+epsilon_t = reshape(epsilon_t, n*m,1);
+
+Y = BigX * betaa + epsilon_t;
 
 % BigX = nm x km
 % beta = km x 1
@@ -77,7 +82,7 @@ Y = BigX * betaa;
 Y_transform = reshape(Y, [n, m] );
 
 age_t1 = age_t + 1;
-X_t1 = [Y_transform, age_t1, age_t1.^2, cons]
+X_t1 = [Y_transform, age_t1, age_t1.^2, cons];
 
 % convert housing to binary
 X_t1(:,index_housing) = X_t1(:,index_housing) >= 0.5;
