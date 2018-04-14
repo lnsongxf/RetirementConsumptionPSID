@@ -6,12 +6,14 @@ A = importdata('coefs.txt');
 B = importdata('sigma.txt');
 data = importdata('InitData.csv');
 
+rng('default');
+
 %% Extract coefs and VCV
 
 betaa = A.data';
 coef_varnames  = cat(1, A.textdata(1, 2:end) );
 
-simga = B.data;
+Var_Cov   = B.data;       
 sigma_varnames = cat(1, B.textdata(2:end, 1) );
 
 %% Extract data
@@ -22,8 +24,8 @@ X0 = data.data(:, 2:end);
 %% Select Data
 
 % Lets just use 5 obs for now
-X0 = X0(1:5, :)
-ids = ids(1:5, :);
+% X0 = X0(1:5, :)
+% ids = ids(1:5, :);
 
 %%  Notes
 % output = n x 8 matrix
@@ -61,36 +63,14 @@ index_housing = 1; % index of housing (linear probability model)
 %% Run once
 
 X_t = X_input;
-age_t = X_input(:, m+1);
-cons = X_input(:, end);
-n = size(X0, 1);
+table_input = [ ids, X_t ];
 
-if m == 5
-    BigX = blkdiag(X_t, X_t, X_t, X_t, X_t); % assuming there are 5 eqns
+for t = 1:40
+    X_t1 = simulate_SUR(X_t, n, m, betaa, Var_Cov, index_housing);
+    table_input = [ table_input; ids, X_t1 ];
+    X_t = X_t1;
 end
 
+T = array2table( table_input, 'VariableNames', colnames );
 
-Var_Cov   = B.data;       
-epsilon_t = getCorrelatedSchocks(n, m, Var_Cov);
-epsilon_t = reshape(epsilon_t, n*m,1);
-
-Y = BigX * betaa + epsilon_t;
-
-% BigX = nm x km
-% beta = km x 1
-% Y = nm x 1
-
-Y_transform = reshape(Y, [n, m] );
-
-age_t1 = age_t + 1;
-X_t1 = [Y_transform, age_t1, age_t1.^2, cons];
-
-% convert housing to binary
-X_t1(:,index_housing) = X_t1(:,index_housing) >= 0.5;
-
-% row is a person
-% columns: housing, consumption, etc, age, age2, constant
-
-id = (1:size(X_input, 1))';
-
-array2table( [ids, X_t; ids, X_t1], 'VariableNames', colnames )
+writetable(T, 'Simulated_Data_from_Aux_Model.csv')
