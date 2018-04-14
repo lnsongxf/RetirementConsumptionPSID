@@ -88,11 +88,44 @@ mat2txt, matrix(coefs) saving("$folder/Results/Aux_Model_Estimates/coefs`filenam
 mat2txt, matrix(sigma) saving("$folder/Results/Aux_Model_Estimates/sigma`filename'.txt") replace
 
 gen sample = e(sample)
-by pid, sort: egen min_year = min(wave)
-keep if F.sample == 1 & age <= 30 & wave == min_year // first observation for each indiv is not in the sample b/c of the lag
 
-count
-keep pid `endog_vars' age age_sq
-order pid `endog_vars' age age_sq
-gen cons = 1
-export delimited using "$folder/Results/Aux_Model_Estimates/InitData.csv", replace
+****************************************************************************************************
+** Generate initial data for simulation
+****************************************************************************************************
+
+preserve
+  by pid, sort: egen min_year = min(wave)
+  keep if F.sample == 1 & age <= 30 & wave == min_year // first observation for each indiv is not in the sample b/c of the lag
+
+  count
+  keep pid `endog_vars' age age_sq
+  order pid `endog_vars' age age_sq
+  gen cons = 1
+  export delimited using "$folder/Results/Aux_Model_Estimates/InitData.csv", replace
+restore
+
+****************************************************************************************************
+** Save age patterns
+****************************************************************************************************
+
+preserve
+  keep if F.sample == 1 | sample == 1
+  keep pid `endog_vars' age age_sq
+  order pid `endog_vars' age age_sq
+  gen cons = 1
+
+  collapse (median) housing-log_inc, by(age)
+  tsset age
+  save "$folder/Results/Aux_Model_Estimates/PSID_by_age_median.csv", replace
+restore
+
+preserve
+  keep if F.sample == 1 | sample == 1
+  keep pid `endog_vars' age age_sq
+  order pid `endog_vars' age age_sq
+  gen cons = 1
+
+  collapse (mean) housing-log_inc, by(age)
+  tsset age
+  save "$folder/Results/Aux_Model_Estimates/PSID_by_age_mean.csv", replace
+restore

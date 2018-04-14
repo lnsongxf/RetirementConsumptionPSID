@@ -1,4 +1,4 @@
-function X_t1 = simulate_SUR(X_t, n, m, betaa, Var_Cov, index_housing)
+function X_t1 = simulate_SUR(X_t, n, m, betaa, Var_Cov, index_housing, index_HW)
 
     age_t = X_t(:, m+1);
     cons = X_t(:, end);
@@ -23,7 +23,12 @@ function X_t1 = simulate_SUR(X_t, n, m, betaa, Var_Cov, index_housing)
 
     % convert housing to binary
     X_t1(:,index_housing) = X_t1(:,index_housing) >= 0.5;
-
+    
+    % if you dont own a home, youre not allowed to have housing wealth in
+    % the sim... does this help?
+%     nohousing = X_t1(:, index_housing) == 0;
+%     X_t1(nohousing, index_HW) = 0;
+    
     % each row is a person
     % columns: housing, consumption, etc, age, age2, constant
 end
