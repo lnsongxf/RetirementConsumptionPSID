@@ -14,28 +14,20 @@ import delimited "$folder/Results/Aux_Model_Estimates/Simulated_Data_from_Aux_Mo
 
 xtset pid age
 
-collapse (mean) housing-log_inc, by(age)
-tsset age
 
-* tempfile sim_data
-* save `sim_data', replace
-
-gen source = "aux model"
+local endog_vars log_consumption log_liq_wealth log_housing_wealth log_income housing
 
 ****************************************************************************************************
-** Load PSID data
-****************************************************************************************************
-append using "$folder/Results/Aux_Model_Estimates/PSID_by_age_mean.csv"
-replace source = "PSID" if source == ""
-encode source, gen(s)
-
-****************************************************************************************************
-** Look by age
+** Run regression
 ****************************************************************************************************
 
-xtset s age
+sureg (`endog_vars' = L.(`endog_vars') age age_sq)
 
-foreach var  of varlist housing-log_inc{
-  xtline `var', overlay name("`var'", replace)
+matrix list e(b) // coefs
+mat coefs = e(b)
 
-}
+mat sigma = e(Sigma)
+
+
+mat2txt, matrix(coefs) saving("$folder/Results/Aux_Model_Estimates/coefs_onsimul.txt") replace
+mat2txt, matrix(sigma) saving("$folder/Results/Aux_Model_Estimates/sigma_onsimul.txt") replace
