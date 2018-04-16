@@ -1,7 +1,8 @@
 set more off
 // global folder "C:\Users\pedm\Documents\Research\Cormac\RetirementConsumptionPSID"
+*global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"
 global folder "C:\Users\Person\Documents\GitHub\RetirementConsumptionPSID"
-use "$folder\Data\Intermediate\Basic-Panel.dta", clear
+use "$folder/Data/Intermediate/Basic-Panel.dta", clear
 
 global retirement_definition 0   // 0 is default (last job ended due to "Quit, Resigned, Retire" or "NA")
                                  // 1 is loose (does not ask why last job ended) and 2 is strict (last job ended due to "Quit, Resigned, Retire" only)
@@ -9,10 +10,10 @@ global allow_kids_to_leave_hh 1  // When looking for stable households, what sho
                                  // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
 
 * Sample selection: households with same husband-wife over time
-do "$folder\Do\Sample-Selection.do"
+do "$folder/Do/Sample-Selection.do"
 
 * Look for retirement transitions of the head
-do "$folder\Do\Find-Retirements.do"
+do "$folder/Do/Find-Retirements.do"
 
 ****************************************************************************************************
 ** Look at income based on time since retirement

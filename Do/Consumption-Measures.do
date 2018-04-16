@@ -133,7 +133,7 @@ egen housingservicesexpenditure = rowtotal(rent_imputed homeinsuranceexpenditure
 
 
 gen year = wave - 1 // note that expenditure data is for year prior to interview
-merge m:1 year using "$folder\Data\Intermediate\CPI.dta"
+merge m:1 year using "$folder/Data/Intermediate/CPI.dta"
 drop if _m == 2
 drop year _m
 

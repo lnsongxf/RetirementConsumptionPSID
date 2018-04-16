@@ -8,9 +8,10 @@ set more off
 graph close
 set autotabgraphs on
 
+*global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"
 global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 
-use "$folder\Data\Intermediate\Basic-Panel.dta", clear
+use "$folder/Data/Intermediate/Basic-Panel.dta", clear
 
 * Switches
 global allow_kids_to_leave_hh 1 // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH 
@@ -20,10 +21,10 @@ global collapse_graphs        0 // Do we want to see the graphs where we collaps
 // drop if emp_status_head != 1 // only keep employed heads. Question: should I put this so early? ie to split up HH? or later?
 
 * Sample selection: households with same husband-wife over time
-qui do "$folder\Do\Sample-Selection.do"
+qui do "$folder/Do/Sample-Selection.do"
 
 * Generate aggregate consumption (following Blundell et al)
-qui do "$folder\Do\Consumption-Measures.do"
+qui do "$folder/Do/Consumption-Measures.do"
 
 * These people have misreported something
 drop if housingstatus == 1 & housevalue == 0
@@ -42,7 +43,7 @@ drop if fam_wealth_real - L.fam_wealth_real > 100 * inc_fam_real & fam_wealth !=
 * drop if housingstatus == 8 // neither own nor rent
 
 * Find first home purcahses (two alternative definitions)
-qui do "$folder\Do\Find-First-Home-Purchase.do"
+qui do "$folder/Do/Find-First-Home-Purchase.do"
 
 drop if mortgageexpenditure > 0 & t_homeownership < 0 // these people do not make sense
 

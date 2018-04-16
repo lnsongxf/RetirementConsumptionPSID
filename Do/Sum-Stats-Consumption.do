@@ -1,14 +1,15 @@
 set more off
 * global folder "C:\Users\pedm\Documents\Research\Cormac\RetirementConsumptionPSID"
+*global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"
 global folder "C:\Users\Person\Documents\GitHub\RetirementConsumptionPSID"
 
-use "$folder\Data\Intermediate\Basic-Panel.dta", clear
+use "$folder/Data/Intermediate/Basic-Panel.dta", clear
 
 ****************************************************************************************************
 ** Generate aggregate consumption (following Blundell et al)
 ****************************************************************************************************
 
-do "$folder\Do\Consumption-Measures.do"
+do "$folder/Do/Consumption-Measures.do"
 	
 ****************************************************************************************************
 ** Replicate Transportation Section of Appendix Table 4 in "Estimates of Annual Consumption Expenditures and Its Major Componenets"

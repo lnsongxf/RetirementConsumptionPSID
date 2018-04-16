@@ -6,9 +6,10 @@ set more off
 graph close
 set autotabgraphs on
 
+*global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"
 global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 
-use "$folder\Data\Intermediate\Basic-Panel.dta", clear
+use "$folder/Data/Intermediate/Basic-Panel.dta", clear
 
 * Switches
 global allow_kids_to_leave_hh 1 // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH 
@@ -18,10 +19,10 @@ global collapse_graphs        0 // Do we want to see the graphs where we collaps
 // drop if emp_status_head != 1 // only keep employed heads. Question: should I put this so early? ie to split up HH? or later?
 
 * Sample selection: households with same husband-wife over time
-qui do "$folder\Do\Sample-Selection.do"
+qui do "$folder/Do/Sample-Selection.do"
 
 * Generate aggregate consumption (following Blundell et al)
-qui do "$folder\Do\Consumption-Measures.do"
+qui do "$folder/Do/Consumption-Measures.do"
 
 * TODO: make income /wealth real 
 
@@ -44,7 +45,7 @@ drop if fam_wealth_real - L.fam_wealth_real > 100 * inc_fam_real & fam_wealth !=
 * drop if housingstatus == 8 // neither own nor rent
 
 * Find first home purcahses (two alternative definitions)
-qui do "$folder\Do\Find-First-Home-Purchase.do"
+qui do "$folder/Do/Find-First-Home-Purchase.do"
 
 drop if mortgageexpenditure > 0 & t_homeownership < 0 // these people do not make sense
 
@@ -221,7 +222,7 @@ coefplot, keep(*t_homeown*) xline(0) name("blundell_with_mort", replace)
 coefplot, keep(94.t_homeownership_100_w_mortgage 96.t_homeownership_100_w_mortgage 98.t_homeownership_100_w_mortgage) ///
 	yline(0) name("blundell_with_mort_2", replace) vertical rename(94.t_homeownership_100_w_mortgage = "6 years before" 96.t_homeownership_100_w_mortgage = "4 years before" 98.t_homeownership_100_w_mortgage = "2 years before") ///
 	ytitle("Deviation in Log Nondurable Consumption", margin(0 5 0 0) ) graphregion(color(white))
-graph export "$folder\Results\ConsumptionBeforePurchase\Nondurable_consumption_before_purchase.pdf", as(pdf) replace
+graph export "$folder/Results/ConsumptionBeforePurchase/Nondurable_consumption_before_purchase.pdf", as(pdf) replace
 
 
 xtreg log_expenditure_total_70 i.age ib100.t_homeownership_100_w_mortgage log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe vce(robust)
@@ -230,7 +231,7 @@ coefplot, keep(*t_homeown*) xline(0) name("total_with_mort", replace)
 coefplot, keep(94.t_homeownership_100_w_mortgage 96.t_homeownership_100_w_mortgage 98.t_homeownership_100_w_mortgage) ///
 	yline(0) name("total_with_mort_2", replace) vertical rename(94.t_homeownership_100_w_mortgage = "6 years before" 96.t_homeownership_100_w_mortgage = "4 years before" 98.t_homeownership_100_w_mortgage = "2 years before") ///
 	ytitle("Deviation in Log Consumption", margin(0 5 0 0) ) graphregion(color(white))
-graph export "$folder\Results\ConsumptionBeforePurchase\Total_consumption_before_purchase.pdf", as(pdf) replace
+graph export "$folder/Results/ConsumptionBeforePurchase/Total_consumption_before_purchase.pdf", as(pdf) replace
 
 
 

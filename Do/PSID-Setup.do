@@ -1,6 +1,7 @@
 set more off
 clear all
 
+*global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"
 global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 
 ****************************************************************************************************
@@ -8,8 +9,8 @@ global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 ****************************************************************************************************
 
 cap ssc install psidtools
-cap mkdir "$folder\Data\Raw\PSID_Install"
-psid install using "$folder\Data\Raw\PSID_Download", to("$folder\Data\Raw\PSID_Install")
+cap mkdir "$folder/Data/Raw/PSID_Install"
+psid install using "$folder/Data/Raw/PSID_Download", to("$folder/Data/Raw/PSID_Install")
 
 ****************************************************************************************************
 ** Select variables and construct panel using year-level files
@@ -906,7 +907,7 @@ psid use
 
 
 	// Pat Note: Alt Q to wrap text
-    using "$folder\Data\Raw\PSID_Install", clear design(1)
+    using "$folder/Data/Raw/PSID_Install", clear design(1)
     dofile(PSID-Setup-Replication, replace);
 
 label define rel2head
@@ -1234,7 +1235,7 @@ preserve
 	mean *expenditure [pweight = family_weight] if wave == 2005
 restore
 
-save "$folder\Data\Intermediate\Basic-Panel.dta", replace
+save "$folder/Data/Intermediate/Basic-Panel.dta", replace
 
 * TODO: add in code from psid_sample.do
 

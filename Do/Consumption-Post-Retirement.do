@@ -2,8 +2,9 @@ set more off
 graph close
 set autotabgraphs on
 
+*global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"
 global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
-use "$folder\Data\Intermediate\Basic-Panel.dta", clear
+use "$folder/Data/Intermediate/Basic-Panel.dta", clear
 
 * Switches
 global quintiles_definition 2    // Defines quintiles. Can be 1, 2, 3, or 4. My preference is 4. I think the next best option is 2
@@ -15,14 +16,14 @@ global allow_kids_to_leave_hh 1  // When looking for stable households, what sho
                                  // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
 
 * Sample selection: households with same husband-wife over time
-do "$folder\Do\Sample-Selection.do"
+do "$folder/Do/Sample-Selection.do"
 
 * Look for retirement transitions of the head
-do "$folder\Do\Find-Retirements.do"
+do "$folder/Do/Find-Retirements.do"
 * NOTE: could also define retirement based on whether you worked < 500 hours that year. Might be worth exploring
 
 * Generate aggregate consumption (following Blundell et al)
-do "$folder\Do\Consumption-Measures.do"
+do "$folder/Do/Consumption-Measures.do"
 
 ****************************************************************************************************
 ** (1) Quintiles based on FAMILY social security income in retirement
@@ -221,24 +222,24 @@ if $graphs_by_quintile == 1{
 	lab var workexpenditure "Work Related Expenditure" // excludes clothing
 	
 	xtline workexpenditure if (ret_duration != 10 | quintile != 3), byopts(title("Work Related Expenditure")) name("work_expenditure", replace) ylabel(#3)
-	graph export "$folder\Results\ConsumptionPostRetirement\work.pdf", as(pdf) replace
+	graph export "$folder/Results/ConsumptionPostRetirement/work.pdf", as(pdf) replace
 
 	xtline expenditure_blundell, byopts(title("Blundell Expenditure")) name("expenditure_blundell", replace) ylabel(#3)
 	
 	xtline expenditure_blundell_eq, byopts(title("Nondurable Consumption") rescale) name("expenditure_blundell_eq", replace) ylabel(#3)
-	graph export "$folder\Results\ConsumptionPostRetirement\expenditure_blundell_eq.pdf", as(pdf) replace
+	graph export "$folder/Results/ConsumptionPostRetirement/expenditure_blundell_eq.pdf", as(pdf) replace
 	
 	xtline expenditure_blundell_exhous, byopts(title("Blundell Expenditure Ex Housing")) name("expenditure_blundell_exhous", replace) ylabel(#3)
 	xtline expenditure_blundell_exhealth,  byopts(title("Blundell Expenditure Ex Health")) name("expenditure_blundell_exhealth", replace) ylabel(#3)
 
 	xtline foodawayfromhomeexpenditure foodathomeexpenditure, byopts(title("Food")) name("food", replace) ylabel(#3)
-	graph export "$folder\Results\ConsumptionPostRetirement\food.pdf", as(pdf) replace
+	graph export "$folder/Results/ConsumptionPostRetirement/food.pdf", as(pdf) replace
 	
 	xtline taxiexpenditure, byopts(title("Taxis")) name("taxis", replace) ylabel(#3)
 	xtline recreationexpenditure clothingexpenditure tripsexpenditure, byopts(title("New Consumption Measures (Post 2005)") rescale ) name("newmeasures", replace) ylabel(#3)
 	
 	xtline tripsexpenditure, byopts( title("Vacations/Trips Expenditure") rescale ) name("trips", replace) ylabel(#3)
-	graph export "$folder\Results\ConsumptionPostRetirement\trips.pdf", as(pdf) replace
+	graph export "$folder/Results/ConsumptionPostRetirement/trips.pdf", as(pdf) replace
 	
 	xtline childcareexpenditure, byopts(title("Child care expenditure")) name("ccare", replace) ylabel(#3)
 

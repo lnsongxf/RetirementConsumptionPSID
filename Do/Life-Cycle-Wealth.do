@@ -7,9 +7,10 @@ set more off
 graph close
 set autotabgraphs on
 
+*global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"
 global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 
-use "$folder\Data\Intermediate\Basic-Panel.dta", clear
+use "$folder/Data/Intermediate/Basic-Panel.dta", clear
 
 * Switches
 global allow_kids_to_leave_hh 1 // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH
@@ -23,10 +24,10 @@ global allow_kids_to_leave_hh 1 // When looking for stable households, what shou
 
 
 * Sample selection: households with same husband-wife over time
-qui do "$folder\Do\Sample-Selection.do"
+qui do "$folder/Do/Sample-Selection.do"
 
 * Generate aggregate consumption (following Blundell et al)
-qui do "$folder\Do\Consumption-Measures.do"
+qui do "$folder/Do/Consumption-Measures.do"
 
 * TODO: make income / wealth real
 
@@ -49,7 +50,7 @@ drop if fam_wealth_real - L.fam_wealth_real > 100 * inc_fam_real & fam_wealth !=
 * drop if housingstatus == 8 // neither own nor rent
 
 * Find first home purcahses (two alternative definitions)
-qui do "$folder\Do\Find-First-Home-Purchase.do"
+qui do "$folder/Do/Find-First-Home-Purchase.do"
 
 ****************************************************************************************************
 ** Gifts / Inheritance
@@ -139,7 +140,7 @@ preserve
 	lab var age_cat "Age"
 
 	tsline fam_liq_wealth_real fam_LiqAndH_wealth_real fam_liq_housing_IRA_real fam_liq_housing_IRA_bus_real fam_wealth_real /* fam_wealth_ex_bus_real fam_wealth_ex_bus_ira_real */, title("Mean Wealth") name("mean_wealth_by_age", replace) ytitle("Real Wealth (2015 dollars)", margin(0 4 0 0) ) graphregion(color(white)) ylabel( #3 )
-	graph export "$folder\Results\Wealth\mean_wealth_by_age.pdf", as(pdf) replace
+	graph export "$folder/Results/Wealth/mean_wealth_by_age.pdf", as(pdf) replace
 restore
 
 * Median
@@ -156,7 +157,7 @@ preserve
 	lab var age_cat "Age"
 
 	tsline fam_liq_wealth_real fam_LiqAndH_wealth_real  fam_liq_housing_IRA_real fam_liq_housing_IRA_bus_real fam_wealth_real /* fam_wealth_ex_bus_real fam_wealth_ex_bus_ira_real */, title("Median Wealth") name("median_wealth_by_age", replace) ytitle("Real Wealth (2015 dollars)", margin(0 4 0 0) ) graphregion(color(white)) ylabel( #3 )
-	graph export "$folder\Results\Wealth\median_wealth_by_age.pdf", as(pdf) replace
+	graph export "$folder/Results/Wealth/median_wealth_by_age.pdf", as(pdf) replace
 restore
 
 ****************************************************************************************************
@@ -205,7 +206,7 @@ preserve
 	lab var age_cat "Age"
 
 	tsline fam_liq_wealth_real fam_LiqAndH_wealth_real fam_liq_housing_IRA_real fam_liq_housing_IRA_bus_real fam_wealth_real , title("Mean Wealth (Drop Top 1%)") name("mean_wealth_by_age_drop_top1", replace) ytitle("Real Wealth (2015 dollars)", margin(0 4 0 0) ) graphregion(color(white)) ylabel( #3 )
-	graph export "$folder\Results\Wealth\mean_wealth_by_age_drop_top1.pdf", as(pdf) replace
+	graph export "$folder/Results/Wealth/mean_wealth_by_age_drop_top1.pdf", as(pdf) replace
 restore
 
 * Plot while excluding those in top 5% in any wave
@@ -224,7 +225,7 @@ preserve
 	lab var age_cat "Age"
 
 	tsline fam_liq_wealth_real fam_LiqAndH_wealth_real fam_liq_housing_IRA_real fam_liq_housing_IRA_bus_real fam_wealth_real , title("Mean Wealth (Drop Top 5%)") name("mean_wealth_by_age_drop_top5", replace) ytitle("Real Wealth (2015 dollars)", margin(0 4 0 0) ) graphregion(color(white)) ylabel( #3 )
-	graph export "$folder\Results\Wealth\mean_wealth_by_age_drop_top5.pdf", as(pdf) replace
+	graph export "$folder/Results/Wealth/mean_wealth_by_age_drop_top5.pdf", as(pdf) replace
 restore
 
 sdfsdf
@@ -262,7 +263,7 @@ preserve
 	lab var fam_liq_wealth_real "Net Liquid Wealth" // TODO: check that it's actually liquid
 	lab var t_homeownership "Duration of Homeownership"
 	tsline fam_wealth_real /* fam_wealth_ex_home_real*/  fam_liq_wealth_real, title("Median Wealth") name("median_wealth_export", replace) ytitle("Real Wealth (1982 dollars)", margin(0 4 0 0) ) graphregion(color(white)) recast(connected)
- 	graph export "$folder\Results\Wealth\median_wealth_by_housing_duration.pdf", as(pdf) replace
+ 	graph export "$folder/Results/Wealth/median_wealth_by_housing_duration.pdf", as(pdf) replace
 restore
 
 
