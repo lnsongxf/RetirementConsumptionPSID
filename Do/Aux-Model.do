@@ -17,6 +17,10 @@ global allow_kids_to_leave_hh 1 // When looking for stable households, what shou
 
 * cap ssc install mat2txt
 
+global aux_model_in_logs 1 // 1 = logs, 0 = levels
+
+global drop_top_x 0 // can be 0, 1, or 5
+
 ****************************************************************************************************
 ** Sample selection
 ****************************************************************************************************
@@ -61,13 +65,72 @@ gen liq_wealth = fam_liq_wealth_real // 2015 dollars
 gen housing_wealth = fam_LiqAndH_wealth_real - fam_liq_wealth_real // 2015 dollars
 gen housing = housingstatus == 1 // renting or living with parents are considered as the same
 gen income = inc_fam_real_2015 // TODO: will need to subtract out taxes using NBER TAXSIM
+gen illiq_wealth = fam_wealth_real - fam_liq_wealth_real // NOTE: we do not use this in the regressions, just use it for our alternative measure of WHtM
 
-local level_vars consumption liq_wealth housing_wealth income
-local endog_vars housing
-foreach var of varlist `level_vars' {
-  gen log_`var' = log(`var')
-  replace log_`var' = log(1) if `var' <= 0 & `var' != .
-  local endog_vars `endog_vars' log_`var'
+if $aux_model_in_logs == 1{
+  * Run the model in logs
+  local level_vars consumption liq_wealth housing_wealth income
+  local endog_vars housing
+  foreach var of varlist `level_vars' {
+    gen log_`var' = log(`var')
+    replace log_`var' = log(1) if `var' <= 0 & `var' != .
+    local endog_vars `endog_vars' log_`var'
+  }
+}
+else if $aux_model_in_logs == 0{
+  * Run the model in levels
+  local level_vars
+  local endog_vars housing consumption liq_wealth housing_wealth income
+}
+
+
+****************************************************************************************************
+** Simple means and medians by age EXCLUDING TOP x%
+****************************************************************************************************
+* TODO: definie this based on fam_wealth_real or Liquid + Housing wealth?
+
+if $drop_top_x > 0{
+  gen NetWealth = liq_wealth + housing_wealth
+
+  * local sort_var fam_wealth_real
+  local sort_var NetWealth
+
+  * Find top x% by age
+  by age, sort: egen p95 = pctile(`sort_var'), p(95)
+  by age, sort: egen p99 = pctile(`sort_var'), p(99)
+  * TODO: try this with a dif measure of wealth ?
+
+  * Plot the 95th and 99th percentiles
+  preserve
+  	keep age p95 p99
+  	duplicates drop
+  	sort age
+  	list
+  	tsset age
+  	tsline p95 p99
+  restore
+
+  * Flag observations in the top x%
+  gen top_95_ = `sort_var' >= p95 & `sort_var' != .
+  gen top_99_ = `sort_var' >= p99 & `sort_var' != .
+
+  * Flag HHs with any observation in the top x%
+  by pid, sort: egen top_95 = max(top_95_)
+  by pid, sort: egen top_99 = max(top_99_)
+
+  tab top_95
+  tab top_99
+
+  * Plot while excluding those in top 1% in any wave
+  if $drop_top_x == 1 {
+    drop if top_99 == 1
+  }
+  if $drop_top_x == 5 {
+    drop if top_95 == 1
+  }
+
+  sort pid wave
+
 }
 
 ****************************************************************************************************
@@ -131,5 +194,28 @@ preserve
   save "$folder/Results/Aux_Model_Estimates/PSID_by_age_mean.csv", replace
 restore
 
-keep if F.sample == 1 | sample == 1
-collapse (mean) housing consumption liq_wealth housing_wealth income log_housing_wealth, by(age)
+****************************************************************************************************
+** Look at wealthy hand to mouth
+****************************************************************************************************
+
+
+preserve
+  gen HtM = liq_wealth <= (income / 24)
+  gen WHtM = HtM & housing_wealth > 0
+  gen PHtM = HtM & housing_wealth == 0
+  collapse (mean) *HtM, by(age)
+  tsset age
+  tsline *HtM,  title("Hand to Mouth Households") subtitle("(using only liquid & housing wealth)") name("WHTM1", replace)
+restore
+
+
+
+
+preserve
+  gen HtM = liq_wealth <= (income / 24)
+  gen WHtM = HtM & illiq_wealth > 0
+  gen PHtM = HtM & illiq_wealth == 0
+  collapse (mean) *HtM, by(age)
+  tsset age
+  tsline *HtM, title("Hand to Mouth Households") subtitle("(using liquid & illiquid wealth)") name("WHTM2", replace)
+restore

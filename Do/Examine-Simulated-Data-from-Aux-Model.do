@@ -4,11 +4,14 @@ set more off
 graph close
 set autotabgraphs on
 
-*global folder "C:/Users/pedm/Documents/GitHub/RetirementConsumptionPSID"
-global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"
+global folder "C:/Users/pedm/Documents/GitHub/RetirementConsumptionPSID"
+/*global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"*/
 
 local sumstat "mean" // can be median or mean
 * local sumstat "median"
+
+global aux_model_in_logs 1 // 1 = logs, 0 = levels
+
 
 ****************************************************************************************************
 ** Load sim data
@@ -18,14 +21,36 @@ import delimited "$folder/Results/Aux_Model_Estimates/Simulated_Data_from_Aux_Mo
 xtset pid age
 
 * Generate variables in levels
-local level_vars
-foreach var of varlist log* {
-  local new_var = substr("`var'", 5, .)
-  gen `new_var' = exp(`var')
-  local level_vars `level_vars' `new_var'
+if $aux_model_in_logs == 1{
+  local level_vars
+  foreach var of varlist log* {
+    local new_var = substr("`var'", 5, .)
+    gen `new_var' = exp(`var')
+    local level_vars `level_vars' `new_var'
+  }
+
+  local log_vars housing-log_inc
+}
+else if $aux_model_in_logs == 0 {
+  local level_vars housing-income
+  local log_vars
 }
 
-collapse (`sumstat') housing-log_inc `level_vars', by(age)
+
+
+preserve
+  gen HtM = liq_wealth <= (income / 24)
+  gen WHtM = HtM & housing_wealth > 0
+  gen HtM_homeowners = HtM & housing > 0
+  gen PHtM = HtM & housing_wealth == 0
+  collapse (mean) *HtM*, by(age)
+  tsset age
+  tsline *HtM*,  title("Hand to Mouth Households") subtitle("in the aux model") name("WHTM1", replace)
+restore
+
+
+
+collapse (`sumstat') `log_vars' `level_vars', by(age)
 tsset age
 
 * tempfile sim_data
@@ -46,10 +71,12 @@ encode source, gen(s)
 
 xtset s age
 
-foreach var  of varlist housing-log_inc{
-  xtline `var', overlay name("`sumstat'_`var'", replace) graphregion(color(white)) ylabel( #3 ) title("`sumstat' `var'")
-  graph export "$folder\Results\AuxModel\plot_`sumstat'_`var'.pdf", as(pdf) replace
-  di "$folder\Results\AuxModel\plot_`sumstat'_`var'
+if $aux_model_in_logs == 1{
+  foreach var  of varlist housing-log_inc{
+    xtline `var', overlay name("`sumstat'_`var'", replace) graphregion(color(white)) ylabel( #3 ) title("`sumstat' `var'")
+    graph export "$folder\Results\AuxModel\plot_`sumstat'_`var'.pdf", as(pdf) replace
+    di "$folder\Results\AuxModel\plot_`sumstat'_`var'
+  }
 }
 
 foreach var  of varlist `level_vars' {
