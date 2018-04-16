@@ -62,8 +62,9 @@ gen housing_wealth = fam_LiqAndH_wealth_real - fam_liq_wealth_real // 2015 dolla
 gen housing = housingstatus == 1 // renting or living with parents are considered as the same
 gen income = inc_fam_real_2015 // TODO: will need to subtract out taxes using NBER TAXSIM
 
+local level_vars consumption liq_wealth housing_wealth income
 local endog_vars housing
-foreach var of varlist consumption liq_wealth housing_wealth income{
+foreach var of varlist `level_vars' {
   gen log_`var' = log(`var')
   replace log_`var' = log(1) if `var' <= 0 & `var' != .
   local endog_vars `endog_vars' log_`var'
@@ -110,22 +111,25 @@ restore
 
 preserve
   keep if F.sample == 1 | sample == 1
-  keep pid `endog_vars' age age_sq
-  order pid `endog_vars' age age_sq
+  keep pid `endog_vars' `level_vars' age age_sq
+  order pid `endog_vars' `level_vars' age age_sq
   gen cons = 1
 
-  collapse (median) housing-log_inc, by(age)
+  collapse (median) `endog_vars' `level_vars', by(age)
   tsset age
   save "$folder/Results/Aux_Model_Estimates/PSID_by_age_median.csv", replace
 restore
 
 preserve
   keep if F.sample == 1 | sample == 1
-  keep pid `endog_vars' age age_sq
-  order pid `endog_vars' age age_sq
+  keep pid `endog_vars' `level_vars' age age_sq
+  order pid `endog_vars' `level_vars' age age_sq
   gen cons = 1
 
-  collapse (mean) housing-log_inc, by(age)
+  collapse (mean) `endog_vars' `level_vars', by(age)
   tsset age
   save "$folder/Results/Aux_Model_Estimates/PSID_by_age_mean.csv", replace
 restore
+
+keep if F.sample == 1 | sample == 1
+collapse (mean) housing consumption liq_wealth housing_wealth income log_housing_wealth, by(age)
