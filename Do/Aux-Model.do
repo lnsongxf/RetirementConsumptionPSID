@@ -66,6 +66,7 @@ gen housing_wealth = fam_LiqAndH_wealth_real - fam_liq_wealth_real // 2015 dolla
 gen housing = housingstatus == 1 // renting or living with parents are considered as the same
 gen income = inc_fam_real_2015 // TODO: will need to subtract out taxes using NBER TAXSIM
 gen illiq_wealth = fam_wealth_real - fam_liq_wealth_real // NOTE: we do not use this in the regressions, just use it for our alternative measure of WHtM
+gen hand_to_mouth = liq_wealth <= (income / 24)
 
 if $aux_model_in_logs == 1{
   * Run the model in logs
@@ -137,7 +138,10 @@ if $drop_top_x > 0{
 ** Run regression
 ****************************************************************************************************
 
-sureg (`endog_vars' = L.(`endog_vars') age age_sq)
+local control_vars age age_sq
+* local control_vars hand_to_mouth age age_sq
+
+sureg (`endog_vars' = L.(`endog_vars') `control_vars')
 
 matrix list e(b) // coefs
 mat coefs = e(b)
@@ -162,8 +166,8 @@ preserve
   keep if F.sample == 1 & age <= 30 & wave == min_year // first observation for each indiv is not in the sample b/c of the lag
 
   count
-  keep pid `endog_vars' age age_sq
-  order pid `endog_vars' age age_sq
+  keep pid `endog_vars' `control_vars'
+  order pid `endog_vars' `control_vars'
   gen cons = 1
   export delimited using "$folder/Results/Aux_Model_Estimates/InitData.csv", replace
 restore
@@ -174,8 +178,8 @@ restore
 
 preserve
   keep if F.sample == 1 | sample == 1
-  keep pid `endog_vars' `level_vars' age age_sq
-  order pid `endog_vars' `level_vars' age age_sq
+  keep pid `endog_vars' `level_vars' `control_vars'
+  order pid `endog_vars' `level_vars' `control_vars'
   gen cons = 1
 
   collapse (median) `endog_vars' `level_vars', by(age)
@@ -185,8 +189,8 @@ restore
 
 preserve
   keep if F.sample == 1 | sample == 1
-  keep pid `endog_vars' `level_vars' age age_sq
-  order pid `endog_vars' `level_vars' age age_sq
+  keep pid `endog_vars' `level_vars' `control_vars'
+  order pid `endog_vars' `level_vars' `control_vars'
   gen cons = 1
 
   collapse (mean) `endog_vars' `level_vars', by(age)

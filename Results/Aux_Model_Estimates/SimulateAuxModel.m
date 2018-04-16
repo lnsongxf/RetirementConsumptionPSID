@@ -53,9 +53,11 @@ X0 = data.data(:, 2:end);
 X_input = X0;
 
 [n, k] = size(X_input);  % n: obs k: regressors
-m      = k-3;            % eqns
+m      = 5; % k-3;            % eqns
 index_housing = 1; % index of housing (linear probability model)
 index_HW = 4;
+% index_age = m+1;
+index_age = find( strcmp(colnames, 'age'), 1) - 1;
 
 % Xi = n x k
 % X_input = ones(n, k) % TODO: from stata
@@ -68,7 +70,7 @@ table_input = [ ids, X_t ];
 
 for t = 1:40
     t
-    X_t1 = simulate_SUR(X_t, n, m, betaa, Var_Cov, index_housing, index_HW);
+    X_t1 = simulate_SUR(X_t, n, m, betaa, Var_Cov, index_housing, index_HW, index_age);
     table_input = [ table_input; ids, X_t1 ];
     X_t = X_t1;
 end
