@@ -4,7 +4,8 @@ set more off
 graph close
 set autotabgraphs on
 
-global folder "C:/Users/pedm/Documents/GitHub/RetirementConsumptionPSID"
+*global folder "C:/Users/pedm/Documents/GitHub/RetirementConsumptionPSID"
+global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"
 
 local sumstat "mean" // can be median or mean
 * local sumstat "median"
