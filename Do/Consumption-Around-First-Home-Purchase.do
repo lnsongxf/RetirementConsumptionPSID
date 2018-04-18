@@ -1,5 +1,5 @@
 ****************************************************************************************************
-** Simple regressions on consumption before/after first home purchase 
+** Simple regressions on consumption before/after first home purchase
 ****************************************************************************************************
 
 set more off
@@ -12,7 +12,7 @@ global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 use "$folder/Data/Intermediate/Basic-Panel.dta", clear
 
 * Switches
-global allow_kids_to_leave_hh 1 // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH 
+global allow_kids_to_leave_hh 1 // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH
                                 // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
 global collapse_graphs        0 // Do we want to see the graphs where we collapse by t_homeownership?
 
@@ -24,7 +24,7 @@ qui do "$folder/Do/Sample-Selection.do"
 * Generate aggregate consumption (following Blundell et al)
 qui do "$folder/Do/Consumption-Measures.do"
 
-* TODO: make income /wealth real 
+* TODO: make income /wealth real
 
 * Todo: try before or after sample selection
 
@@ -33,7 +33,7 @@ drop if housingstatus == 1 & housevalue == 0
 drop if housingstatus == 1 & housevalue < 10000
 
 * These people have a crazy change in wealth
-* TODO: what do Aguiar and Hurst do 
+* TODO: what do Aguiar and Hurst do
 sort pid wave
 gen change_wealth = (fam_wealth_real - L.fam_wealth_real) / L.fam_wealth_real
 drop if change_w > 100 & change_w != . & L.fam_wealth_real > 10000
@@ -96,16 +96,16 @@ local reg_controls /*i.age_cat d_year* */ i.wave `family_controls'
 * Perhaps drop outliers? Extreme consumption values? Top 5%?
 xtreg log_expenditure_hurst ib100.t_homeownership_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe
 
-xtreg log_expenditure_hurst ib100.t_homeown_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe 
+xtreg log_expenditure_hurst ib100.t_homeown_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe
 
 
 /*
 * This looks good!! Median consumption falls at t=-2. But no fixed effect
 * Though the fixed effect might be important! I find a similar drop when I use reg without the FE
-qreg log_expenditure_hurst ib100.t_homeownership_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave 
+qreg log_expenditure_hurst ib100.t_homeownership_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave
 
 char t_homeownership_100[omit] 100
-xi i.t_homeownership_100 i.married_dummy i.fsize_topcode i.children_topcode 
+xi i.t_homeownership_100 i.married_dummy i.fsize_topcode i.children_topcode
 qregpd log_expenditure_hurst log_inc_fam_real _I*, id(pid) fix(wave) q(50)
 * WOOHOO! Results are good
 * Though why no standard errors for the homeownership coefs?
@@ -133,7 +133,7 @@ tab age if expenditure_hurst > inc_fam_real & t_homeownership != .
 // drop if expenditure_hurst >= inc_fam_real // & t_homeownership != .
 
 xtreg log_expenditure_hurst ib100.t_homeownership_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe
-xtreg log_expenditure_hurst ib100.t_homeown_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe 
+xtreg log_expenditure_hurst ib100.t_homeown_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe
 
 
 
@@ -153,11 +153,11 @@ keep if age <= 40
 * These results make sense! You buy WAY more furnishings in the year you buy your house obviously
 /*
 xtreg log_furnishingsexpenditure age age_2 ib100.t_homeownership_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe
-xtreg log_furnishingsexpenditure age age_2 ib100.t_homeown_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe 
+xtreg log_furnishingsexpenditure age age_2 ib100.t_homeown_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe
 */
 
-* Looks pretty good!!! 
-* Blundell expenditure = AguiarHurst expenditure + healthinsuranceexpenditure + healthservicesexpenditure  
+* Looks pretty good!!!
+* Blundell expenditure = AguiarHurst expenditure + healthinsuranceexpenditure + healthservicesexpenditure
 * + educationexpenditure - fooddeliveredexpenditure - propertytaxexpenditure
 * Though I suppose education is kinda a durable good
 * Results are not significant but still broadly in line with our model
@@ -165,7 +165,7 @@ xtreg log_furnishingsexpenditure age age_2 ib100.t_homeown_100 log_inc_fam_real 
 xtreg log_expenditure_blundell age age_2 ib100.t_homeownership_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe vce(robust)
 coefplot, keep(*t_homeown*) xline(0) name("blundell_homeownership_robust", replace)
 
-xtreg log_expenditure_blundell age age_2 ib100.t_homeown_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe 
+xtreg log_expenditure_blundell age age_2 ib100.t_homeown_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe
 coefplot, keep(*t_homeown*) xline(0) name("blundell", replace)
 
 * exclude education, health, child care
@@ -173,13 +173,13 @@ coefplot, keep(*t_homeown*) xline(0) name("blundell", replace)
 gen log_expenditure_blundell_ex3 = log(expenditure_blundell_ex3)
 xtreg log_expenditure_blundell_ex3 age age_2 ib100.t_homeownership_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe
 coefplot, keep(*t_homeown*) xline(0) name("blundell_homeownership_ex3", replace)
-xtreg log_expenditure_blundell_ex3 age age_2 ib100.t_homeown_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe 
+xtreg log_expenditure_blundell_ex3 age age_2 ib100.t_homeown_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe
 
 * exclude edu only
 gen log_expenditure_blundell_exedu = log(expenditure_blundell_exedu)
 xtreg log_expenditure_blundell_exedu age age_2 ib100.t_homeownership_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe
 coefplot, keep(*t_homeown*) xline(0) name("blundell_homeownership_ex_edu", replace)
-xtreg log_expenditure_blundell_exedu age age_2 ib100.t_homeown_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe 
+xtreg log_expenditure_blundell_exedu age age_2 ib100.t_homeown_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe
 
 * interact with income at time of home purchase
 * results look good!
@@ -208,13 +208,16 @@ gen LTV = (mortgage1 + mortgage2) / housevalue if t_homeownership == 0
 // gen ignore_t0 = (LTV == 0 | LTV < 0.1 | mortgage1 == 0 ) & t_homeownership == 0
 gen ignore_t0 = (LTV == 0 | LTV < 0.7 | mortgage1 == 0 | LTV > 1) & t_homeownership == 0
 
-by pid, sort: egen ignore = max(ignore_t0) 
+by pid, sort: egen ignore = max(ignore_t0)
 gen t_homeownership_100_w_mortgage = t_homeownership_100 * (ignore != 1)
 
 tab t_homeownership_100 ignore
 tab t_homeownership_100_w_mortgage ignore
 
-** Panel regressions 
+* TODO: look at this without all the controls
+/*reg log_expenditure_blundell ib100.t_homeownership_100_w_mortgage log_inc_fam_real /*  i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe vce(robust) */*/
+
+** Panel regressions
 * Significant drop at t = -2 compared to -4. But for some reason -6 and -8 are a bit low
 xtreg log_expenditure_blundell i.age ib100.t_homeownership_100_w_mortgage log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe vce(robust)
 coefplot, keep(*t_homeown*) xline(0) name("blundell_with_mort", replace)
@@ -301,5 +304,4 @@ gen log_expenditure_hurst_trim = log(expenditure_hurst_trim)
 
 xtreg log_expenditure_hurst_trim ib100.t_homeownership_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe
 
-xtreg log_expenditure_hurst_trim ib100.t_homeown_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe 
-
+xtreg log_expenditure_hurst_trim ib100.t_homeown_100 log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe

@@ -134,14 +134,48 @@ if $drop_top_x > 0{
 
 }
 
-****************************************************************************************************
-** Run regression
-****************************************************************************************************
 
 local control_vars age age_sq
 * local control_vars hand_to_mouth age age_sq
 
-sureg (`endog_vars' = L.(`endog_vars') `control_vars')
+****************************************************************************************************
+** Consumption before purchase
+****************************************************************************************************
+
+* Shift t_homeownership so that all values are positive (needed for i. command)
+gen t_homeownership_100 = t_homeownership + 100
+replace t_homeownership_100 = 92 if t_homeownership_100 < 92
+replace t_homeownership_100 = 1000 if t_homeownership == . // | t_homeownership_100 >= 102
+
+gen LTV = (mortgage1 + mortgage2) / housevalue if t_homeownership == 0
+// gen ignore_t0 = (LTV == 0 | LTV < 0.1 | mortgage1 == 0 ) & t_homeownership == 0
+/*gen ignore_t0 = (LTV == 0 | LTV < 0.7 | mortgage1 == 0 | LTV > 1) & t_homeownership == 0*/
+gen ignore_t0 = (LTV == 0 | LTV < 0.1 | mortgage1 == 0 ) & t_homeownership == 0
+by pid, sort: egen ignore = max(ignore_t0)
+gen t_homeownership_100_w_mortgage = t_homeownership_100 * (ignore != 1)
+
+
+
+
+* TODO: add dummy if they have a mortgage when they buy home
+reg log_consumption ib100.t_homeownership_100_w_mortgage /* L.(`endog_vars') */ `control_vars'
+/* log_inc_fam_real i.married_dummy i.fsize_topcode i.children_topcode i.wave, fe vce(robust) */
+
+by pid, sort: egen min_t_homeownership_100 = min(t_homeownership_100)
+keep if min_t_homeownership_100 <= 94
+collapse (median) log_consumption log_liq_wealth log_housing_wealth log_income consumption liq_wealth housing_wealth housing income, by( t_homeownership_100_w_mortgage )
+
+dsfsdf
+
+****************************************************************************************************
+** Run SU regression
+****************************************************************************************************
+
+
+sureg (`endog_vars' = )
+
+
+sdfdsf
 
 matrix list e(b) // coefs
 mat coefs = e(b)
