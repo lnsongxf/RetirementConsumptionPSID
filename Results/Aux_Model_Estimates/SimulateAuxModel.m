@@ -1,20 +1,42 @@
 clear; clc; close all;
 %cd 'C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID\Results\Aux_Model_Estimates'
  cd '/Users/agneskaa/Documents/RetirementConsumptionPSID/Results/Aux_Model_Estimates'
+age_cutoff = 40;
+twogroup = 1; % Swith for using one vs two groups for esting the aux model
 
-A = importdata('coefs.txt');
-B = importdata('sigma.txt');
-data = importdata('InitData.csv');
+if twogroup==1
+    A_young = importdata('coefs_below_40.txt');
+    B_young = importdata('sigma_below_40.txt');
 
-rng('default');
+    A_old = importdata('coefs_above_40.txt');
+    B_old = importdata('sigma_above_40.txt');
 
-%% Extract coefs and VCV
+    data = importdata('InitData.csv');
+    rng('default');
+    %% Extract coefs and VCV
 
-betaa = A.data';
-coef_varnames  = cat(1, A.textdata(1, 2:end) );
+    betaa_young = A_young.data';
+    betaa_old   = A_old.data';
+    coef_varnames  = cat(1, A_young.textdata(1, 2:end) );
 
-Var_Cov   = B.data;       
-sigma_varnames = cat(1, B.textdata(2:end, 1) );
+    Var_Cov_young   = B_young.data;
+    Var_Cov_old     = B_old.data;
+    sigma_varnames = cat(1, B_young.textdata(2:end, 1) );
+else
+    A = importdata('coefs.txt');
+    B = importdata('coefs.txt');
+
+    data = importdata('InitData.csv');
+    rng('default');
+    %% Extract coefs and VCV
+
+    betaa = A.data';
+    coef_varnames  = cat(1, A.textdata(1, 2:end) );
+
+    Var_Cov   = B.data;
+    sigma_varnames = cat(1, B.textdata(2:end, 1) );
+
+end
 
 %% Extract data
 colnames = data.textdata;
@@ -36,17 +58,17 @@ X0 = data.data(:, 2:end);
 % Xi = n x k
 % k = regressors
 % n = obs
-% 
+%
 % Y = nm x 1
 % m = # eqns (5)
-% 
-% Y1 = consumption for each person 
+%
+% Y1 = consumption for each person
 % n x 1
-% 
+%
 % Y = [Y1; Y2; Y3; Y4; Y5]
-% 
+%
 % Xi = [Y1, Y2, Y3, Y4, Y5; age; age2; cons]
-% 
+%
 % X = diag(Xi) repeated m times
 
 %% Prepare simulation
@@ -56,23 +78,48 @@ X_input = X0;
 m      = 5; % k-3;            % eqns
 index_housing = 1; % index of housing (linear probability model)
 index_HW = 4;
-% index_age = m+1;
 index_age = find( strcmp(colnames, 'age'), 1) - 1;
 
-% Xi = n x k
-% X_input = ones(n, k) % TODO: from stata
-% X_input = [ [eye(5); eye(5)], zeros(10,2), ones(10,1)];
+if twogroup==1 % if two sets  of coefs
+    X_t = X_input;
+    table_input = [ ids, X_t ];
 
-%% Run once
+    %% Run it for young people
+    for t = 1:40
+        t
+        X_t1 = simulate_SUR(X_t, n, m, betaa_young, Var_Cov_young, index_housing, index_HW, index_age);
+        table_input = [ table_input; ids, X_t1 ];
+        X_t = X_t1;
+    end
 
-X_t = X_input;
-table_input = [ ids, X_t ];
+    %% Cut those above age_cutoff
+    people_to_keep = table_input(:, 7) <= age_cutoff;
+    table_input = table_input(people_to_keep, :);
 
-for t = 1:40
-    t
-    X_t1 = simulate_SUR(X_t, n, m, betaa, Var_Cov, index_housing, index_HW, index_age);
-    table_input = [ table_input; ids, X_t1 ];
-    X_t = X_t1;
+    %% Find those at age cutoff
+    people_age_cutoff = table_input(:, 7) == age_cutoff;
+    X_t = table_input(people_age_cutoff, :);
+
+    ## Run it for old people
+    for t = 1:(70-age_cutoff)
+        t
+        X_t1 = simulate_SUR(X_t, n, m, betaa_old, Var_Cov_old, index_housing, index_HW, index_age);
+        table_input = [ table_input; ids, X_t1 ];
+        X_t = X_t1;
+    end
+
+else % if only one set of coefs
+    X_t = X_input;
+    table_input = [ ids, X_t ];
+
+
+    for t = 1:40
+        t
+        X_t1 = simulate_SUR(X_t, n, m, betaa, Var_Cov, index_housing, index_HW, index_age);
+        table_input = [ table_input; ids, X_t1 ];
+        X_t = X_t1;
+
+    end
 end
 
 T = array2table( table_input, 'VariableNames', colnames );
