@@ -98,9 +98,9 @@ if twogroup==1 % if two sets  of coefs
 
     %% Find those at age cutoff
     people_age_cutoff = table_input(:, 7) == age_cutoff;
-    X_t = table_input(people_age_cutoff, :);
-
-    ## Run it for old people
+X_t = table_input(people_age_cutoff, 2:end);   
+n = length(X_t);
+   % Run it for old people
     for t = 1:(70-age_cutoff)
         t
         X_t1 = simulate_SUR(X_t, n, m, betaa_old, Var_Cov_old, index_housing, index_HW, index_age);
