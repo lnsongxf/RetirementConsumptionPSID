@@ -21,6 +21,9 @@ global aux_model_in_logs 1 // 1 = logs, 0 = levels
 
 global drop_top_x 0 // can be 0, 1, or 5
 
+global estimate_reg_by_age 1 // 0 is our baseline where we estimate SUREG with everyone pooled together. 1 is alternative where we do two buckets
+global cutoff_age 40
+
 ****************************************************************************************************
 ** Sample selection
 ****************************************************************************************************
@@ -62,7 +65,8 @@ keep if age >= 20 & age <= 65
 
 gen consumption = expenditure_exH_real_2015 // blundell expenditure excluding housing
 gen liq_wealth = fam_liq_wealth_real // 2015 dollars
-gen housing_wealth = fam_LiqAndH_wealth_real - fam_liq_wealth_real // 2015 dollars
+* gen housing_wealth = fam_LiqAndH_wealth_real - fam_liq_wealth_real // 2015 dollars (includes other housing wealth)
+gen housing_wealth = homeequity_real
 gen housing = housingstatus == 1 // renting or living with parents are considered as the same
 gen income = inc_fam_real_2015 // TODO: will need to subtract out taxes using NBER TAXSIM
 gen illiq_wealth = fam_wealth_real - fam_liq_wealth_real // NOTE: we do not use this in the regressions, just use it for our alternative measure of WHtM
@@ -142,7 +146,7 @@ local control_vars age age_sq
 ** Consumption before purchase
 ****************************************************************************************************
 
-* Shift t_homeownership so that all values are positive (needed for i. command)
+/** Shift t_homeownership so that all values are positive (needed for i. command)
 gen t_homeownership_100 = t_homeownership + 100
 replace t_homeownership_100 = 92 if t_homeownership_100 < 92
 replace t_homeownership_100 = 1000 if t_homeownership == . // | t_homeownership_100 >= 102
@@ -163,33 +167,58 @@ reg log_consumption ib100.t_homeownership_100_w_mortgage /* L.(`endog_vars') */ 
 
 by pid, sort: egen min_t_homeownership_100 = min(t_homeownership_100)
 keep if min_t_homeownership_100 <= 94
-collapse (median) log_consumption log_liq_wealth log_housing_wealth log_income consumption liq_wealth housing_wealth housing income, by( t_homeownership_100_w_mortgage )
+collapse (median) log_consumption log_liq_wealth log_housing_wealth log_income consumption liq_wealth housing_wealth housing income, by( t_homeownership_100_w_mortgage )*/
 
-dsfsdf
+
+****************************************************************************************************
+** Drop renters with home equity
+****************************************************************************************************
+
+drop if housing == 0 & housing_wealth != 0
+
+/*sum housing_wealth if housing == 1
+sum housing_wealth if housing == 0*/
 
 ****************************************************************************************************
 ** Run SU regression
 ****************************************************************************************************
 
+if $estimate_reg_by_age == 0{
+    sureg (`endog_vars' =  L.(`endog_vars') `control_vars')
 
-sureg (`endog_vars' = )
+    * matrix list e(b) // coefs
+    mat coefs = e(b)
+    mat sigma = e(Sigma)
+
+    // e(sample)         marks estimation sample
+    local filename ""
+    mat2txt, matrix(coefs) saving("$folder/Results/Aux_Model_Estimates/coefs`filename'.txt") replace
+    mat2txt, matrix(sigma) saving("$folder/Results/Aux_Model_Estimates/sigma`filename'.txt") replace
+    gen sample = e(sample)
 
 
-sdfdsf
+}
+else if $estimate_reg_by_age == 1{
+  ** Below cutoff  age
+  sureg (`endog_vars' =  L.(`endog_vars') `control_vars') if age >= 20 & age <= $cutoff_age
+  mat coefs = e(b)
+  mat sigma = e(Sigma)
+  local filename "_below_$cutoff_age"
+  mat2txt, matrix(coefs) saving("$folder/Results/Aux_Model_Estimates/coefs`filename'.txt") replace
+  mat2txt, matrix(sigma) saving("$folder/Results/Aux_Model_Estimates/sigma`filename'.txt") replace
+  gen sample_below = e(sample)
 
-matrix list e(b) // coefs
-mat coefs = e(b)
-// matrix list e(V) // variance-covariance matrix of the estimators
-// mat list e(Sigma) // sigma hat = covariance matrix of the residuals
-mat sigma = e(Sigma)
+  ** Above cutoff age
+  sureg (`endog_vars' =  L.(`endog_vars') `control_vars') if age > $cutoff_age
+  mat coefs = e(b)
+  mat sigma = e(Sigma)
+  local filename "_above_$cutoff_age"
+  mat2txt, matrix(coefs) saving("$folder/Results/Aux_Model_Estimates/coefs`filename'.txt") replace
+  mat2txt, matrix(sigma) saving("$folder/Results/Aux_Model_Estimates/sigma`filename'.txt") replace
+  gen sample_above = e(sample)
 
-// e(sample)         marks estimation sample
-local filename ""
-
-mat2txt, matrix(coefs) saving("$folder/Results/Aux_Model_Estimates/coefs`filename'.txt") replace
-mat2txt, matrix(sigma) saving("$folder/Results/Aux_Model_Estimates/sigma`filename'.txt") replace
-
-gen sample = e(sample)
+  gen sample = sample_below + sample_above
+}
 
 ****************************************************************************************************
 ** Generate initial data for simulation
@@ -199,12 +228,14 @@ preserve
   by pid, sort: egen min_year = min(wave)
   keep if F.sample == 1 & age <= 30 & wave == min_year // first observation for each indiv is not in the sample b/c of the lag
 
+  tab age
   count
   keep pid `endog_vars' `control_vars'
   order pid `endog_vars' `control_vars'
   gen cons = 1
   export delimited using "$folder/Results/Aux_Model_Estimates/InitData.csv", replace
 restore
+
 
 ****************************************************************************************************
 ** Save age patterns
@@ -215,8 +246,9 @@ preserve
   keep pid `endog_vars' `level_vars' `control_vars'
   order pid `endog_vars' `level_vars' `control_vars'
   gen cons = 1
+  gen log_housing_wealth_if_owner = log_housing_wealth if housing == 1
 
-  collapse (median) `endog_vars' `level_vars', by(age)
+  collapse (median) `endog_vars' `level_vars' log_housing_wealth_if_owner, by(age)
   tsset age
   save "$folder/Results/Aux_Model_Estimates/PSID_by_age_median.csv", replace
 restore
@@ -226,8 +258,9 @@ preserve
   keep pid `endog_vars' `level_vars' `control_vars'
   order pid `endog_vars' `level_vars' `control_vars'
   gen cons = 1
+  gen log_housing_wealth_if_owner = log_housing_wealth if housing == 1
 
-  collapse (mean) `endog_vars' `level_vars', by(age)
+  collapse (mean) `endog_vars' `level_vars' log_housing_wealth_if_owner, by(age)
   tsset age
   save "$folder/Results/Aux_Model_Estimates/PSID_by_age_mean.csv", replace
 restore

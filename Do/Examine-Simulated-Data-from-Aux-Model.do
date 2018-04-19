@@ -29,7 +29,8 @@ if $aux_model_in_logs == 1{
     local level_vars `level_vars' `new_var'
   }
 
-  local log_vars housing-log_inc
+  gen log_housing_wealth_if_owner = log_housing_wealth if housing == 1
+  local log_vars housing-log_inc log_housing_wealth_if_owner
 }
 else if $aux_model_in_logs == 0 {
   local level_vars housing-income
@@ -53,6 +54,7 @@ restore
 collapse (`sumstat') `log_vars' `level_vars', by(age)
 tsset age
 
+
 * tempfile sim_data
 * save `sim_data', replace
 
@@ -72,7 +74,7 @@ encode source, gen(s)
 xtset s age
 
 if $aux_model_in_logs == 1{
-  foreach var  of varlist housing-log_inc{
+  foreach var  of varlist `log_vars' {
     xtline `var', overlay name("`sumstat'_`var'", replace) graphregion(color(white)) ylabel( #3 ) title("`sumstat' `var'")
     graph export "$folder\Results\AuxModel\plot_`sumstat'_`var'.pdf", as(pdf) replace
     di "$folder\Results\AuxModel\plot_`sumstat'_`var'
