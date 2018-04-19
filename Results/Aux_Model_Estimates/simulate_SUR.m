@@ -35,6 +35,8 @@ function X_t1 = simulate_SUR(X_t, n, m, betaa, Var_Cov, index_housing, index_HW,
     % convert housing to binary
     X_t1(:,index_housing) = X_t1(:,index_housing) >= 0.5;
     
+    X_t1(:, index_HW) = X_t1(:, index_HW) .* X_t1(:, index_housing);
+    
     % if you dont own a home, youre not allowed to have housing wealth in
     % the sim... does this help?
 %     nohousing = X_t1(:, index_housing) == 0;
