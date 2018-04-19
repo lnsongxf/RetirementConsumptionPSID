@@ -200,6 +200,7 @@ gen fam_wealth_real              = 100 * fam_wealth / CPI_all_base_2015
 gen fam_wealth_ex_home_real      = 100 * fam_wealth_ex_home / CPI_all_base_2015
 gen value_gifts_real             = 100 * value_gifts / CPI_all_base_2015
 gen fam_liq_wealth_real          = 100 * fam_liq_wealth / CPI_all_base_2015
+gen homeequity_real              = 100 * homeequity / CPI_all_base_2015
 gen fam_LiqAndH_wealth_real      = 100 * fam_liq_plus_housing_wealth / CPI_all_base_2015 // liquid and housing wealth only
 gen fam_wealth_ex_bus_real       = 100 * fam_wealth_ex_bus / CPI_all_base_2015
 gen fam_wealth_ex_bus_ira_real   = 100 * fam_wealth_ex_bus_ira / CPI_all_base_2015

@@ -729,6 +729,14 @@ psid use
 	[99]S420 [01]S520 [03]S620 [05]S720 [07]S820 [09]ER46966 [11]ER52390
 	[13]ER58207 [15]ER65404
 
+	// Accuracy code for imputation of wealth summary variables.
+	|| acc_homeequity
+	// [84]S120A [89]S220A [94]S320A
+	[99]S420A [01]S520A [03]S620A [05]S720A [07]S820A [09]ER46967 [11]ER52391
+	[13]ER58208 [15]ER65405
+	// 1 = imputed
+	// 0 = not
+
 	// Own or Rent
 	|| housingstatus
 	// [68]V103 [69]V593 [70]V1264 [71]V1967 [72]V2566 [73]V3108 [74]V3522

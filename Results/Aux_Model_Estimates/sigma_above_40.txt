@@ -1,0 +1,6 @@
+	housing	log_consumption	log_liq_wealth	log_housing_wealth	log_income	
+housing	 .05322047	  .0099264	 .03930698	 .52407018	  .0126272	
+log_consumption	  .0099264	 .27887239	 .16232326	 .12344348	 .11654785	
+log_liq_wealth	 .03930698	 .16232326	 8.9087198	 .84061847	   .365252	
+log_housing_wealth	 .52407018	 .12344348	 .84061847	 8.8733515	 .16304551	
+log_income	  .0126272	 .11654785	   .365252	 .16304551	 .96912439	
