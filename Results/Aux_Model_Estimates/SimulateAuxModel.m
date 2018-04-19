@@ -1,8 +1,11 @@
 clear; clc; close all;
 cd 'C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID\Results\Aux_Model_Estimates'
 %  cd '/Users/agneskaa/Documents/RetirementConsumptionPSID/Results/Aux_Model_Estimates'
+
+% SWITCHES
 age_cutoff = 40;
 twogroup = 1; % Swith for using one vs two groups for esting the aux model
+no_age_coefs = 1; % baseline 0 includes both age and age2. 1 does not
 
 if twogroup==1
     A_young = importdata('coefs_below_40.txt');
@@ -22,6 +25,16 @@ if twogroup==1
     Var_Cov_young   = B_young.data;
     Var_Cov_old     = B_old.data;
     sigma_varnames = cat(1, B_young.textdata(2:end, 1) );
+    
+    if no_age_coefs == 1
+        display('add zeros for age coefs')
+        betaa_young = add_zeros_to_betas(betaa_young);
+        betaa_old = add_zeros_to_betas(betaa_old);
+    end
+
+    % Inspect results
+%     reshape(betaa_young,  [8, 5] )'
+%     reshape(betaa_old,  [8, 5] )'
 else
     A = importdata('coefs.txt');
     B = importdata('coefs.txt');
@@ -37,6 +50,8 @@ else
     sigma_varnames = cat(1, B.textdata(2:end, 1) );
 
 end
+
+
 
 %% Extract data
 colnames = data.textdata;

@@ -24,6 +24,8 @@ global drop_top_x 0 // can be 0, 1, or 5
 global estimate_reg_by_age 1 // 0 is our baseline where we estimate SUREG with everyone pooled together. 1 is alternative where we do two buckets
 global cutoff_age 40
 
+* NOTE: I manually removed age and age2 from the SUR
+
 ****************************************************************************************************
 ** Sample selection
 ****************************************************************************************************
@@ -60,7 +62,7 @@ qui do "$folder\Do\Find-First-Home-Purchase.do"
 ****************************************************************************************************
 ** Define variables
 ****************************************************************************************************
-keep if age >= 20 & age <= 65
+keep if age >= 25 & age <= 65
 * keep if age >= 20 & age <= 65
 
 gen consumption = expenditure_exH_real_2015 // blundell expenditure excluding housing
@@ -184,7 +186,7 @@ sum housing_wealth if housing == 0*/
 ****************************************************************************************************
 
 if $estimate_reg_by_age == 0{
-    sureg (`endog_vars' =  L.(`endog_vars') `control_vars')
+    sureg (`endog_vars' =  L.(`endog_vars') /* `control_vars' */)
 
     * matrix list e(b) // coefs
     mat coefs = e(b)
@@ -200,7 +202,7 @@ if $estimate_reg_by_age == 0{
 }
 else if $estimate_reg_by_age == 1{
   ** Below cutoff  age
-  sureg (`endog_vars' =  L.(`endog_vars') `control_vars') if age >= 20 & age <= $cutoff_age
+  sureg (`endog_vars' =  L.(`endog_vars') /* `control_vars' */) if age >= 20 & age <= $cutoff_age
   mat coefs = e(b)
   mat sigma = e(Sigma)
   local filename "_below_$cutoff_age"
@@ -209,7 +211,7 @@ else if $estimate_reg_by_age == 1{
   gen sample_below = e(sample)
 
   ** Above cutoff age
-  sureg (`endog_vars' =  L.(`endog_vars') `control_vars') if age > $cutoff_age
+  sureg (`endog_vars' =  L.(`endog_vars') /* `control_vars' */) if age > $cutoff_age
   mat coefs = e(b)
   mat sigma = e(Sigma)
   local filename "_above_$cutoff_age"

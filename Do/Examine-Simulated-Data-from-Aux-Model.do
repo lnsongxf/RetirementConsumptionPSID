@@ -30,7 +30,7 @@ if $aux_model_in_logs == 1{
   }
 
   gen log_housing_wealth_if_owner = log_housing_wealth if housing == 1
-  local log_vars housing-log_inc log_housing_wealth_if_owner
+  local log_vars housing-log_inc log_housing_wealth_if_own
 }
 else if $aux_model_in_logs == 0 {
   local level_vars housing-income
@@ -67,6 +67,7 @@ append using "$folder/Results/Aux_Model_Estimates/PSID_by_age_`sumstat'.csv"
 replace source = "PSID" if source == ""
 encode source, gen(s)
 
+rename log_housing_wealth_if_owner log_housing_wealth_if_own
 ****************************************************************************************************
 ** Look by age
 ****************************************************************************************************
