@@ -22,7 +22,9 @@ global aux_model_in_logs 1 // 1 = logs, 0 = levels
 global drop_top_x 0 // can be 0, 1, or 5
 
 global estimate_reg_by_age 1 // 0 is our baseline where we estimate SUREG with everyone pooled together. 1 is alternative where we do two buckets
-global cutoff_age 40
+global cutoff_age 50
+
+global no_age_coefs 1 // default is  0 (include age and age2)
 
 * NOTE: I manually removed age and age2 from the SUR
 
@@ -184,9 +186,17 @@ sum housing_wealth if housing == 0*/
 ****************************************************************************************************
 ** Run SU regression
 ****************************************************************************************************
+if $no_age_coefs == 0 {
+	local exog_vars `control_vars'
+}
+
+if $no_age_coefs == 1 {
+	local exog_vars 
+}
+
 
 if $estimate_reg_by_age == 0{
-    sureg (`endog_vars' =  L.(`endog_vars') /* `control_vars' */)
+    sureg (`endog_vars' =  L.(`endog_vars') `exog_vars' )
 
     * matrix list e(b) // coefs
     mat coefs = e(b)
@@ -202,7 +212,7 @@ if $estimate_reg_by_age == 0{
 }
 else if $estimate_reg_by_age == 1{
   ** Below cutoff  age
-  sureg (`endog_vars' =  L.(`endog_vars') /* `control_vars' */) if age >= 20 & age <= $cutoff_age
+  sureg (`endog_vars' =  L.(`endog_vars') `exog_vars' ) if age >= 20 & age <= $cutoff_age
   mat coefs = e(b)
   mat sigma = e(Sigma)
   local filename "_below_$cutoff_age"
@@ -211,7 +221,7 @@ else if $estimate_reg_by_age == 1{
   gen sample_below = e(sample)
 
   ** Above cutoff age
-  sureg (`endog_vars' =  L.(`endog_vars') /* `control_vars' */) if age > $cutoff_age
+  sureg (`endog_vars' =  L.(`endog_vars') `exog_vars') if age > $cutoff_age
   mat coefs = e(b)
   mat sigma = e(Sigma)
   local filename "_above_$cutoff_age"
@@ -238,6 +248,22 @@ preserve
   export delimited using "$folder/Results/Aux_Model_Estimates/InitData.csv", replace
 restore
 
+****************************************************************************************************
+** Generate initial means for simulation
+****************************************************************************************************
+
+preserve
+  by pid, sort: egen min_year = min(wave)
+  keep if F.sample == 1 & age == 25 // just look at the youngest age
+  
+  sum housing
+  collapse (mean) log_consumption log_liq_wealth log_housing_wealth log_income `control_vars', by(housing)
+  gen pid = 1
+  keep pid `endog_vars' `control_vars'
+  order pid `endog_vars' `control_vars'
+  gen cons = 1
+  export delimited using "$folder/Results/Aux_Model_Estimates/InitDataMeans.csv", replace
+restore
 
 ****************************************************************************************************
 ** Save age patterns
@@ -275,10 +301,13 @@ restore
 preserve
   gen HtM = liq_wealth <= (income / 24)
   gen WHtM = HtM & housing_wealth > 0
-  gen PHtM = HtM & housing_wealth == 0
-  collapse (mean) *HtM, by(age)
+  gen PHtM = HtM & housing_wealth == 0 // should this be <= 0 ?
+//   gen PHtM2 = HtM & housing_wealth <= 0 
+  collapse (mean) *HtM*, by(age)
   tsset age
-  tsline *HtM,  title("Hand to Mouth Households") subtitle("(using only liquid & housing wealth)") name("WHTM1", replace)
+  tsline *HtM*,  title("Hand to Mouth Households") subtitle("(using only liquid & housing wealth)") name("WHTM1", replace)
+  graph export "$folder\Results\AuxModel\PSID_HtM.pdf", as(pdf) replace
+
 restore
 
 
@@ -288,7 +317,10 @@ preserve
   gen HtM = liq_wealth <= (income / 24)
   gen WHtM = HtM & illiq_wealth > 0
   gen PHtM = HtM & illiq_wealth == 0
-  collapse (mean) *HtM, by(age)
+  gen PHtM2 = HtM & illiq_wealth <= 0 
+  collapse (mean) *HtM*, by(age)
   tsset age
-  tsline *HtM, title("Hand to Mouth Households") subtitle("(using liquid & illiquid wealth)") name("WHTM2", replace)
+  tsline *HtM*, title("Hand to Mouth Households") subtitle("(using liquid & illiquid wealth)") name("WHTM2", replace)
+  graph export "$folder\Results\AuxModel\PSID_HtM_all_illiq.pdf", as(pdf) replace
 restore
+

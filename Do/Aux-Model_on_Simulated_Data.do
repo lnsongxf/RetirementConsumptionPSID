@@ -14,10 +14,6 @@ import delimited "$folder/Results/Aux_Model_Estimates/Simulated_Data_from_Aux_Mo
 
 xtset pid age
 
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
 local endog_vars housing log_consumption log_liq_wealth log_housing_wealth log_income 
 
 ****************************************************************************************************

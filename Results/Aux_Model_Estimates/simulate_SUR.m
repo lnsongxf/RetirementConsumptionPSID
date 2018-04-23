@@ -18,7 +18,7 @@ function X_t1 = simulate_SUR(X_t, n, m, betaa, Var_Cov, index_housing, index_HW,
 
     Y_transform = reshape(BigY_t1, [n, m] );
 
-    age_t1 = age_t + 1;
+    age_t1 = age_t + 2;
     
 %     %% Here we compute WHtM 
 %     % SHIT. This is going to be hard coded as logs

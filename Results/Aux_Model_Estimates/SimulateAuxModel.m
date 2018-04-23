@@ -3,16 +3,20 @@ cd 'C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID\Results\Aux_Model_E
 %  cd '/Users/agneskaa/Documents/RetirementConsumptionPSID/Results/Aux_Model_Estimates'
 
 % SWITCHES
-age_cutoff = 40;
+age_cutoff = 50;
 twogroup = 1; % Swith for using one vs two groups for esting the aux model
 no_age_coefs = 1; % baseline 0 includes both age and age2. 1 does not
+use_means_as_init_data = 0;
+
+% TODO: if using two groups, will need to make the cutoff more flexible 
+% now that people age in 2 year intervals
 
 if twogroup==1
-    A_young = importdata('coefs_below_40.txt');
-    B_young = importdata('sigma_below_40.txt');
+    A_young = importdata(['coefs_below_', num2str(age_cutoff), '.txt']);
+    B_young = importdata(['sigma_below_', num2str(age_cutoff), '.txt']);
 
-    A_old = importdata('coefs_above_40.txt');
-    B_old = importdata('sigma_above_40.txt');
+    A_old = importdata(['coefs_above_', num2str(age_cutoff), '.txt']);
+    B_old = importdata(['sigma_above_', num2str(age_cutoff), '.txt']);
 
     data = importdata('InitData.csv');
     rng('default');
@@ -33,11 +37,11 @@ if twogroup==1
     end
 
     % Inspect results
-%     reshape(betaa_young,  [8, 5] )'
-%     reshape(betaa_old,  [8, 5] )'
+    reshape(betaa_young,  [8, 5] )'
+    reshape(betaa_old,  [8, 5] )'
 else
     A = importdata('coefs.txt');
-    B = importdata('coefs.txt');
+    B = importdata('sigma.txt');
 
     data = importdata('InitData.csv');
     rng('default');
@@ -48,10 +52,23 @@ else
 
     Var_Cov   = B.data;
     sigma_varnames = cat(1, B.textdata(2:end, 1) );
+    
+    if no_age_coefs == 1
+        display('add zeros for age coefs')
+        betaa = add_zeros_to_betas(betaa);
+    end
 
 end
 
-
+%% Use means as initial data
+if use_means_as_init_data == 1
+    data = importdata('InitDataMeans.csv');
+    
+    n = 4000;
+    percent_owners = 0.2095517;
+    n_owners = round(n * percent_owners);
+    data.data = [repmat( data.data(1,:), n - n_owners, 1); repmat( data.data(2,:), n_owners, 1)];
+end
 
 %% Extract data
 colnames = data.textdata;
@@ -111,11 +128,12 @@ if twogroup==1 % if two sets  of coefs
     people_to_keep = table_input(:, 7) <= age_cutoff;
     table_input = table_input(people_to_keep, :);
 
-    %% Find those at age cutoff
-    people_age_cutoff = table_input(:, 7) == age_cutoff;
-X_t = table_input(people_age_cutoff, 2:end);   
-n = length(X_t);
-   % Run it for old people
+    %% Find those at age cutoff (or just one year before)
+    people_age_cutoff = table_input(:, 7) == age_cutoff | table_input(:, 7) == age_cutoff - 1;
+    X_t = table_input(people_age_cutoff, 2:end);   
+    n = length(X_t);
+   
+    %% Run it for old people
     for t = 1:(70-age_cutoff)
         t
         X_t1 = simulate_SUR(X_t, n, m, betaa_old, Var_Cov_old, index_housing, index_HW, index_age);
