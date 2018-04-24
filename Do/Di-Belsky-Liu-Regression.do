@@ -7,7 +7,7 @@ graph close
 set autotabgraphs on
 
 global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
-cd "$folder\Results\Graphs_for_Paper" // where to save outreg2 results
+cd "$folder\Results\Di_Belsky_Liu_Graph" // where to save outreg2 results
 use "$folder\Data\Intermediate\Basic-Panel.dta", clear
 
 * Switches
@@ -16,11 +16,13 @@ global allow_kids_to_leave_hh 1 // When looking for stable households, what shou
 
 * drop if emp_status_head != 1 // only keep employed heads. Question: should I put this so early? ie to split up HH? or later?
 
-global allow_hh_present_for_part 1
+global allow_hh_present_for_part 1 // baseline = 1
 
-global analyze_liquid_wealth 1
+global analyze_liquid_wealth 0
 
 global add_cubic 1
+
+global control_for_income 0 // baseline in Di et al is to control for income (1). 
 
 * cap ssc install outreg2
 * cap ssc install egenmore
@@ -214,6 +216,17 @@ else if $add_cubic == 1{
   local cubic years_owning3
 }
 
+if $control_for_income == 1{
+	local extra_controls log_average_income log_init_wealth
+	local extra_controls2 log_average_income i.init_wealth_quant
+	local file_suffix `file_suffix'
+}
+else if $control_for_income == 0 {
+	local extra_controls 
+	local extra_controls2
+	local file_suffix `file_suffix'_noIncControl
+}
+
 ****************************************************************************************************
 ** Regression (Model A)
 ****************************************************************************************************
@@ -221,15 +234,15 @@ else if $add_cubic == 1{
 gen married_end = married == 1
 gen divorced_end = married == 4
 
-inspect years_owning years_owning2 `cubic' log_average_income log_init_wealth total_gifts black init_HS init_some_college init_college_plus educ_improvement init_age married_end divorced_end region metro_2015 change_kids
+inspect years_owning years_owning2 `cubic' `extra_controls' total_gifts black init_HS init_some_college init_college_plus educ_improvement init_age married_end divorced_end region metro_2015 change_kids
 
 
-reg `dep_var' years_owning years_owning2 `cubic' log_average_income log_init_wealth total_gifts i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_end i.divorced_end i.region `metro_var' change_kids
+reg `dep_var' years_owning years_owning2 `cubic' `extra_controls' total_gifts i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_end i.divorced_end i.region `metro_var' change_kids
 qui outreg2 using "DiBelskyLiu_Reg`file_suffix'.xls", ctitle(Model A) excel replace nose noaster
 qui outreg2 using "DiBelskyLiu_Means`file_suffix'.xls", ctitle(Model A) excel replace nose noaster sum
 
 * Years owning as dummy
-qui reg `dep_var' i.years_owning log_average_income log_init_wealth total_gifts i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_end i.divorced_end i.region `metro_var' change_kids
+qui reg `dep_var' i.years_owning `extra_controls' total_gifts i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_end i.divorced_end i.region `metro_var' change_kids
 qui outreg2 using "DiBelskyLiu_Reg`file_suffix'.xls", ctitle(Model A Dummy) excel nose noaster
 qui outreg2 using "DiBelskyLiu_Means`file_suffix'.xls", ctitle(Model A Dummy) excel nose noaster sum
 
@@ -241,11 +254,11 @@ qui outreg2 using "DiBelskyLiu_Means`file_suffix'.xls", ctitle(Model A Dummy) ex
 
 egen init_wealth_quant = xtile(log_init_wealth), n(4)
 
-reg `dep_var' years_owning years_owning2 `cubic' log_average_income total_gifts i.init_wealth_quant i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_end i.divorced_end i.region `metro_var' change_kids
+reg `dep_var' years_owning years_owning2 `cubic' `extra_controls2' total_gifts  i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_end i.divorced_end i.region `metro_var' change_kids
 qui outreg2 using "DiBelskyLiu_Reg`file_suffix'.xls", ctitle(Model B) excel nose noaster
 qui outreg2 using "DiBelskyLiu_Means`file_suffix'.xls", ctitle(Model B) excel nose noaster sum
 
-qui reg `dep_var' i.years_owning log_average_income total_gifts i.init_wealth_quant i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_end i.divorced_end i.region `metro_var' change_kids
+qui reg `dep_var' i.years_owning `extra_controls2' total_gifts i.black i.init_HS i.init_some_college i.init_college_plus educ_improvement init_age i.married_end i.divorced_end i.region `metro_var' change_kids
 qui outreg2 using "DiBelskyLiu_Reg`file_suffix'.xls", ctitle(Model B Dummy) excel nose noaster
 qui outreg2 using "DiBelskyLiu_Means`file_suffix'.xls", ctitle(Model B Dummy) excel nose noaster sum
 
