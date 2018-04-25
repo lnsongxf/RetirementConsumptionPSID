@@ -98,7 +98,7 @@ for i=1:1:height_beta_c % # of models
      wealth_rent(i,:)       = exp(LogW_rent(i,:));
      Wealth_Difference(i,:) = wealth(i,:)-wealth_rent(i,:);
 end
-
+Wealth_Difference = Wealth_Difference*(1/0.44);
 
 figure(1)
 hold on
