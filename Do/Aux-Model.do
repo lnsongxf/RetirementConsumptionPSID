@@ -76,6 +76,11 @@ gen income = inc_fam_real_2015 // TODO: will need to subtract out taxes using NB
 gen illiq_wealth = fam_wealth_real - fam_liq_wealth_real // NOTE: we do not use this in the regressions, just use it for our alternative measure of WHtM
 gen hand_to_mouth = liq_wealth <= (income / 24)
 
+* New variables
+// housevalue_real
+// mortgage_debt_real
+* TODO: if I combine these, do I get housing_wealth?
+
 if $aux_model_in_logs == 1{
   * Run the model in logs
   local level_vars consumption liq_wealth housing_wealth income
@@ -183,6 +188,30 @@ drop if housing == 0 & housing_wealth != 0
 /*sum housing_wealth if housing == 1
 sum housing_wealth if housing == 0*/
 
+
+
+
+
+****************************************************************************************************
+** Look at distribution of house prices based on income
+****************************************************************************************************
+
+gen house_price_inc_ratio = housevalue_real / income if housing == 1 & income > 16000
+hist house_price_inc_ratio, name("hist", replace)
+
+gen log_housevalue_real = log(housevalue_real)
+gen log_house_price_inc_ratio = log_housevalue_real - log_income if housing == 1 & income > 1000
+hist log_house_price_inc_ratio, name("hist_log", replace)
+
+by pid, sort: egen log_income_mean = mean(log_income)
+gen log_house_price_meaninc_ratio = log_housevalue_real - log_income_mean if housing == 1 & log_income_mean >= 6.9077553 // requires at least 1000 avg income
+hist log_house_price_meaninc_ratio, name("hist_log_mean_inc", replace)
+
+* todo: take avg house price
+by pid, sort: egen log_housevalue_real_mean = mean(log_housevalue_real)
+
+// sfdsf
+
 ****************************************************************************************************
 ** Run SU regression
 ****************************************************************************************************
@@ -264,6 +293,22 @@ preserve
   gen cons = 1
   export delimited using "$folder/Results/Aux_Model_Estimates/InitDataMeans.csv", replace
 restore
+
+****************************************************************************************************
+** Save sample used in aux model
+****************************************************************************************************
+
+preserve
+  keep if F.sample == 1 | sample == 1
+  keep pid wave `endog_vars' `level_vars' `control_vars' race educhead children metro metro_pre2015 metro_2015 value_gifts_real married region
+  order pid wave `endog_vars' `level_vars' `control_vars'
+  * gen cons = 1
+  * gen log_housing_wealth_if_owner = log_housing_wealth if housing == 1
+
+  save "$folder/Data/Final/AuxModelPanel.dta", replace
+restore
+
+
 
 ****************************************************************************************************
 ** Save age patterns

@@ -188,9 +188,9 @@ egen fam_liq_wealth              = rowtotal(bank_account_wealth stock_wealth) //
 egen fam_liq_plus_housing_wealth = rowtotal(fam_liq_wealth homeequity other_real_estate_wealth)
 egen fam_liq_housing_IRA         = rowtotal(fam_liq_wealth homeequity other_real_estate_wealth IRA_wealth)
 egen fam_liq_housing_IRA_bus     = rowtotal(fam_liq_wealth homeequity other_real_estate_wealth IRA_wealth business_wealth)
-gen fam_wealth_ex_bus            = fam_wealth - business_wealth // business_wealth is net
-gen fam_wealth_ex_bus_ira        = fam_wealth - business_wealth - IRA_wealth // business_wealth is net
-
+gen  fam_wealth_ex_bus           = fam_wealth - business_wealth // business_wealth is net
+gen  fam_wealth_ex_bus_ira       = fam_wealth - business_wealth - IRA_wealth // business_wealth is net
+egen mortgage_debt               = rowtotal( mortgage1 mortgage2 )
 
 * NOTE: I took out IRA wealth
 * TODO: say that mortgage debt is in housing, and all other debt is in liquid
@@ -206,6 +206,8 @@ gen fam_wealth_ex_bus_real       = 100 * fam_wealth_ex_bus / CPI_all_base_2015
 gen fam_wealth_ex_bus_ira_real   = 100 * fam_wealth_ex_bus_ira / CPI_all_base_2015
 gen fam_liq_housing_IRA_real     = 100 * fam_liq_housing_IRA / CPI_all_base_2015
 gen fam_liq_housing_IRA_bus_real = 100 * fam_liq_housing_IRA_bus / CPI_all_base_2015
+gen housevalue_real              = 100 * housevalue / CPI_all_base_2015
+gen mortgage_debt_real           = 100 * mortgage_debt / CPI_all_base_2015
 
 * TODO: perhaps down the road add expenditure_total* and inc_*
 

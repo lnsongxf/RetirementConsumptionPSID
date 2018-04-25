@@ -2,6 +2,15 @@
 ** Reproduce Di Belsky Liu Regression using our sample
 ****************************************************************************************************
 
+******
+****** PROBLEM: income is in 1982 dollars and wealth is in 2015
+******
+
+* NOTE: in the previous results, we were using wealth as measured in 1982-1984 real dollars.
+* As of April 13, we updated wealth to 2015 dollars, so the results will be slightly different next time we run these regressions
+* NOTE: when we plot the results , we just scale up from 1982-84 dollars to 2015 dollars
+
+
 set more off
 graph close
 set autotabgraphs on
@@ -26,6 +35,7 @@ global control_for_income 0 // baseline in Di et al is to control for income (1)
 
 * cap ssc install outreg2
 * cap ssc install egenmore
+
 
 ****************************************************************************************************
 ** Sample selection
