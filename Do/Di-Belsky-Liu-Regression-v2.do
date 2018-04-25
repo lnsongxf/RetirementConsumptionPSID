@@ -20,8 +20,8 @@ xtset pid wave, delta(2)
 sort pid wave
 
 * SWITCHES
-global allow_hh_present_for_part 1 // baseline = 1
-global analyze_liquid_wealth 1
+global allow_hh_present_for_part 1 // baseline (1) allows households that were not present in both 1999 and 2015. instead only requires that they were present for at least 4 years
+global analyze_liquid_wealth 0
 global add_cubic 0
 // global control_for_income 1 // baseline in Di et al is to control for income (1). 
 
@@ -32,11 +32,11 @@ global add_cubic 0
 * Model B - control for initial wealth quartiles, income, & other controls
 * Model C - control for initial wealth, NOT income, & others
 * Model D - control for initial wealth quartiles, NOT income, & others
-
 * Model E - control for initial wealth, income, & NOT other controls
 * Model F - control for initial wealth quartiles, income, & NOT other controls
 * Model G - control for initial wealth, NOT income, & NOT others
 * Model H - control for initial wealth quartiles, NOT income, & NOT others
+* Model I - control for none of these
 
 ****************************************************************************************************
 ** Prepare Data
@@ -324,6 +324,20 @@ qui reg `dep_var' i.years_owning `extra_controls2' `baseline_controls'
 qui outreg2 using "Coefs`file_suffix'.xls", ctitle("`model_name' Dummy") excel nose noaster
 qui outreg2 using "Means`file_suffix'.xls", ctitle("`model_name' Dummy") excel nose noaster sum
 
+****************************************************************************************************
+** Regression (Model I)
+****************************************************************************************************
+local extra_controls2 
+local model_name "Model I"
+
+reg `dep_var' years_owning years_owning2 `cubic' `extra_controls2' `baseline_controls'
+qui outreg2 using "Coefs`file_suffix'.xls", ctitle(`model_name') excel nose noaster
+qui outreg2 using "Means`file_suffix'.xls", ctitle(`model_name') excel nose noaster sum
+
+qui reg `dep_var' i.years_owning `extra_controls2' `baseline_controls'
+qui outreg2 using "Coefs`file_suffix'.xls", ctitle("`model_name' Dummy") excel nose noaster
+qui outreg2 using "Means`file_suffix'.xls", ctitle("`model_name' Dummy") excel nose noaster sum
+
 
 di "See Results in:"
 di "$output"
@@ -340,3 +354,5 @@ di "Means`file_suffix'.xls"
 * Model F - control for initial wealth quartiles, income, & NOT other controls
 * Model G - control for initial wealth, NOT income, & NOT others
 * Model H - control for initial wealth quartiles, NOT income, & NOT others
+
+* Model I - control for none of these
