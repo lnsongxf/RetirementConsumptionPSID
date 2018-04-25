@@ -197,15 +197,17 @@ sum housing_wealth if housing == 0*/
 ****************************************************************************************************
 
 gen house_price_inc_ratio = housevalue_real / income if housing == 1 & income > 16000
-hist house_price_inc_ratio, name("hist", replace)
+hist house_price_inc_ratio, name("hist", replace) graphregion(color(white)) 
 
 gen log_housevalue_real = log(housevalue_real)
 gen log_house_price_inc_ratio = log_housevalue_real - log_income if housing == 1 & income > 1000
-hist log_house_price_inc_ratio, name("hist_log", replace)
+lab var log_house_price_inc_ratio "Log( House Price / Income)"
+hist log_house_price_inc_ratio, name("hist_log", replace) graphregion(color(white)) title("House Price / Income")
+graph export "$folder/Results/Homeownership/HousePriceIncomeRatio.pdf", as(pdf) replace
 
 by pid, sort: egen log_income_mean = mean(log_income)
 gen log_house_price_meaninc_ratio = log_housevalue_real - log_income_mean if housing == 1 & log_income_mean >= 6.9077553 // requires at least 1000 avg income
-hist log_house_price_meaninc_ratio, name("hist_log_mean_inc", replace)
+hist log_house_price_meaninc_ratio, name("hist_log_mean_inc", replace) graphregion(color(white)) 
 
 * todo: take avg house price
 by pid, sort: egen log_housevalue_real_mean = mean(log_housevalue_real)
@@ -304,7 +306,7 @@ preserve
   order pid wave `endog_vars' `level_vars' `control_vars'
   * gen cons = 1
   * gen log_housing_wealth_if_owner = log_housing_wealth if housing == 1
-
+  sort pid wave
   save "$folder/Data/Final/AuxModelPanel.dta", replace
 restore
 
@@ -323,6 +325,7 @@ preserve
 
   collapse (median) `endog_vars' `level_vars' log_housing_wealth_if_owner, by(age)
   tsset age
+  sort age
   save "$folder/Results/Aux_Model_Estimates/PSID_by_age_median.csv", replace
 restore
 
@@ -335,6 +338,7 @@ preserve
 
   collapse (mean) `endog_vars' `level_vars' log_housing_wealth_if_owner, by(age)
   tsset age
+  sort age
   save "$folder/Results/Aux_Model_Estimates/PSID_by_age_mean.csv", replace
 restore
 
@@ -346,15 +350,18 @@ restore
 preserve
   gen HtM = liq_wealth <= (income / 24)
   gen WHtM = HtM & housing_wealth > 0
-  gen PHtM = HtM & housing_wealth == 0 // should this be <= 0 ?
-//   gen PHtM2 = HtM & housing_wealth <= 0 
+//   gen PHtM = HtM & housing_wealth == 0 // should this be <= 0 ?
+  gen PHtM = HtM & housing_wealth <= 0 
   collapse (mean) *HtM*, by(age)
   tsset age
-  tsline *HtM*,  title("Hand to Mouth Households") subtitle("(using only liquid & housing wealth)") name("WHTM1", replace)
+  lab var WHtM "Share of Wealthy HtM"
+  lab var PHtM "Share of Poor HtM"
+  tsline WHtM PHtM,  title("Hand to Mouth Households") subtitle("(using only liquid & housing wealth)") name("WHTM1", replace) graphregion(color(white)) 
   graph export "$folder\Results\AuxModel\PSID_HtM.pdf", as(pdf) replace
 
 restore
-
+* (homeowners with liq wealth < 2 weeks income)
+* (renters with liq wealth < 2 weeks income)
 
 
 
@@ -365,7 +372,10 @@ preserve
   gen PHtM2 = HtM & illiq_wealth <= 0 
   collapse (mean) *HtM*, by(age)
   tsset age
-  tsline *HtM*, title("Hand to Mouth Households") subtitle("(using liquid & illiquid wealth)") name("WHTM2", replace)
+  lab var WHtM "Share of Wealthy HtM"
+  lab var PHtM "Share of Poor HtM (illiq w == 0)"
+  lab var PHtM2 "Share of Poor HtM (illiq w < 0)"
+  tsline WHtM* PHtM*, title("Hand to Mouth Households") subtitle("(using liquid & illiquid wealth)") name("WHTM2", replace) graphregion(color(white)) 
   graph export "$folder\Results\AuxModel\PSID_HtM_all_illiq.pdf", as(pdf) replace
 restore
-
+* NOTE: which did we prefer, phtm1 or 2?
