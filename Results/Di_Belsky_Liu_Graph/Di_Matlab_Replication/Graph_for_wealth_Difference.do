@@ -28,10 +28,10 @@ erase "$folder/Results/Di_Belsky_Liu_Graph/Di_Matlab_Replication/LW.dta"
 ren Duration year
 tsset year
 
-tsline NW_Model_B LW_Model_B, title("Wealth Difference between Owners and Renters") subtitle("Controlling for income ") name("Wealth_by_years_owning_modelB", replace) ytitle("Real Wealth (2015 dollars)", margin(0 4 0 0) ) graphregion(color(white)) ylabel( #3 ) ///
+tsline NW_Model_B LW_Model_B if year <10, title("Wealth Difference between Owners and Renters") subtitle("Controlling for income ") name("Wealth_by_years_owning_modelB", replace) ytitle("Real Wealth (2015 dollars)", margin(0 4 0 0) ) graphregion(color(white)) ylabel( #3 ) ///
 legend(order(1 "Net Wealth" 2 "Net Liquid Wealth")) xtitle("Duration of Homeownership") 
+graph export "$folder/Results/Di_Belsky_Liu_Graph/wealth_differences_modelB.pdf", as(pdf) replace
 
-tsline NW_Model_D LW_Model_D, title("Wealth Difference between Owners and Renters") subtitle("No control for income ") name("Wealth_by_years_owning_modelD", replace) ytitle("Real Wealth (2015 dollars)", margin(0 4 0 0) ) graphregion(color(white)) ylabel( #3 ) ///
+tsline NW_Model_D LW_Model_D if year<10, title("Wealth Difference between Owners and Renters") subtitle("No control for income ") name("Wealth_by_years_owning_modelD", replace) ytitle("Real Wealth (2015 dollars)", margin(0 4 0 0) ) graphregion(color(white)) ylabel( #3 ) ///
 legend(order(1 "Net Wealth" 2 "Net Liquid Wealth")) xtitle("Duration of Homeownership") 
-
-*graph export "$folder/Results/Di_Belsky_Liu_Graph/wealth_differences.pdf", as(pdf) replace
+graph export "$folder/Results/Di_Belsky_Liu_Graph/wealth_differences_modelD.pdf", as(pdf) replace
