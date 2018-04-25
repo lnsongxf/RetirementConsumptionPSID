@@ -21,10 +21,10 @@ global aux_model_in_logs 1 // 1 = logs, 0 = levels
 
 global drop_top_x 0 // can be 0, 1, or 5
 
-global estimate_reg_by_age 1 // 0 is our baseline where we estimate SUREG with everyone pooled together. 1 is alternative where we do two buckets
+global estimate_reg_by_age 0 // 0 is our baseline where we estimate SUREG with everyone pooled together. 1 is alternative where we do two buckets
 global cutoff_age 50
 
-global no_age_coefs 1 // default is  0 (include age and age2)
+global no_age_coefs 0 // default is  0 (include age and age2)
 
 * NOTE: I manually removed age and age2 from the SUR
 

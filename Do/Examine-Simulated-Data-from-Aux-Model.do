@@ -7,8 +7,8 @@ set autotabgraphs on
 global folder "C:/Users/pedm/Documents/GitHub/RetirementConsumptionPSID"
 /*global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"*/
 
-local sumstat "mean" // can be median or mean
-* local sumstat "median"
+* local sumstat "mean" // can be median or mean
+local sumstat "median"
 
 global aux_model_in_logs 1 // 1 = logs, 0 = levels
 
@@ -81,14 +81,14 @@ xtset s age
 
 if $aux_model_in_logs == 1{
   foreach var  of varlist `log_vars' {
-    xtline `var', overlay name("`sumstat'_`var'", replace) graphregion(color(white)) ylabel( #3 ) title("`sumstat' `var'")
+    xtline `var', overlay name("`sumstat'_`var'", replace) graphregion(color(white)) ylabel( #3 ) title("`sumstat' `var' (aux model v1)")
     graph export "$folder\Results\AuxModel\plot_`sumstat'_`var'.pdf", as(pdf) replace
     di "$folder\Results\AuxModel\plot_`sumstat'_`var'
   }
 }
 
 foreach var  of varlist `level_vars' {
-  xtline `var', overlay name("`sumstat'_`var'", replace) graphregion(color(white)) ylabel( #3 ) title("`sumstat' `var'")
+  xtline `var', overlay name("`sumstat'_`var'", replace) graphregion(color(white)) ylabel( #3 ) title("`sumstat' `var' (aux model v1)")
   graph export "$folder\Results\AuxModel\plot_`sumstat'_`var'.pdf", as(pdf) replace
   di "$folder\Results\AuxModel\plot_`sumstat'_`var'
 }
