@@ -22,6 +22,8 @@ use "$folder/Results/Di_Belsky_Liu_Graph/Di_Matlab_Replication/NW.dta"
 
 merge 1:1 Duration_Dummy using "$folder/Results/Di_Belsky_Liu_Graph/Di_Matlab_Replication/LW.dta" 
 drop _merge
+erase "$folder/Results/Di_Belsky_Liu_Graph/Di_Matlab_Replication/NW.dta"
+erase "$folder/Results/Di_Belsky_Liu_Graph/Di_Matlab_Replication/LW.dta"
 
 ren Duration_Dummy year
 tsset year
