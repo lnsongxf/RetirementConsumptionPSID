@@ -177,7 +177,7 @@ wealth_rent       = nan(height_beta_c, length(dur));
 Wealth_Difference = nan(height_beta_c, length(dur));
 d = length(dummy_dur);
 for i=1:1:height_beta_c % # of models
-  if i==2 || i==4 || i==6 || i==8 || i==10 || i==12 || i==14 || i==16         % Models where years owning is dummy
+  if i==2 || i==4 || i==6 || i==8 || i==10 || i==12 || i==14 || i==16  || i==18        % Models where years owning is dummy
      LogW(i,1:d)            = (alpha(i)+beta_c_times_C(i))*ones(size(dummy_dur)) +  ones(size(dummy_dur)).*Gamma(i, :);
      LogW_rent(i,1:d)       = (alpha(i)+beta_c_times_C(i))*ones(size(dummy_dur));
   else    
@@ -229,7 +229,7 @@ hold on
 for i=12:2:18
 plot(dummy_dur(1:d-1),Wealth_Difference(i,1:d-1))
 end
-hleg=legend('Model E Dummy','Model F Dummy', 'Model G Dummy','Model H Dummy');
+hleg=legend('Model F Dummy','Model G Dummy', 'Model H Dummy','Model I Dummy');
 set(hleg,'Location','northeast','FontSize',12);
 ylabel('Wealth Difference between Owners and Renters','FontSize',14)
 xlabel('Duration of Homeownership','FontSize',14)
@@ -237,6 +237,11 @@ title("Models with Dummies for Duration")
 
 % To Excel 
 diff_ = length(dur) - length(dummy_dur);
-tt = table(dur', [dummy_dur'; zeros(diff_,1)], Wealth_Difference(1,:)',  Wealth_Difference(2,:)' , Wealth_Difference(3,:)', Wealth_Difference(4,:)');
-tt.Properties.VariableNames= {'Duration', 'Duration_Dummy', 'LW_Model_A', 'LW_Model_A_Dummy', 'LW_Model_B', 'LW_Model_B_Dummy'};
+tt = table(dur', [dummy_dur'; zeros(diff_,1)], Wealth_Difference(1,:)', Wealth_Difference(2,:)' , Wealth_Difference(3,:)', Wealth_Difference(4,:)',...
+ Wealth_Difference(5,:)',  Wealth_Difference(6,:)' , Wealth_Difference(7,:)', Wealth_Difference(8,:)', Wealth_Difference(9,:)', Wealth_Difference(10,:)', ...
+ Wealth_Difference(11,:)',  Wealth_Difference(12,:)' , Wealth_Difference(13,:)', Wealth_Difference(14,:)', Wealth_Difference(15,:)', Wealth_Difference(16,:)', ...
+ Wealth_Difference(17,:)',Wealth_Difference(18,:)');
+tt.Properties.VariableNames= {'Duration', 'Duration_Dummy', 'LW_Model_A', 'LW_Model_A_Dummy', 'LW_Model_B', 'LW_Model_B_Dummy', ...
+    'LW_Model_C', 'LW_Model_C_Dummy', 'LW_Model_D', 'LW_Model_D_Dummy', 'LW_Model_E', 'LW_Model_E_Dummy', 'LW_Model_F', 'LW_Model_F_Dummy', ...
+    'LW_Model_G', 'LW_Model_G_Dummy', 'LW_Model_H', 'LW_Model_H_Dummy', 'LW_Model_I', 'LW_Model_I_Dummy'};
 writetable(tt,'Matlab_Results.xlsx','Sheet',2)
