@@ -104,6 +104,7 @@ for i=1:1:height_beta_c % # of models
      Wealth_Difference(i,:) = wealth(i,:)-wealth_rent(i,:);
 end
 
+Wealth_Difference = Wealth_Difference*(1/0.44);
 
 figure(3)
 hold on
