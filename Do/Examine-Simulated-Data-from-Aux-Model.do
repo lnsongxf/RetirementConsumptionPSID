@@ -7,8 +7,8 @@ set autotabgraphs on
 global folder "C:/Users/pedm/Documents/GitHub/RetirementConsumptionPSID"
 /*global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"*/
 
-* local sumstat "mean" // can be median or mean
-local sumstat "median"
+local sumstat "mean" // can be median or mean
+* local sumstat "median"
 
 global aux_model_in_logs 1 // 1 = logs, 0 = levels
 
@@ -43,12 +43,14 @@ else if $aux_model_in_logs == 0 {
 preserve
   gen HtM = liq_wealth <= (income / 24)
   gen WHtM = HtM & housing_wealth > 1 // we've gone from logs to levels. And in logs, minimum housing_wealth == log(0) == 1
-  gen HtM_homeowners = HtM & housing > 0
+//   gen HtM_homeowners = HtM & housing > 0
   gen PHtM = HtM & housing_wealth <= 1
   collapse (mean) *HtM*, by(age)
   tsset age
   list
-  tsline *HtM*,  title("Hand to Mouth Households") subtitle("in the aux model") name("WHTM1", replace)
+  lab var WHtM "Share of Wealthy HtM"
+  lab var PHtM "Share of Poor HtM"
+  tsline WHtM PHtM,  title("Hand to Mouth Households") subtitle("in the aux model") name("WHTM1", replace) graphregion(color(white))
   graph export "$folder\Results\AuxModel\AuxModel_HtM.pdf", as(pdf) replace
 restore
 

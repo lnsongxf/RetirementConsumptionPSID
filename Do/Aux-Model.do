@@ -64,7 +64,7 @@ qui do "$folder\Do\Find-First-Home-Purchase.do"
 ****************************************************************************************************
 ** Define variables
 ****************************************************************************************************
-keep if age >= 25 & age <= 65
+keep if age >= 22 & age <= 65
 * keep if age >= 20 & age <= 65
 
 gen consumption = expenditure_exH_real_2015 // blundell expenditure excluding housing
