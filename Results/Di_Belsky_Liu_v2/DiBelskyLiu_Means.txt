@@ -1,0 +1,11 @@
+	(1)	(2)
+VARIABLES	Model B	Model B
+		
+log_total_wealth	7.893	7.893
+years_owning	5.036	5.036
+years_owning2	49.60	49.60
+log_avg_income	10.09	10.09
+log_initial_wealth	5.778	5.778
+initial_age	25.31	25.31
+		
+Observations	122,981	122,981
