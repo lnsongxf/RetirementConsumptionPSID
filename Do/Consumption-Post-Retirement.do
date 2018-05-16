@@ -11,7 +11,9 @@ global quintiles_definition 2    // Defines quintiles. Can be 1, 2, 3, or 4. My 
 global retirement_definition 0   // 0 is default (last job ended due to "Quit, Resigned, Retire" or "NA")
                                  // 1 is loose (does not ask why last job ended) and 2 is strict (last job ended due to "Quit, Resigned, Retire" only)
 global ret_duration_definition 2 // Defines retirement year. Can be 1, 2, or 3. My preference is 3 (for the sharp income drop) although 2 is perhaps better when looking at consumption data (for smoothness)
-global graphs_by_quintile 1      // Graph by quintile. Can be 0 or 1
+global graphs_by_mean 0          // Graph by quintile. Can be 0 or 1
+global graphs_by_quintile 0      // Graph by quintile. Can be 0 or 1
+global graphs_by_tertile 1       // Tertiles
 global allow_kids_to_leave_hh 1  // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH 
                                  // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
 
@@ -45,12 +47,15 @@ if $quintiles_definition == 1{
 ****************************************************************************************************
 ** (2) Quintiles based on FAMILY social security income in retirement
 **     (using the MAX observed social security income)
+** TODO: convert to real
 ****************************************************************************************************
 
 if $quintiles_definition == 2{
-	by pid, sort: egen max_inc_ss_fam = max(inc_ss_fam)
+	by pid, sort: egen max_inc_ss_fam = max(inc_ss_fam_real)
 	xtile quintile_last               = max_inc_ss_fam if wave == max_year & retired == 1, n(5)
+	xtile tertile_last                = max_inc_ss_fam if wave == max_year & retired == 1, n(3)
 	by pid, sort: egen quintile       = max(quintile_last)
+	by pid, sort: egen tertile        = max(tertile_last)
 
 	** Problem with this measure is that there are lots of cases where max_inc_ss_fam == 0
 	** So the lowest quintile isn't made of households with the lowest permanent income
@@ -82,8 +87,6 @@ if $quintiles_definition == 2{
 	reg max_age i.quintile  if retired == 1 & L.retired == 0
 
 }
-
-
 
 * Going forward, if we want to divide by max_inc_ss_fam quintiles, perhaps we drop households that retired young
 
@@ -162,7 +165,7 @@ if $ret_duration_definition == 3{
 * tab waves if retirement_transition == 1
 
 * Graph averages by ret_duration
-if $graphs_by_quintile == 0{
+if $graphs_by_mean == 1{
 	collapse *expenditure* transportation_blundell (count) n = expenditure_blundell, by(ret_duration)
 	
 	drop if ret_duration == .
@@ -249,3 +252,60 @@ if $graphs_by_quintile == 1{
 	xtline healthservicesexpenditure healthinsuranceexpenditure, byopts(title("Health Expenditure")) name("health", replace) ylabel(#3)
 
 }
+
+if $graphs_by_tertile == 1{
+	cap mkdir "$folder/Results/ConsumptionPostRetirement/Tertile/"
+	
+	collapse *expenditure* transportation_blundell (count) n = expenditure_blundell, by(ret_duration tertile)
+	
+	drop if ret_duration == .
+	keep if ret_duration >= -10 & ret_duration <= 10
+
+	xtset tertile ret_duration
+	
+	lab var ret_duration "Duration of Head's Retirement"
+	lab var transportation_blundell "Transportation Services"
+	lab var gasolineexpenditure "Gasoline Expenditure"
+	lab var healthcareexpenditure "Health care"
+	lab var healthinsuranceexpenditure "Health insurance"
+	lab var healthservicesexpenditure "Health services"
+	lab var tripsexpenditure "Trips"
+	lab var recreationexpenditure "Recreation"
+	lab var clothingexpenditure "Clothing"
+	lab var foodathomeexpenditure "Food at home"
+	lab var foodawayfromhomeexpenditure "Food away from home"
+	lab var expenditure_blundell_eq "Nondurable Consumption (Equivalence Scale)"
+	lab var workexpenditure "Work Related Expenditure" // excludes clothing
+	
+	xtline workexpenditure if (ret_duration != 10 | tertile != 3), byopts(title("Work Related Expenditure")) name("work_expenditure", replace) ylabel(#3)
+	graph export "$folder/Results/ConsumptionPostRetirement/Tertile/work.pdf", as(pdf) replace
+
+	xtline expenditure_blundell, byopts(title("Blundell Expenditure")) name("expenditure_blundell", replace) ylabel(#3)
+	
+	xtline expenditure_blundell_eq, byopts(title("Nondurable Consumption") rescale) name("expenditure_blundell_eq", replace) ylabel(#3)
+	graph export "$folder/Results/ConsumptionPostRetirement/Tertile/expenditure_blundell_eq.pdf", as(pdf) replace
+	
+	xtline expenditure_blundell_exhous, byopts(title("Blundell Expenditure Ex Housing")) name("expenditure_blundell_exhous", replace) ylabel(#3)
+	xtline expenditure_blundell_exhealth,  byopts(title("Blundell Expenditure Ex Health")) name("expenditure_blundell_exhealth", replace) ylabel(#3)
+
+	xtline foodawayfromhomeexpenditure foodathomeexpenditure, byopts(title("Food")) name("food", replace) ylabel(#3)
+	graph export "$folder/Results/ConsumptionPostRetirement/Tertile/food.pdf", as(pdf) replace
+	
+	xtline taxiexpenditure, byopts(title("Taxis")) name("taxis", replace) ylabel(#3)
+	xtline recreationexpenditure clothingexpenditure tripsexpenditure, byopts(title("New Consumption Measures (Post 2005)") rescale ) name("newmeasures", replace) ylabel(#3)
+	
+	xtline tripsexpenditure, byopts( title("Vacations/Trips Expenditure") rescale ) name("trips", replace) ylabel(#3)
+	graph export "$folder/Results/ConsumptionPostRetirement/Tertile/trips.pdf", as(pdf) replace
+	
+	xtline childcareexpenditure, byopts(title("Child care expenditure")) name("ccare", replace) ylabel(#3)
+
+	xtline educationexpenditure, byopts(title("Education Expenditure")) name("education", replace) ylabel(#3)
+	xtline transportation_blundell, byopts(title("Transportation Expenditure")) name("transportation", replace) ylabel(#3)
+	xtline gasolineexpenditure, byopts(title("Gasoline")) name("gas", replace) ylabel(#3)
+	xtline healthservicesexpenditure healthinsuranceexpenditure, byopts(title("Health Expenditure")) name("health", replace) ylabel(#3)
+
+}
+
+* TODO: plot the 8 consumption categories (real) by tertile
+* TODO: create these graphs (1) for full period and (2) for 2005 to 2015
+

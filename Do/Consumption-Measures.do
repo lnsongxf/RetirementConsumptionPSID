@@ -83,6 +83,45 @@ egen expenditure_total_100         = rowtotal(`expenditure_total_100')
 * Also, Straub drops repairsexpenditure (and maybe furnishing?) cause those are savings rather than consumption
 
 
+****************************************************************************************************
+** Consumption Categories
+****************************************************************************************************
+
+* 	- Some comprehensive categorization
+* 
+* 1		- Food at home
+* 		- Food stamps
+* 
+* 2		- Food away
+* 
+* 3		- Utilities
+* 		- Home insurance
+* 		- Imputed Rent
+* 		- *Repairs
+* 		
+* 4		- Health Insurance
+* 		- Health Services
+* 
+* 5		- Education
+* 		- Childcare
+* 
+* 6		- Gasoline
+* 		- Transportation
+* 
+* 7		- *Vacations/Trips
+* 		- *Recreation
+* 
+* 8		- *Clothing
+
+
+
+
+
+* 1) add them
+* 2) convert to real values using (where x is the variable of interest)
+* gen x_real = 100 * x / CPI_all_base_2015
+
+
 
 ****************************************************************************************************
 ** Aguiar and Hurst Additions
@@ -179,6 +218,8 @@ foreach var of varlist housingexpenditure mortgageexpenditure rentexpenditure //
 * NOTE: inc_fam remains nominal (though up above, expenditure categories are converted to real... not the best naming convention)
 gen inc_fam_real      = 100 * inc_fam / CPI_all
 gen inc_fam_real_2015 = 100 * inc_fam / CPI_all_base_2015
+
+gen inc_ss_fam_real   = 100 * inc_ss_fam / CPI_all_base_2015
 
 ****************************************************************************************************
 ** Wealth

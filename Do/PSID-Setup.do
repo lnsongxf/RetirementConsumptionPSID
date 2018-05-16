@@ -1,6 +1,9 @@
 set more off
 clear all
 
+// PSID Variable Search:
+// https://simba.isr.umich.edu/VS/s.aspx
+
 *global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"
 global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 
