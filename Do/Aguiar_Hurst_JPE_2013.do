@@ -18,7 +18,7 @@ qui do "$folder\Do\Consumption-Measures.do"
 cap ssc install regsave
 
 keep if age >= 25 & age <= 75
-
+//just a comment
 * Aguiar and Hurst:
 * We also restrict the sample to households that record a nonzero annual 
 * expenditure on six key sub-omponents of the consumption basket: food, 
