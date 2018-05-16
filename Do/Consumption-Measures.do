@@ -82,6 +82,7 @@ egen expenditure_total_100         = rowtotal(`expenditure_total_100')
 * WARNING: housingexpenditure includes mortgage payment. Might be better to include imputed rents for those people
 * Also, Straub drops repairsexpenditure (and maybe furnishing?) cause those are savings rather than consumption
 
+gen equiv = sqrt(fsize)
 
 ****************************************************************************************************
 ** Consumption Categories
@@ -118,8 +119,10 @@ egen expenditure_total_100         = rowtotal(`expenditure_total_100')
 
 
 * 1) add them
+* egen x = rowtotal(var1 var2)
 * 2) convert to real values using (where x is the variable of interest)
 * gen x_real = 100 * x / CPI_all_base_2015
+* 3) divide each category equiv (replace x = x / equiv )
 
 
 
@@ -259,7 +262,6 @@ gen mortgage_debt_real           = 100 * mortgage_debt / CPI_all_base_2015
 ** Equivalence scale
 ****************************************************************************************************
 
-gen equiv = sqrt(fsize)
 
 gen expenditure_blundell_eq        = expenditure_blundell / equiv
 gen expenditure_blundell_eq_exH    = expenditure_blundell_exhous / equiv
