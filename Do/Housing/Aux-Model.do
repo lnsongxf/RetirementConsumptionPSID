@@ -212,8 +212,25 @@ hist log_house_price_meaninc_ratio, name("hist_log_mean_inc", replace) graphregi
 * todo: take avg house price
 by pid, sort: egen log_housevalue_real_mean = mean(log_housevalue_real)
 
-// sfdsf
+****************************************************************************************************
+** Look at wealth by age
+****************************************************************************************************
 
+* TODO: why do these results look so different ???
+
+preserve
+	collapse (median) housing_wealth liq_wealth HL_ratio, by(age)
+	tsset age
+	tsline housing_w liq_w, name("median", replace)
+restore
+
+preserve
+	collapse (mean) housing_wealth liq_wealth HL_ratio, by(age)
+	tsset age
+	tsline housing_w liq_w, name("mean", replace)
+restore
+
+sdfsdf
 ****************************************************************************************************
 ** Run SU regression
 ****************************************************************************************************

@@ -1,7 +1,7 @@
 clear all
 
-*global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
-global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"
+global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
+* global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"
 
 import excel "$folder/Results/Di_Belsky_Liu_Graph/Di_Matlab_Replication/Matlab_Results.xlsx" ///
       , sheet("Sheet1") firstrow clear 

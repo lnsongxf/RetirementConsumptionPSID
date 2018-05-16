@@ -160,6 +160,23 @@ preserve
 	graph export "$folder/Results/Wealth/median_wealth_by_age.pdf", as(pdf) replace
 restore
 
+preserve
+	collapse (median) log_fam_wealth_real log_fam_wealth_ex_home_real fam_wealth_real fam_wealth_ex_home_real fam_liq_wealth_real fam_LiqAndH_wealth_real fam_liq_housing_IRA_real fam_liq_housing_IRA_bus_real fam_wealth_ex_bus_real fam_wealth_ex_bus_ira_real, by(age_cat)
+	tsset age_cat
+
+	lab var fam_liq_wealth_real "Liquid Wealth"
+	lab var fam_LiqAndH_wealth_real "Liquid + Housing"
+	lab var fam_liq_housing_IRA_real "Liquid + Housing + IRA"
+	lab var fam_liq_housing_IRA_bus_real "Liquid + Housing + IRA + Bus"
+	lab var fam_wealth_real "Net Wealth"
+
+	lab var age_cat "Age"
+
+	tsline fam_liq_wealth_real fam_LiqAndH_wealth_real  fam_wealth_real , title("Median Wealth") name("cleaner_median_wealth_by_age", replace) ytitle("Real Wealth (2015 dollars)", margin(0 4 0 0) ) graphregion(color(white)) ylabel( #3 )
+	graph export "$folder/Results/Wealth/median_wealth_by_age_cleaner.pdf", as(pdf) replace
+restore
+
+
 ****************************************************************************************************
 ** Simple means and medians by age EXCLUDING TOP 1%
 ****************************************************************************************************
