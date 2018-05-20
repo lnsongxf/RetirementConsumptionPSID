@@ -7,6 +7,7 @@ use "$folder\Data\Intermediate\Basic-Panel.dta", clear
 
 * Switches							 
 global cohort_graphs 0           // plot graphs by age and cohort (1) or by age controlling for cohort and year (0) 
+global use_age_cat 0             // 1 to use 5 year age categories, 0 to use annual categories
 
 * Generate aggregate consumption (following Blundell et al)
 qui do "$folder\Do\Consumption-Measures.do"
@@ -49,6 +50,13 @@ foreach var of varlist expenditure_hurst expenditure_hurst_nonH ///
 }
 
 xtset pid wave, delta(2)
+
+* Create age categories (aka 5 year brackets)
+if $use_age_cat == 1{
+	egen age_cat = cut(age), at( 20(5)75 ) // icodes label
+	drop age
+	rename age_cat age
+}
 
 ****************************************************************************************************
 ** Create cohorts and collapse
@@ -121,6 +129,7 @@ foreach num of numlist 3/9 {
 gen married_dummy = married == 1 // just look at married or not (rather than divorced, never married, widowed, separated, etc)
 local family_controls i.married_dummy i.fsize i.children i.children0_2 i.children3_5 i.children6_13 i.children14_17m i.children14_17f i.children18_21m i.children18_21f 
 local reg_controls i.age i.year_born d_year* `family_controls' 
+local panel_reg_controls i.age d_year* `family_controls' // same as above but without year_born
 
 * Question: is it right to use family weights rather than cross sectional? [pweight = family_weight]
 
@@ -146,21 +155,51 @@ qui reg log_expenditure_hurst_nonH `reg_controls'
 regsave using `results', addlabel(lab, "Nondurables w/out Housing") append
 
 preserve
-* Find coefs by age
-use `results', clear
-gen is_age = strpos(var, "age")
-keep if is_age > 0
-drop is_age
-destring var, replace ignore("b.age")
-rename var age
-
-* Plot results
-encode lab, gen(labels)
-xtset labels age
-lab var age "Age"
-lab var coef "Log Expenditure Relative to Age 25"
-xtline coef, overlay name("Fig1", replace) note("Nondurables in PSID include food, gasoline, utilities, transportation services, and child care." "It does not include other components used in Aguiar Hurst, such as tobacco, clothing,""personal care, domestic services, airfare, nondurable entertainment, gambling, business" "services, and chartiable giving") title("Life Cycle Consumption") ytitle(, margin(0 2 0 0))
+	* Find coefs by age
+	use `results', clear
+	gen is_age = strpos(var, "age")
+	keep if is_age > 0
+	drop is_age
+	destring var, replace ignore("b.age")
+	rename var age
+	
+	* Plot results
+	encode lab, gen(labels)
+	xtset labels age
+	lab var age "Age"
+	lab var coef "Log Expenditure Relative to Age 25"
+	xtline coef, overlay name("Fig1", replace) note("Nondurables in PSID include food, gasoline, utilities, transportation services, and child care." "It does not include other components used in Aguiar Hurst, such as tobacco, clothing,""personal care, domestic services, airfare, nondurable entertainment, gambling, business" "services, and chartiable giving") title("Life Cycle Consumption") ytitle(, margin(0 2 0 0))
 restore
+
+
+****************************************************************************************************
+** Fig 1a - with FE
+****************************************************************************************************
+
+xtreg log_expenditure_hurst `panel_reg_controls', fe
+regsave using `results', addlabel(lab, "Nondurables") replace
+
+qui xtreg log_expenditure_hurst_nonH `panel_reg_controls', fe 
+regsave using `results', addlabel(lab, "Nondurables w/out Housing") append
+
+preserve
+	* Find coefs by age
+	use `results', clear
+	gen is_age = strpos(var, "age")
+	keep if is_age > 0
+	drop is_age
+	destring var, replace ignore("b.age")
+	rename var age
+	
+	* Plot results
+	encode lab, gen(labels)
+	xtset labels age
+	lab var age "Age"
+	lab var coef "Log Expenditure Relative to Age 25"
+	xtline coef, overlay name("Fig1_fe", replace) title("Life Cycle Consumption (with FE)") note("Nondurables in PSID include food, gasoline, utilities, transportation services, and child care." "It does not include other components used in Aguiar Hurst, such as tobacco, clothing,""personal care, domestic services, airfare, nondurable entertainment, gambling, business" "services, and chartiable giving") ytitle(, margin(0 2 0 0))
+	graph export "$folder\Results\AguiarHurstReplication\Fig1_fe.pdf", as(pdf) replace
+restore
+
 
 ****************************************************************************************************
 ** Figure 2a - Work vs Non Work
@@ -202,6 +241,40 @@ xtline coef, overlay name("Fig2", replace) title("Life Cycle Consumption: Work v
 restore
 
 ****************************************************************************************************
+** Fig 2a - with FE
+****************************************************************************************************
+
+tempfile results
+xtreg log_foodathomeexpenditure `panel_reg_controls', fe
+regsave using `results', addlabel(lab, "Food at Home") replace
+
+qui xtreg log_workexpenditure `panel_reg_controls', fe 
+regsave using `results', addlabel(lab, "Work Related") append
+
+qui xtreg log_nonwork_nondur_expenditure `panel_reg_controls', fe 
+regsave using `results', addlabel(lab, "Non Work Related") append
+
+
+preserve
+	* Find coefs by age
+	use `results', clear
+	gen is_age = strpos(var, "age")
+	keep if is_age > 0
+	drop is_age
+	destring var, replace ignore("b.age")
+	rename var age
+	
+	* Plot results
+	encode lab, gen(labels)
+	xtset labels age
+	lab var age "Age"
+	lab var coef "Log Expenditure Relative to Age 25"
+	xtline coef, overlay name("Fig2_fe", replace) title("Life Cycle Consumption: Work vs Non Work (with FE)") ytitle(, margin(0 2 0 0))
+	graph export "$folder\Results\AguiarHurstReplication\Fig2_fe.pdf", as(pdf) replace
+restore
+
+
+****************************************************************************************************
 ** Figure 3a - Smaller categories starting in 1999
 ** They use entertainemnt, utilities, housing services, other ND, domestic services
 ****************************************************************************************************
@@ -218,20 +291,54 @@ qui reg log_childcareexpenditure `reg_controls'
 regsave using `results', addlabel(lab, "Child Care Expenditure") append
 
 * Find coefs by age
-use `results', clear
-gen is_age = strpos(var, "age")
-keep if is_age > 0
-drop is_age
-destring var, replace ignore("b.age")
-rename var age
-
-* Plot results
-encode lab, gen(labels)
-xtset labels age
-lab var age "Age"
-lab var coef "Log Expenditure Relative to Age 25"
-xtline coef, overlay name("Fig3a", replace) title("Life Cycle Consumption: Increasing Components") ytitle(, margin(0 2 0 0))
+	use `results', clear
+	gen is_age = strpos(var, "age")
+	keep if is_age > 0
+	drop is_age
+	destring var, replace ignore("b.age")
+	rename var age
+	
+	* Plot results
+	encode lab, gen(labels)
+	xtset labels age
+	lab var age "Age"
+	lab var coef "Log Expenditure Relative to Age 25"
+	xtline coef, overlay name("Fig3a", replace) title("Life Cycle Consumption: Increasing Components") ytitle(, margin(0 2 0 0))
 restore
+
+****************************************************************************************************
+** Fig 3a - with FE
+****************************************************************************************************
+
+tempfile results
+xtreg log_utilityexpenditure `panel_reg_controls', fe
+regsave using `results', addlabel(lab, "Utilities") replace
+
+qui xtreg log_housingservicesexpenditure `panel_reg_controls', fe 
+regsave using `results', addlabel(lab, "Housing Services") append
+
+qui xtreg log_childcareexpenditure `panel_reg_controls', fe 
+regsave using `results', addlabel(lab, "Child Care Expenditure") append
+
+
+preserve
+	* Find coefs by age
+	use `results', clear
+	gen is_age = strpos(var, "age")
+	keep if is_age > 0
+	drop is_age
+	destring var, replace ignore("b.age")
+	rename var age
+	
+	* Plot results
+	encode lab, gen(labels)
+	xtset labels age
+	lab var age "Age"
+	lab var coef "Log Expenditure Relative to Age 25"
+	xtline coef, overlay name("Fig3a_fe", replace) title("Life Cycle Consumption: Increasing Components (with FE)") ytitle(, margin(0 2 0 0))
+	graph export "$folder\Results\AguiarHurstReplication\Fig3a_fe.pdf", as(pdf) replace
+restore
+
 
 ****************************************************************************************************
 ** Figure 3b - Smaller categories starting in 1999
@@ -266,7 +373,40 @@ xtline coef, overlay name("Fig3b", replace)  title("Life Cycle Consumption: Decr
 restore
 
 ****************************************************************************************************
-** Fig 3 extension - Post 2005 Expenditure Categories
+** Fig 3b - with FE
+****************************************************************************************************
+
+tempfile results
+xtreg log_transportationexpenditure `panel_reg_controls', fe
+regsave using `results', addlabel(lab, "Transportation") replace
+
+qui xtreg log_foodathomeexpenditure `panel_reg_controls', fe 
+regsave using `results', addlabel(lab, "Food at home") append
+
+qui xtreg log_foodawayfromhomeexpenditure `panel_reg_controls', fe 
+regsave using `results', addlabel(lab, "Food away from home") append
+
+
+preserve
+	* Find coefs by age
+	use `results', clear
+	gen is_age = strpos(var, "age")
+	keep if is_age > 0
+	drop is_age
+	destring var, replace ignore("b.age")
+	rename var age
+	
+	* Plot results
+	encode lab, gen(labels)
+	xtset labels age
+	lab var age "Age"
+	lab var coef "Log Expenditure Relative to Age 25"
+	xtline coef, overlay name("Fig3b_fe", replace) title("Life Cycle Consumption: Decreasing Components (with FE)") ytitle(, margin(0 2 0 0))
+	graph export "$folder\Results\AguiarHurstReplication\Fig3b_fe.pdf", as(pdf) replace
+restore
+
+****************************************************************************************************
+** Fig 3c - Post 2005 Expenditure Categories
 ****************************************************************************************************
 
 preserve
@@ -311,6 +451,55 @@ lab var age "Age"
 lab var coef "Log Expenditure Relative to Age 25"
 xtline coef, overlay name("Fig3_alt", replace)  title("Life Cycle Consumption: New PSID Measures") ytitle(, margin(0 2 0 0))
 restore
+
+****************************************************************************************************
+** Fig 3c - with FE
+****************************************************************************************************
+preserve
+
+	* Select smaller sample
+	keep if wave >= 2005
+	// keep if year_born >= 1940 // aka maximum of age 65 in 2005
+	
+	* New year dummies, starting in 2005
+	* where year dummies are normalized so that Ed_year=0 and Cov(d_year,trend)=0
+	drop year_cat* d_year_*
+	quietly tab wave, gen(year_cat)
+	foreach num of numlist 3/6 {
+		gen d_year_`num'=year_cat`num'+(1-`num')*year_cat2+(`num'-2)*year_cat1
+	}
+
+	tempfile results
+	xtreg log_workexpenditure_post05 `panel_reg_controls', fe
+	regsave using `results', addlabel(lab, "Work Related (incl clothing)") replace
+	
+	qui xtreg log_clothingexpenditure `panel_reg_controls', fe 
+	regsave using `results', addlabel(lab, "Clothing") append
+	
+	qui xtreg log_tripsexpenditure `panel_reg_controls', fe 
+	regsave using `results', addlabel(lab, "Trips") append
+
+	qui xtreg log_recreationexpenditure `panel_reg_controls', fe 
+	regsave using `results', addlabel(lab, "Recreation") append
+
+
+	* Find coefs by age
+	use `results', clear
+	gen is_age = strpos(var, "age")
+	keep if is_age > 0
+	drop is_age
+	destring var, replace ignore("b.age")
+	rename var age
+	
+	* Plot results
+	encode lab, gen(labels)
+	xtset labels age
+	lab var age "Age"
+	lab var coef "Log Expenditure Relative to Age 25"
+	xtline coef, overlay name("Fig3c_fe", replace) title("Life Cycle Consumption: New PSID Measures (with FE)") ytitle(, margin(0 2 0 0))
+	graph export "$folder\Results\AguiarHurstReplication\Fig3c_fe.pdf", as(pdf) replace
+restore
+
 
 ****************************************************************************************************
 ** Fig 3b extension - Post 2005 Expenditure Categories

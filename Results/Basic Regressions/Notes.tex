@@ -51,7 +51,7 @@
 
 A big area of controversy in economics is how households adjust their consumption and leisure decisions as they approach and enter into retirement. Previous research has documented significant drops in households' spending at retirement, which potentially indicates that they have under-saved in preparation for old age and therefore suffer a fall in living standards. However, other papers have suggested that, as the opportunity cost of leisure falls at retirement, households optimally switch leisure for consumption and therefore falls in spending do not reflect drops in living standards. This project aims to document the extent to which these changes in spending and time use differ across different types of households, and ultimately, to understand what drives these difference.
 
-\section{Life Cycle Consumption Dynamics}
+\section{Life Cycle Consumption Dynamics (APC)}
 
 
 \begin{figure}[h]
@@ -61,7 +61,7 @@ A big area of controversy in economics is how households adjust their consumptio
 \end{figure}
 
 \pagebreak 
-We follow the method of Aguiar and Hurst (2013) to compute consumption dynamics in the Panel Study of Income Dynamics. These authors study the hump-shaped profile of nondurable expenditures and ask why nondurable expenditure declines during the second half of the life cycle, as seen in the red line of the first figure. The authors find that much of the decline is attributable to a decline in work related expenditures. This can be seen in the green line of the second figure.
+We replicate the method of Aguiar and Hurst (2013) to compute consumption dynamics over the life cycle. We use the Panel Study of Income Dynamics, whereas they use the CEX. These authors study the hump-shaped profile of nondurable expenditures and ask why nondurable expenditure declines during the second half of the life cycle, as seen in the red line of the first figure. The authors find that much of the decline is attributable to a decline in work related expenditures. This can be seen in the green line of the second figure.
 
 \begin{figure}[h]
 	%\caption{Life Cycle Consumption}
@@ -88,6 +88,40 @@ We follow the method of Aguiar and Hurst (2013) to compute consumption dynamics 
 \end{figure}
 
 
+\section{Life Cycle Consumption Dynamics (with HH FE)}
+
+We extend the above analysis to take advantage of the longitudinal nature of the PSID. We add a household fixed effect to the age-period-cohort regression and take out the cohort effect. 
+
+\begin{figure}[h]
+	% \caption{Life Cycle Consumption}
+	\centering
+	\includegraphics[width=0.9\textwidth]{../AguiarHurstReplication/Fig1_fe.pdf}
+\end{figure}
+
+
+\begin{figure}[h]
+	%\caption{Life Cycle Consumption}
+	\centering
+	\includegraphics[width=0.9\textwidth]{../AguiarHurstReplication/Fig2_fe.pdf}
+\end{figure}
+
+\begin{figure}[h]
+	%\caption{Life Cycle Consumption}
+	\centering
+	\includegraphics[width=0.9\textwidth]{../AguiarHurstReplication/Fig3a_fe.pdf}
+\end{figure}
+
+\begin{figure}[h]
+	%\caption{Life Cycle Consumption}
+	\centering
+	\includegraphics[width=0.9\textwidth]{../AguiarHurstReplication/Fig3c_fe.pdf}
+\end{figure}
+
+\begin{figure}[h]
+	%\caption{Life Cycle Consumption}
+	\centering
+	\includegraphics[width=0.9\textwidth]{../AguiarHurstReplication/Fig3b_fe.pdf}
+\end{figure}
 
 
 \section{Consumption around Retirement}
