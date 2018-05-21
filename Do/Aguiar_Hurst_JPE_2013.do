@@ -1,15 +1,18 @@
 set more off
 graph close
-set autotabgraphs on
+* set autotabgraphs on
 
-global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
-use "$folder\Data\Intermediate\Basic-Panel.dta", clear
+* global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
+global folder "/Users/bibekbasnet/Documents/GitHub/RetirementConsumptionPSID"
+
+use "$folder/Data/Intermediate/Basic-Panel.dta", clear
+
 
 * Switches							 
 global cohort_graphs 0           // plot graphs by age and cohort (1) or by age controlling for cohort and year (0) 
 
 * Generate aggregate consumption (following Blundell et al)
-qui do "$folder\Do\Consumption-Measures.do"
+qui do "$folder/Do/Consumption-Measures.do"
 
 ****************************************************************************************************
 ** Aguiar and Hurst prep
@@ -21,7 +24,7 @@ keep if age >= 25 & age <= 75
 //just a comment
 * Aguiar and Hurst:
 * We also restrict the sample to households that record a nonzero annual 
-* expenditure on six key sub-omponents of the consumption basket: food, 
+* expenditure on six key sub-components of the consumption basket: food, 
 * entertainment, transportation, clothing and personal care, utilities, and housing/rent.
 
 * In the PSID, they impute missing values
