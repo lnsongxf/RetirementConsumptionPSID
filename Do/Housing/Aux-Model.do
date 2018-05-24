@@ -21,8 +21,8 @@ global aux_model_in_logs 1 // 1 = logs, 0 = levels
 
 global drop_top_x 0 // can be 0, 1, or 5
 
-global estimate_reg_by_age 0 // 0 is our baseline where we estimate SUREG with everyone pooled together. 1 is alternative where we do two buckets
-global cutoff_age 50
+global estimate_reg_by_age 1 // 0 is our baseline where we estimate SUREG with everyone pooled together. 1 is alternative where we do two buckets
+global cutoff_age 40
 
 global no_age_coefs 0 // default is  0 (include age and age2)
 
@@ -59,7 +59,7 @@ drop if fam_wealth_real - L.fam_wealth_real > 100 * inc_fam_real & fam_wealth !=
 * drop if housingstatus == 8 // neither own nor rent
 
 * Find first home purcahses (two alternative definitions)
-qui do "$folder\Do\Find-First-Home-Purchase.do"
+qui do "$folder\Do\Housing\Find-First-Home-Purchase.do"
 
 ****************************************************************************************************
 ** Define variables
@@ -218,6 +218,7 @@ by pid, sort: egen log_housevalue_real_mean = mean(log_housevalue_real)
 
 * TODO: why do these results look so different ???
 
+/*
 preserve
 	collapse (median) housing_wealth liq_wealth HL_ratio, by(age)
 	tsset age
@@ -230,7 +231,26 @@ preserve
 	tsline housing_w liq_w, name("mean", replace)
 restore
 
-sdfsdf
+*/
+
+****************************************************************************************************
+** Test our version of SU regression
+****************************************************************************************************
+sureg (log_income log_consumption = L.(log_income log_consumption) )
+mat list e(Sigma)
+
+reg log_income L.(log_income log_consumption) 
+predict double resid1, residuals
+
+reg log_consumption L.(log_income log_consumption) 
+predict double resid2, residuals
+
+corr resid1 resid2, covariance
+
+** WOOHOO! It works
+** Equation by equation OLS is equivalent to system OLS or FGLS when all the regressors are the same across equations
+** For more info, see Wooldridge screen shots in the Notes folder
+
 ****************************************************************************************************
 ** Run SU regression
 ****************************************************************************************************

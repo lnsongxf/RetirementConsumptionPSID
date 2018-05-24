@@ -1,0 +1,15 @@
+	(1)	(2)
+VARIABLES	Model A	Model B
+		
+log_liq_wealth	6.235	6.235
+years_owning	5.191	5.191
+years_owning2	48.16	48.16
+log_avg_income	10.61	10.61
+1b.init_wealth_quant		0.311
+2.init_wealth_quant		0.218
+3.init_wealth_quant		0.247
+4.init_wealth_quant		0.224
+initial_age	25.29	25.29
+log_initial_wealth	5.913	
+		
+Observations	117,978	117,978

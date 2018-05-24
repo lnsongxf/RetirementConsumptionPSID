@@ -1,15 +1,12 @@
 clear; clc; close all;
-%cd 'C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID\Results\Aux_Model_Estimates'
-  cd '/Users/agneskaa/Documents/RetirementConsumptionPSID/Results/Aux_Model_Estimates'
+cd 'C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID\Results\Aux_Model_Estimates'
+%   cd '/Users/agneskaa/Documents/RetirementConsumptionPSID/Results/Aux_Model_Estimates'
 
 % SWITCHES
-age_cutoff = 50;
-twogroup = 0; % Swith for using one vs two groups for esting the aux model
+age_cutoff = 40;
+twogroup = 1; % Swith for using one vs two groups for esting the aux model
 no_age_coefs = 0; % baseline 0 includes both age and age2. 1 does not
 use_means_as_init_data = 0;
-
-% TODO: if using two groups, will need to make the cutoff more flexible 
-% now that people age in 2 year intervals
 
 if twogroup==1
     A_young = importdata(['coefs_below_', num2str(age_cutoff), '.txt']);
@@ -59,6 +56,7 @@ else
     end
 
 end
+
 
 %% Use means as initial data
 if use_means_as_init_data == 1
@@ -131,13 +129,14 @@ if twogroup==1 % if two sets  of coefs
     %% Find those at age cutoff (or just one year before)
     people_age_cutoff = table_input(:, 7) == age_cutoff | table_input(:, 7) == age_cutoff - 1;
     X_t = table_input(people_age_cutoff, 2:end);   
+    ids_new = table_input(people_age_cutoff, 1);   
     n = length(X_t);
    
     %% Run it for old people
     for t = 1:(70-age_cutoff)
         t
         X_t1 = simulate_SUR(X_t, n, m, betaa_old, Var_Cov_old, index_housing, index_HW, index_age);
-        table_input = [ table_input; ids, X_t1 ];
+        table_input = [ table_input; ids_new, X_t1 ];
         X_t = X_t1;
     end
 

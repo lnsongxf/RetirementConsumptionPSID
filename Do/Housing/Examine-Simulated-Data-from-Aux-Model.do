@@ -12,6 +12,10 @@ local sumstat "median"
 
 global aux_model_in_logs 1 // 1 = logs, 0 = levels
 
+// local title "(aux model v1)"
+local title "(aux model v2)"
+
+set scheme s2mono
 
 ****************************************************************************************************
 ** Load sim data
@@ -81,14 +85,14 @@ xtset s age
 
 if $aux_model_in_logs == 1{
   foreach var  of varlist `log_vars' {
-    xtline `var', overlay name("`sumstat'_`var'", replace) graphregion(color(white)) ylabel( #3 ) title("`sumstat' `var' (aux model v1)")
+    xtline `var', overlay name("`sumstat'_`var'", replace) graphregion(color(white)) ylabel( #3 ) title("`sumstat' `var' `title'")
     graph export "$folder\Results\AuxModel\plot_`sumstat'_`var'.pdf", as(pdf) replace
     di "$folder\Results\AuxModel\plot_`sumstat'_`var'
   }
 }
 
 foreach var  of varlist `level_vars' {
-  xtline `var', overlay name("`sumstat'_`var'", replace) graphregion(color(white)) ylabel( #3 ) title("`sumstat' `var' (aux model v1)")
+  xtline `var', overlay name("`sumstat'_`var'", replace) graphregion(color(white)) ylabel( #3 ) title("`sumstat' `var' `title'")
   graph export "$folder\Results\AuxModel\plot_`sumstat'_`var'.pdf", as(pdf) replace
   di "$folder\Results\AuxModel\plot_`sumstat'_`var'
 }

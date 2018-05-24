@@ -1,0 +1,16 @@
+	(1)	(2)
+VARIABLES	Model A	Model B
+		
+years_owning	0.256	0.260
+years_owning2	-0.00318	-0.00345
+log_avg_income	1.496	1.497
+2.init_wealth_quant		0.273
+3.init_wealth_quant		0.355
+4.init_wealth_quant		0.265
+initial_age	0.00735	0.0115
+log_initial_wealth	0.0343	
+Constant	-11.20	-11.33
+		
+Observations	117,978	117,978
+R-squared	0.114	0.114
+Standard errors in parentheses		

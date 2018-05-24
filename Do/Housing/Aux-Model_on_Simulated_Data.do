@@ -4,10 +4,10 @@ set more off
 graph close
 set autotabgraphs on
 
-cd "/Users/agneskaa/Documents/RetirementConsumptionPSID/Results/Di_Belsky_Liu_v2"
+global folder "C:/Users/pedm/Documents/GitHub/RetirementConsumptionPSID"
+//  global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"
 
-*global folder "C:/Users/pedm/Documents/GitHub/RetirementConsumptionPSID"
- global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"
+cd "$folder/Results/Di_Belsky_Liu_v2"
  
 * SWITCH to CHOOSE WEALTH CAT.
 global analyze_liquid_wealth 1 
@@ -17,24 +17,39 @@ global analyze_liquid_wealth 1
 ****************************************************************************************************
 import delimited "$folder/Results/Aux_Model_Estimates/Simulated_Data_from_Aux_Model.csv"
 
-xtset pid age
+xtset pid age, delta(2)
 
 local endog_vars housing log_consumption log_liq_wealth log_housing_wealth log_income 
+
+
+preserve
+	gen L_housing = L.housing
+	gen L_log_consumption = L.log_consumption
+	gen L_log_liq_wealth = L.log_liq_wealth
+	gen L_log_housing_wealth = L.log_housing_wealth
+	gen L_log_income = L.log_income
+	
+	drop if L_log_income ==  . | L_housing == . | L_log_consumption == .
+	describe
+	export delimited using "$folder/Results/Aux_Model_Estimates/Simulated_Data_from_Aux_Model_with_lags.csv", replace
+restore
+
 
 ****************************************************************************************************
 ** Run regression
 ****************************************************************************************************
-/*
+
 sureg (`endog_vars' = L.(`endog_vars') age age_sq)
 
 matrix list e(b) // coefs
 mat coefs = e(b)
 
+mat  list e(Sigma)
 mat sigma = e(Sigma)
 
 
 mat2txt, matrix(coefs) saving("$folder/Results/Aux_Model_Estimates/coefs_onsimul.txt") replace
-mat2txt, matrix(sigma) saving("$folder/Results/Aux_Model_Estimates/sigma_onsimul.txt") replace */
+mat2txt, matrix(sigma) saving("$folder/Results/Aux_Model_Estimates/sigma_onsimul.txt") replace 
 
 ****************************************************************************************************
 ** Di Belsky Liu

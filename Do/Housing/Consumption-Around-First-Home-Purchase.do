@@ -45,7 +45,7 @@ drop if fam_wealth_real - L.fam_wealth_real > 100 * inc_fam_real & fam_wealth !=
 * drop if housingstatus == 8 // neither own nor rent
 
 * Find first home purcahses (two alternative definitions)
-qui do "$folder/Do/Find-First-Home-Purchase.do"
+qui do "$folder/Do/Housing/Find-First-Home-Purchase.do"
 
 drop if mortgageexpenditure > 0 & t_homeownership < 0 // these people do not make sense
 
