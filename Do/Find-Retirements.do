@@ -14,7 +14,7 @@ gen retired_unambig = emp_status_head == 4 & (emp_status_head_2 != 1 & emp_statu
 gen retirement_transition_loose  = retired_unambig == 1 & L.emp_status_head == 1
 
 * Currently retired, previously employed, and last job ended due to "Quit, Resigned, Retire" or "Inap." or "NA"
-gen retirement_transition        = retired_unambig == 1 & L.emp_status_head == 1 & (why_last_job_end == 4 | why_last_job_end == 0 | why_last_job_end == 9)
+gen retirement_transition        = retired_unambig == 1 & L.emp_status_head == 1 & (why_last_job_end == 4 | why_last_job_end == 0 | why_last_job_end == 9 | why_last_job_end == 7)
 
 * Currently retired, previously employed, and quit last job due to "Quit, Resigned, Retire"
 * WARNING: lots of people just have "Inap." for why_last_job_end
