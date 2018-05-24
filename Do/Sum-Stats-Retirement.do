@@ -1,7 +1,9 @@
 set more off
 // global folder "C:\Users\pedm\Documents\Research\Cormac\RetirementConsumptionPSID"
 *global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"
-global folder "C:\Users\Person\Documents\GitHub\RetirementConsumptionPSID"
+*global folder "C:\Users\Person\Documents\GitHub\RetirementConsumptionPSID"
+global folder "/Users/bibekbasnet/Documents/GitHub/RetirementConsumptionPSID"
+
 use "$folder/Data/Intermediate/Basic-Panel.dta", clear
 
 global retirement_definition 0   // 0 is default (last job ended due to "Quit, Resigned, Retire" or "NA")
@@ -9,6 +11,11 @@ global retirement_definition 0   // 0 is default (last job ended due to "Quit, R
 global allow_kids_to_leave_hh 1  // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH 
                                  // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
 
+global how_to_deal_with_spouse 3 // 1 () 2 (spouse always works) 3 (spouse has same ret transition +/- 1 wave) 4 () 5 (do not do anything special based on the spouse)
+						
+global retirement_definition_spouse 1 //// 0 is default (last job ended due to "Quit, Resigned, Retire" or "NA")
+                                       // 1 is loose (does not ask why last job ended) and 2 is strict (last job ended due to "Quit, Resigned, Retire" only)			 
+					
 * Sample selection: households with same husband-wife over time
 do "$folder/Do/Sample-Selection.do"
 
@@ -16,7 +23,7 @@ do "$folder/Do/Sample-Selection.do"
 do "$folder/Do/Find-Retirements.do"
 
 ****************************************************************************************************
-** Look at income based on time since retirement
+** 1) Look at income based on time since retirement
 ** Here time since retirement is based on my generated retirement year
 ****************************************************************************************************
 
@@ -40,12 +47,12 @@ preserve
 	
 	tsset ret_
 	label var ret_duration "Duration of Head's Retirement (ret year = first retired wave - months out)"
-	tsline `inc_measures', title("Income based on time since head's retirement") name("income_by_ret_duration", replace) ylabel(#3)
+	tsline `inc_measures', title("Income based on time since head's retirement") name("income_by_ret_duration_SP$how_to_deal_with_spouse", replace) ylabel(#3)
 restore
 
 
 ****************************************************************************************************
-** Look at income based on time since retirement
+** 2) Look at income based on time since retirement
 ** Here retirement year is defined as self reported retirement year
 ****************************************************************************************************
 
@@ -60,12 +67,14 @@ preserve
 	
 	tsset ret_
 	label var ret_duration "Duration of Head's Retirement (ret year = first retired wave)"
-	tsline `inc_measures', title("Income based on time since head's retirement") name("income_by_ret_duration_2", replace) ylabel(#3)
+	tsline `inc_measures', title("Income based on time since head's retirement") name("income_by_ret_duration_2_SP$how_to_deal_with_spouse", replace) ylabel(#3)
+	graph export "$folder/Results/IncomeAroundRetirement/Income_with_spouse_definition_$how_to_deal_with_spouse.pdf", as(pdf) replace
+
 restore
 
 
 ****************************************************************************************************
-** Look at income based on time since retirement
+** 3) Look at income based on time since retirement
 ** Here retirement year is defined as the first survey wave where they say they are retired
 ** (though I exclude cases where the self reported ret_year is far from the observed transition)
 ****************************************************************************************************
@@ -81,7 +90,7 @@ preserve
 	
 	tsset ret_
 	label var ret_duration "Duration of Head's Retirement (ret year as self reported)"
-	tsline `inc_measures', title("Income based on time since head's retirement") name("income_by_ret_duration_3", replace) ylabel(#3)
+	tsline `inc_measures', title("Income based on time since head's retirement") name("income_by_ret_duration_3_SP$how_to_deal_with_spouse", replace) ylabel(#3)
 restore
 
 
@@ -91,6 +100,7 @@ restore
 * households with zero Social Security who have reached age 65?
 ****************************************************************************************************
 
+/*
 gen pos_inc_ss_head = inc_ss_head > 0 & inc_ss_head != .
 gen pos_inc_ss_fam = inc_ss_fam > 0 & inc_ss_fam != .
 
@@ -107,3 +117,4 @@ tsline pos_inc_ss*, name("pos_inc_ss", replace)
 * At age 62, 29.4% of heads have positive SS income
 * At age 65, 60.7% of heads have positive SS income
 * At age 70, 94.3% of heads have positive SS income
+*/
