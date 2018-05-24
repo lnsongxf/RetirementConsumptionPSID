@@ -1,4 +1,13 @@
 ****************************************************************************************************
+** Merge in CPI
+****************************************************************************************************
+
+gen year = wave - 1 // note that expenditure data is for year prior to interview
+merge m:1 year using "$folder/Data/Intermediate/CPI.dta"
+drop if _m == 2
+drop year _m
+
+****************************************************************************************************
 ** Generate aggregate consumption (following Blundell et al)
 ****************************************************************************************************
 
@@ -13,6 +22,7 @@ local transportation_blundell autoinsexpenditure vehiclerepairexpenditure ///
 parkingexpenditure bustrainexpenditure taxiexpenditure othertransexpenditure
 
 gen healthservicesexpenditure = healthcareexpenditure - healthinsuranceexpenditure // my best guess as to how Pistaferri et al define this variable
+*replace healthservicesexpenditure = healthcareexpenditure - healthinsuranceexpenditure // my best guess as to how Pistaferri et al define this variable
 
 gen rent_imputed = rentexpenditure
 replace rent_imputed = 0.06 * housevalue if housingstatus == 1
@@ -62,12 +72,19 @@ lab var expenditure_blundell "Total Expenditure (Blundell et al)"
 ** Will be useful for constructing savings rate = (Y - C) / Y
 ****************************************************************************************************
 
+gen equiv = sqrt(fsize)
+
 * Pre 2005, only measure 70% of expenditure
 local expenditure_total_70 foodexpenditure healthcareexpenditure utilityexpenditure ///
       transportationexpenditure educationexpenditure childcareexpenditure ///
 	  housingexpenditure
 
 	  * rent_imputed propertytaxexpenditure homeinsuranceexpenditure
+	  
+local expenditure_total_pre2005 foodexpenditure healthcareexpenditure utilityexpenditure ///
+      transportationexpenditure educationexpenditure childcareexpenditure ///
+	  rent_imputed propertytaxexpenditure homeinsuranceexpenditure foodstamp
+	  
 
 * I exclude housingexpenditure and replace it with rent_imputed propertytaxexpenditure homeinsuranceexpenditure
 
@@ -78,43 +95,128 @@ local expenditure_total_100 `expenditure_total_70' furnishingsexpenditure ///
 
 egen expenditure_total_70          = rowtotal(`expenditure_total_70')
 egen expenditure_total_100         = rowtotal(`expenditure_total_100')
+egen expenditure_total_pre2005     = rowtotal(`expenditure_total_pre2005')
+
+* TODO: expenditure_total_post2005
+local expenditure_total_post2005 `expenditure_total_pre2005' furnishingsexpenditure ///
+      clothingexpenditure tripsexpenditure recreationexpenditure repairsexpenditure telephoneexpenditure
 
 * WARNING: housingexpenditure includes mortgage payment. Might be better to include imputed rents for those people
 * Also, Straub drops repairsexpenditure (and maybe furnishing?) cause those are savings rather than consumption
 
-gen equiv = sqrt(fsize)
+
+egen expenditure_total_post2005       = rowtotal(`expenditure_total_post2005') if wave >= 2005
+gen expenditure_total_post2005_real    = (100 * expenditure_total_post2005 / CPI_all_base_2015) / equiv
+
+// gen expenditure_total_100_real = 100 * expenditure_total_100 / CPI_all_base_2015
+// replace expenditure_total_100_real =  expenditure_total_100_real / equiv
+
 
 ****************************************************************************************************
-** Consumption Categories
+** Consumption Categories //
 ****************************************************************************************************
+*Category 1 | Food at Home | From 1999 to 2015
 
-* 	- Some comprehensive categorization
-* 
-* 1		- Food at home
-* 		- Food stamps
-* 
-* 2		- Food away
-* 
-* 3		- Utilities
+local total_foodexp_home foodathomeexpenditure fooddeliveredexpenditure foodstamp
+egen total_foodexp_home        = rowtotal(`total_foodexp_home')
+*Converting the nominal value to real value of food expenditure at home
+gen total_foodexp_home_real    = 100 * total_foodexp_home / CPI_all_base_2015
+
+
+* Category 2 | Food expenditure away from home
+* this category is already created in the document
+egen total_foodexp_away = rowtotal(foodawayfromhomeexpenditure)
+
+* Converting the nomial value to real value
+gen total_foodexp_away_real = 100 * total_foodexp_away / CPI_all_base_2015
+
+
+*Category 3 | Housing without repairs expenses. Repairs were added only from 2005 data
+local total_housing rent_imputed utilityexpenditure homeinsuranceexpenditure propertytaxexpenditure
+
+egen total_housing = rowtotal(`total_housing')
+*Converting from nominal value to real value
+gen total_housing_real    = 100 * total_housing / CPI_all_base_2015
+
+*    	- Utilities
 * 		- Home insurance
 * 		- Imputed Rent
 * 		- *Repairs
-* 		
-* 4		- Health Insurance
-* 		- Health Services
-* 
-* 5		- Education
-* 		- Childcare
-* 
-* 6		- Gasoline
-* 		- Transportation
-* 
-* 7		- *Vacations/Trips
-* 		- *Recreation
-* 
-* 8		- *Clothing
+
+*CATEGORY 4 | Housing expenditure from 2005 onwards
+*Note:Data on Repairs and telephone/internet expenditure was collected from 2005 onwards only. So we need two different equations on this. 
+local total_housing_2005 rent_imputed utilityexpenditure homeinsuranceexpenditure propertytaxexpenditure repairsexpenditure telephoneexpenditure
+egen total_housing_2005       = rowtotal(`total_housing_2005') if wave >= 2005
+gen total_housing_2005_real    = 100 * total_housing_2005  / CPI_all_base_2015
 
 
+*CATEGORY 5 | Health expenses (Generated variable combining
+	// expenditures for hospital and nursing home, doctor, prescription drugs
+	// and insurance.)
+local total_healthexpense healthcareexpenditure 
+egen total_healthexpense = rowtotal(`total_healthexpense')
+
+gen total_healthexpense_real    = 100 * total_healthexpense / CPI_all_base_2015
+
+
+*CATEGORY 6 | Education expenses
+local total_education educationexpenditure
+*childcareexpenditure
+egen total_education = rowtotal(`total_education')
+gen total_education_real =  100 * total_education / CPI_all_base_2015
+
+
+*CATEGORY 7 | nondurable tranportation expenses
+local total_transportexpense gasolineexpenditure transportation_blundell
+egen total_transportexpense = rowtotal(`total_transportexpense')
+gen total_transport_real = 100 * total_transportexpense / CPI_all_base_2015
+
+
+* CATEGORY 8 | Recreation expenses **
+* The data on recreation was added from 2005 survey
+local total_recreation_2005 recreationexpenditure tripsexpenditure
+egen total_recreation_2005   = rowtotal(`total_recreation_2005') if wave >= 2005
+
+gen total_recreation_2005_real  = 100 * total_recreation_2005 / CPI_all_base_2015
+
+
+*CATEGORY 9 | Clothing expenses | This category was also added from 2005 onwards
+
+egen total_clothing_2005 = rowtotal(clothingexpenditure) if wave >= 2005
+gen total_clothing_2005_real = 100 * total_clothing_2005 / CPI_all_base_2015
+
+
+gen expenditure_total_pre2005_real = 100 * expenditure_total_pre2005 / CPI_all_base_2015
+
+
+
+* dividing all by equiv 
+foreach var of varlist  total_foodexp_home_real total_foodexp_away_real total_housing_real ///
+total_housing_2005_real total_education_real total_healthexpense_real total_transport_real  ///
+total_recreation_2005_real total_clothing_2005_real expenditure_total_pre2005_real {
+replace `var' =  `var'/ equiv
+}
+
+*********************************************
+//ADDING MISSING DURABLES TO PLOT BAR GRAPHS
+*********************************************
+// local missing_food_exp fooddeliveredexpenditure 
+// egen missing_food_exp = rowtotal(`missing_food_exp')
+// gen missing_food_exp_real =  100 * missing_food_exp / CPI_all_base_2015
+// replace missing_food_exp_real =  missing_food_exp_real/ equiv
+
+
+local transport_durables vehicleloanexpenditure vehicledpexpenditure vehicleleaseexpenditure ///
+	  addvehicleexpenditure
+egen transport_durables = rowtotal(`transport_durables')
+gen transport_durables_real =  100 * transport_durables / CPI_all_base_2015
+replace transport_durables_real =  transport_durables_real/ equiv
+
+gen transportationexp_real2015 = 100 * (transportationexpenditure / CPI_all_base_2015) / equiv
+* excludes vehicle loan, down payment, lease, and additional vehicle expenditure
+* additonal vehicle expenditure (intially excluded from the data)
+// local transportation_blundell autoinsexpenditure vehiclerepairexpenditure ///
+// parkingexpenditure bustrainexpenditure taxiexpenditure othertransexpenditure// gasoline (
 
 
 
@@ -123,8 +225,6 @@ gen equiv = sqrt(fsize)
 * 2) convert to real values using (where x is the variable of interest)
 * gen x_real = 100 * x / CPI_all_base_2015
 * 3) divide each category equiv (replace x = x / equiv )
-
-
 
 ****************************************************************************************************
 ** Aguiar and Hurst Additions
@@ -169,15 +269,53 @@ egen nonwork_nondur_expenditure    = rowtotal( /* healthinsuranceexpenditure hea
 
 egen housingservicesexpenditure = rowtotal(rent_imputed homeinsuranceexpenditure propertytaxexpenditure)
 
+
+****************************************************************************************************
+** Compare imputed variables to underlying data
+** slightly weird: transportationexpenditure == transportationexpenditure_TEST
+** but we cannot replicate this assertion using the real-equiv-scale data
+****************************************************************************************************
+
+/*
+graph bar total_transport_real transport_durables, over(age) stack name("fig1", replace)
+graph bar transportationexp_real2015, over(age) stack name("fig2", replace)
+
+preserve
+collapse total_transport_real transport_durables transportationexp_real2015, by(age)
+gen transportation_NEW = total_transport_real + transport_durables
+tsset age
+tsline transportationexp_real2015 transportation_NEW
+restore
+*/
+
+/*
+
+gen dif_trans = transportationexp_real2015 - total_transport_real - transport_durables
+
+
+* Assert that these components of transportation all add up to transportationexpenditure
+egen transportationexpenditure_TEST = rowtotal(vehicleloanexpenditure vehicledpexpenditure vehicleleaseexpenditure autoinsexpenditure addvehicleexpenditure ///
+	vehiclerepairexpenditure gasolineexpenditure parkingexpenditure bustrainexpenditure taxiexpenditure othertransexpenditure)
+assert transportationexpenditure_TEST <= transportationexpenditure + 0.03 & ///
+		transportationexpenditure_TEST >= transportationexpenditure - 0.03
+
+
+
+sum dif_trans 
+hist dif_trans 
+tab wave if dif_trans > 0.1 | dif_trans < -0.1
+
+edit pid wave transportationexpenditure vehicleloanexpenditure vehicledpexpenditure vehicleleaseexpenditure autoinsexpenditure addvehicleexpenditure ///
+	vehiclerepairexpenditure gasolineexpenditure parkingexpenditure bustrainexpenditure taxiexpenditure othertransexpenditure ///
+	dif_trans transportationexp_real2015 total_transport_real transport_durables	if dif_trans > 0.1 | dif_trans < -0.1
+*/
+	
+	
+
 ****************************************************************************************************
 ** Merge in CPI and make real
 ****************************************************************************************************
 
-
-gen year = wave - 1 // note that expenditure data is for year prior to interview
-merge m:1 year using "$folder/Data/Intermediate/CPI.dta"
-drop if _m == 2
-drop year _m
 
 * Convert to real terms using individual index
 * WARNING: individual index might have different base year from CPI_all
