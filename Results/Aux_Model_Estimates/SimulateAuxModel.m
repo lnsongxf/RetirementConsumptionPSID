@@ -4,7 +4,7 @@ cd 'C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID\Results\Aux_Model_E
 
 % SWITCHES
 age_cutoff = 40;
-twogroup = 1; % Swith for using one vs two groups for esting the aux model
+twogroup = 0; % Swith for using one vs two groups for esting the aux model
 no_age_coefs = 0; % baseline 0 includes both age and age2. 1 does not
 use_means_as_init_data = 0;
 

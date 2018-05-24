@@ -21,12 +21,14 @@ global aux_model_in_logs 1 // 1 = logs, 0 = levels
 
 global drop_top_x 0 // can be 0, 1, or 5
 
-global estimate_reg_by_age 1 // 0 is our baseline where we estimate SUREG with everyone pooled together. 1 is alternative where we do two buckets
+global estimate_reg_by_age 0 // 0 is our baseline where we estimate SUREG with everyone pooled together. 1 is alternative where we do two buckets
 global cutoff_age 40
 
-global no_age_coefs 0 // default is  0 (include age and age2)
+global no_age_coefs 0 // default is  0 (include age and age2). NOTE: I manually removed age and age2 from the SUR
+global residualized_vars 1 // original version was 0 (no residualization) (NOTE: only works for log variables)
+global house_price_by_age 0 // plot distribution of house price by age?
 
-* NOTE: I manually removed age and age2 from the SUR
+* TODO: add in mortgage debt vs house value
 
 ****************************************************************************************************
 ** Sample selection
@@ -196,6 +198,7 @@ sum housing_wealth if housing == 0*/
 ** Look at distribution of house prices based on income
 ****************************************************************************************************
 
+if $house_price_by_age == 1{
 gen house_price_inc_ratio = housevalue_real / income if housing == 1 & income > 16000
 hist house_price_inc_ratio, name("hist", replace) graphregion(color(white)) 
 
@@ -211,6 +214,77 @@ hist log_house_price_meaninc_ratio, name("hist_log_mean_inc", replace) graphregi
 
 * todo: take avg house price
 by pid, sort: egen log_housevalue_real_mean = mean(log_housevalue_real)
+}
+
+
+****************************************************************************************************
+** Convert endogenous variables to "residualized" variables
+****************************************************************************************************
+
+preserve
+	collapse log_housing_wealth , by(housing age)
+	xtset housing age
+	xtline log, title("Housing Wealth") name("HW_by_housing_status_ORIG", replace)
+restore
+
+
+if $residualized_vars == 1{
+	* Generate controls
+	egen edu = cut(educhead), at(0, 12, 14, 16 20)
+	gen white = racehead == 1
+	gen black = racehead == 2
+	gen otherrace = racehead != 1 & racehead != 2
+	gen metro2 = metro == 2 // 3 categories, but category 0 is very small
+	
+// 	egen cohort = cut(year_born), at( 1920, 1940(10)1980, 2000 ) icodes label
+	egen cohort = cut(year_born), at( 1920, 1950(10)1980, 2000 ) icodes label
+	
+	* Define Regression
+	* PROBLEM: cohort picks up a lot of the age effect, b/c people born early are the ones who are old in our sample
+	local X_vars ib12.edu black otherrace metro2 ib2015.wave // i.cohort // race education metro_area year (?) and cohort
+
+	// 	local var log_income
+	
+	foreach var of varlist log_income log_consumption log_liq_wealth log_housing_wealth {
+		
+		* Compute residuals (Note: results look weird without the constant
+		reg `var' `X_vars' 
+		predict `var'_resid, residuals
+		replace `var'_resid = `var'_resid + _b[_cons] // add the constant back in (we want to control for someone being high or low educated... but we dont want to take out the constant) I think
+		
+		* Deal with non homeowners!
+		if "`var'" == "log_housing_wealth"{
+			replace `var'_resid = 0 if housing == 0
+			
+			* TODO: will need to do same more mortgage debt down the road
+		}
+		
+		* Plot the results
+		/*
+		preserve
+			collapse `var' `var'_resid, by(age)
+			tsset age
+			replace `var'_resid = `var'_resid 
+			tsline `var', name(`var', replace)
+			tsline `var'_resid, name(`var'_resid, replace)
+		restore
+		*/
+		* Overwrite the original variable
+		drop `var'
+		rename `var'_resid `var'
+	}
+}
+
+
+* WARNING!!! Make sure you cannot have housing wealth if you don't own a house!
+preserve
+	collapse log_housing_wealth , by(housing age)
+	xtset housing age
+	xtline log, title("Housing Wealth") name("HW_by_housing_status", replace)
+restore
+* TODO: what happens when you don't own a house? you should not be able to have housing wealth....
+
+
 
 ****************************************************************************************************
 ** Look at wealth by age
@@ -236,6 +310,7 @@ restore
 ****************************************************************************************************
 ** Test our version of SU regression
 ****************************************************************************************************
+/*
 sureg (log_income log_consumption = L.(log_income log_consumption) )
 mat list e(Sigma)
 
@@ -250,6 +325,7 @@ corr resid1 resid2, covariance
 ** WOOHOO! It works
 ** Equation by equation OLS is equivalent to system OLS or FGLS when all the regressors are the same across equations
 ** For more info, see Wooldridge screen shots in the Notes folder
+*/
 
 ****************************************************************************************************
 ** Run SU regression

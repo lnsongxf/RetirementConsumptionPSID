@@ -8,12 +8,12 @@ global folder "C:/Users/pedm/Documents/GitHub/RetirementConsumptionPSID"
 /*global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"*/
 
 * local sumstat "mean" // can be median or mean
-local sumstat "median"
+local sumstat "mean"
 
 global aux_model_in_logs 1 // 1 = logs, 0 = levels
 
 // local title "(aux model v1)"
-local title "(aux model v2)"
+local title "(residualized aux model)"
 
 set scheme s2mono
 
