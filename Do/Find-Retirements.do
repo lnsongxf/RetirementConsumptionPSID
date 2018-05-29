@@ -114,9 +114,9 @@ replace retirement_transition_strict_s = 0 if back_to_work_spouse == 1
 
 * Replace all retirement transitions with zero if outside of 50 - 70 age range (following Hurd and Rohwedder)
 * Pat Note: I expanded to age 80, just in case it gives us more observations
-replace retirement_transition_spouse        = 0 //if age < 50 | age > 80
-replace retirement_transition_loose_s  = 0 //if age < 50 | age > 80
-replace retirement_transition_strict_s = 0 //if age < 50 | age > 80
+* replace retirement_transition_spouse   = 0 if age < 50 | age > 80
+* replace retirement_transition_loose_s  = 0 if age < 50 | age > 80
+* replace retirement_transition_strict_s = 0 if age < 50 | age > 80
 
 ****************************************************************************************************
 ** Choose an alternative measure of retirement
@@ -221,7 +221,6 @@ if $how_to_deal_with_spouse == 4{
 		tab retirement_transition retirement_transition_head
 		}
 	
-		
 if $how_to_deal_with_spouse == 5{
 *		5 option: ignore the spouse (keep doing what we currently do)
 		* no need to modify retirement_transition b/c we already defined it for the head
@@ -237,7 +236,9 @@ if $how_to_deal_with_spouse == 5{
 * total expenditure by social security income - 3 tertiles
 
 
+Task 1: Graphs on expenditure with different how_to_deal_with_spouse based on tertile level = 15 total graphs
 
+Task 2: Graphs on expenditure with different how_to_deal_with_spouse based on social security level = 15 graphs in total
 
 
 

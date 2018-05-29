@@ -1,0 +1,55 @@
+
+
+
+
+
+
+- Is there some way of identifying the partial retirees. Perhaps if they report both retired and working in emp_status_head, emp_status_head_2, or emp_status_head_3
+
+	- Five versions:
+		- Spouse never works
+		- Spouse always works
+		- Spouse has same* retirement transition *for +/- one wave
+		- Spouse has a different retirement transition
+		- 5 option: ignore the spouse (keep doing what we currently do)
+
+-switch to create these 4 versions
+
+
+
+emp_status_spouse
+
+
+	|| emp_status_spouse_2
+
+
+	|| emp_status_spouse_3
+	
+	|| ret_year_spouse
+
+	|| why_last_job_end_spouse
+
+
+label define emp_status_lab
+1 "Working now"
+2 "Temp laid off; sick or maternity leave" // Only temporarily laid off, sick leave or maternity leave
+3 "Looking for work, unemployed"
+4 "Retired"
+5 "Disabled" // Permanently disabled; temporarily disabled
+6 "Keeping house"
+7 "Student"
+8 "Other" // Other; workfare; in prison or jail
+99 "DK; NA; refused"
+0 "NA"; // Inap. No spouse. Or no 2nd or 3rd mention
+
+
+
+label define why_last_job_end
+1 "Company folded" // Company folded/changed hands/moved out of town; employer died/went out of business
+2 "Strike; lockout"
+3 "Laid off; fired"
+4 "Quit; resigned; retired" // ; pregnant; needed more money; just wanted a change
+7 "Other; transfer" // ; any mention of armed services
+8 "Job was completed; temp" // ; seasonal work; was a temporary job
+9 "DK; NA; refused"
+0 "Inap."; // : did not work for money in 2002 or has not worked for money since January 1, 2001 (ER21127=5, 8, or 9); began working for this employer in 2003 (ER21130=2003); still working for this employer

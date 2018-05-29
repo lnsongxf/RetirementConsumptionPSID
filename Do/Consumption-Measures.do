@@ -400,7 +400,6 @@ gen mortgage_debt_real           = 100 * mortgage_debt / CPI_all_base_2015
 ** Equivalence scale
 ****************************************************************************************************
 
-
 gen expenditure_blundell_eq        = expenditure_blundell / equiv
 gen expenditure_blundell_eq_exH    = expenditure_blundell_exhous / equiv
 

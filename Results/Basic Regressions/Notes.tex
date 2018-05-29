@@ -155,25 +155,397 @@ While nondurable consumption (scaled for family size) declines for most of the p
 	\includegraphics[width=0.9\textwidth]{../ConsumptionPostRetirement/food.pdf}
 \end{figure}
 
+
 Of course, these are just simple averages for now. The next step will be to integrate this analysis with the method of Aguiar and Hurst. Then we can look at the impact of retirement on consumption while controlling for age, period, cohort, marital status, and family size effects. This will hopefully allow us to get a better picture of the heterogeneous impact of retirement.
 
-\section{Consumption around Retirement by Tertile}
+\section{Consumption around Retirement by Tertile Pre-2005}
+
+To further explore the impact  of retirement, we compute the mean consumption based on tertile for different nondurable categories. 
 
 \begin{figure}[h]
 	%\caption{Life Cycle Consumption}
 	\centering
-	\includegraphics[width=0.9\textwidth]{../ConsumptionPostRetirement/Tertile_5/total_housing_real.pdf}
+	\includegraphics[width=0.9\textwidth]{../ConsumptionPostRetirement/Tertile_1/total_foodexp_home_real.pdf}
+\end{figure}
+
+\clearpage
+
+\section{Imputed Expenditure versus Sum of Categorical}
+
+\begin{figure}[h]
+	\caption{For categories before 2005}
+	\centering
+	\includegraphics[width=0.8\textwidth]{../ConsumptionPostRetirement/Comparision_of_imputed_and_categorical_age.pdf}
+\end{figure}
+
+\begin{figure}[h]
+	\caption{For categories before 2005}
+	\centering
+	\includegraphics[width=0.8\textwidth]{../ConsumptionPostRetirement/Comparision_of_imputed_and_categorical_ret.pdf}
 \end{figure}
 
 
-\section{How to deal with spouse retirement?}
+\section{Imputed Expenditure versus Sum of Categorical}
 
+\begin{figure}[h]
+	\caption{For categories before 2005}
+	\centering
+	\includegraphics[width=0.8\textwidth]{../ConsumptionPostRetirement/Tertile_Bar/tertile1.pdf}
+\end{figure}
+
+\begin{figure}[h]
+	\caption{For categories before 2005}
+	\centering
+	\includegraphics[width=0.8\textwidth]{../ConsumptionPostRetirement/Tertile_Bar/tertile2.pdf}
+\end{figure}
+
+\begin{figure}[h]
+	\caption{For categories before 2005}
+	\centering
+	\includegraphics[width=0.8\textwidth]{../ConsumptionPostRetirement/Tertile_Bar/tertile3.pdf}
+\end{figure}
+
+
+\section{Bar Graphs for Categorical Expenditure}
 
 \begin{figure}[h]
 	\caption{1 - Spouse never works}
 	\centering
-	\includegraphics[width=1\textwidth]{../IncomeAroundRetirement/Income_with_spouse_definition_1.pdf}
+	\includegraphics[width=0.8\textwidth]{../IncomeAroundRetirement/Income_with_spouse_definition_1.pdf}
 \end{figure}
+
+\begin{figure}[h]
+	\caption{2 - Spouse always works}
+	\centering
+	\includegraphics[width=0.8\textwidth]{../IncomeAroundRetirement/Income_with_spouse_definition_2.pdf}
+\end{figure}
+
+\begin{figure}[h]
+	\caption{3 - Spouse has same retirement transition +/- wave}
+	\centering
+	\includegraphics[width=0.8\textwidth]{../IncomeAroundRetirement/Income_with_spouse_definition_3.pdf}
+\end{figure}
+
+\begin{figure}[h]
+	\caption{4 - Spouse has a different retirement transition}
+	\centering
+	\includegraphics[width=0.8\textwidth]{../IncomeAroundRetirement/Income_with_spouse_definition_4.pdf}
+\end{figure}
+
+\begin{figure}[h]
+	\caption{5 - Ignoring the spouse}
+	\centering
+	\includegraphics[width=0.8\textwidth]{../IncomeAroundRetirement/Income_with_spouse_definition_5.pdf}
+\end{figure}
+
+
+\clearpage
+\section{Expenditure based on tertiles for spouse retirement}
+
+\subsection{Spouse Never Works}
+
+\begin{figure}[h]
+	\caption{1 - Spouse never works(Smoothed)}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef/Smoothed/spouse_def_1.pdf}
+\end{figure}
+
+\begin{figure}[h]
+	\caption{1 - Spouse never works(Unsmoothed)}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef/UnSmoothed/spouse_def_1.pdf}
+\end{figure}
+\clearpage
+
+
+\subsection{Spouse always works}
+\begin{figure}[h]
+	\caption{2 - Spouse always works(Smoothed)}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef/Smoothed/spouse_def_2.pdf}
+\end{figure}
+
+\begin{figure}[h]
+	\caption{2 - Spouse always works(Unsmoothed)}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef/UNSmoothed/spouse_def_2.pdf}
+\end{figure}
+\clearpage
+
+\subsection{Same retirement transition +/- wave}
+\begin{figure}[h]
+	\caption{3 - Spouse has same retirement transition +/- wave (Smoothed)}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef/Smoothed/spouse_def_3.pdf}
+\end{figure}
+
+\begin{figure}[h]
+	\caption{3 - Spouse has same retirement transition +/- wave(Unsmoothed)}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef/UnSmoothed/spouse_def_3.pdf}
+\end{figure}
+\clearpage
+
+
+\subsection{Different retirement transition}
+\begin{figure}[h]
+	\caption{4 - Spouse has a different retirement transition(Smoothed)}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef/Smoothed/spouse_def_4.pdf}
+\end{figure}
+
+\begin{figure}[h]
+	\caption{4 - Spouse has a different retirement transition(Unsmoothed)}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef/UnSmoothed/spouse_def_4.pdf}
+\end{figure}
+\clearpage
+
+
+\subsection{Ignoring the spouse}
+
+\begin{figure}[h]
+	\caption{5 - Ignoring the spouse (Smoothed)}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef/Smoothed/spouse_def_5.pdf}
+\end{figure}
+
+\begin{figure}[h]
+	\caption{5 - Ignoring the spouse(Unsmoothed)}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef/UnSmoothed/spouse_def_5.pdf}
+\end{figure}
+
+\clearpage
+
+\section{Categorical Expenditure Based on Spouse Defination}
+
+\subsection{1- Spouse Never Works}
+
+\begin{figure}[h]
+	\caption{Food Expenditure at Home}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_foodexp_home_real.pdf}
+\end{figure}
+
+
+\begin{figure}[h]
+	\caption{Food Expenditure Away from Home}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_foodexp_away_real.pdf}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h]
+	\caption{Expenditure on Housing}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_housing_real.pdf}
+\end{figure}
+
+
+\begin{figure}[h]
+	\caption{Expenditure on Education}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_education_real.pdf}
+\end{figure}
+\clearpage
+
+\begin{figure}[h]
+	\caption{Expenditure on Health}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_healthexpense_real.pdf}
+\end{figure}
+
+
+\begin{figure}[h]
+	\caption{Expenditure on Non-Durable Transport}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_transport_real.pdf}
+\end{figure}
+\clearpage
+
+\subsection{2- Spouse Always Works}
+
+\begin{figure}[h]
+	\caption{Food Expenditure at Home}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/2/spouse_def_total_foodexp_home_real.pdf}
+\end{figure}
+
+
+\begin{figure}[h]
+	\caption{Food Expenditure Away from Home}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/2/spouse_def_total_foodexp_away_real.pdf}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h]
+	\caption{Expenditure on Housing}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/2/spouse_def_total_housing_real.pdf}
+\end{figure}
+
+
+\begin{figure}[h]
+	\caption{Expenditure on Education}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/2/spouse_def_total_education_real.pdf}
+\end{figure}
+\clearpage
+
+\begin{figure}[h]
+	\caption{Expenditure on Health}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/2/spouse_def_total_healthexpense_real.pdf}
+\end{figure}
+
+
+\begin{figure}[h]
+	\caption{Expenditure on Non-Durable Transport}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/2/spouse_def_total_transport_real.pdf}
+\end{figure}
+\clearpage
+
+
+\subsection{3- Spouse has same retirement transition +/- wave}
+
+\begin{figure}[h]
+	\caption{Food Expenditure at Home}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/3/spouse_def_total_foodexp_home_real.pdf}
+\end{figure}
+
+
+\begin{figure}[h]
+	\caption{Food Expenditure Away from Home}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/3/spouse_def_total_foodexp_away_real.pdf}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h]
+	\caption{Expenditure on Housing}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/3/spouse_def_total_housing_real.pdf}
+\end{figure}
+
+
+\begin{figure}[h]
+	\caption{Expenditure on Education}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/3/spouse_def_total_education_real.pdf}
+\end{figure}
+\clearpage
+
+\begin{figure}[h]
+	\caption{Expenditure on Health}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/3/spouse_def_total_healthexpense_real.pdf}
+\end{figure}
+
+
+\begin{figure}[h]
+	\caption{Expenditure on Non-Durable Transport}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/3/spouse_def_total_transport_real.pdf}
+\end{figure}
+\clearpage
+
+
+\subsection{4-Spouse has Different Retirement Transition}
+
+\begin{figure}[h]
+	\caption{Food Expenditure at Home}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/4/spouse_def_total_foodexp_home_real.pdf}
+\end{figure}
+
+
+\begin{figure}[h]
+	\caption{Food Expenditure Away from Home}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/4/spouse_def_total_foodexp_away_real.pdf}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h]
+	\caption{Expenditure on Housing}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/4/spouse_def_total_housing_real.pdf}
+\end{figure}
+
+
+\begin{figure}[h]
+	\caption{Expenditure on Education}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/3/spouse_def_total_education_real.pdf}
+\end{figure}
+\clearpage
+
+\begin{figure}[h]
+	\caption{Expenditure on Health}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/4/spouse_def_total_healthexpense_real.pdf}
+\end{figure}
+
+
+\begin{figure}[h]
+	\caption{Expenditure on Non-Durable Transport}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/4/spouse_def_total_transport_real.pdf}
+\end{figure}
+\clearpage
+
+\subsection{5-Ignoring the spouse}
+
+\begin{figure}[h]
+	\caption{Food Expenditure at Home}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/5/spouse_def_total_foodexp_home_real.pdf}
+\end{figure}
+
+
+\begin{figure}[h]
+	\caption{Food Expenditure Away from Home}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/5/spouse_def_total_foodexp_away_real.pdf}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h]
+	\caption{Expenditure on Housing}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/5/spouse_def_total_housing_real.pdf}
+\end{figure}
+
+
+\begin{figure}[h]
+	\caption{Expenditure on Education}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/5/spouse_def_total_education_real.pdf}
+\end{figure}
+\clearpage
+
+\begin{figure}[h]
+	\caption{Expenditure on Health}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/5/spouse_def_total_healthexpense_real.pdf}
+\end{figure}
+
+
+\begin{figure}[h]
+	\caption{Expenditure on Non-Durable Transport}
+	\centering
+	\includegraphics[width=0.6\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/5/spouse_def_total_transport_real.pdf}
+\end{figure}
+\clearpage
 
 \end{document}
               
