@@ -248,17 +248,16 @@ if $residualized_vars == 1{
 	foreach var of varlist log_income log_consumption log_liq_wealth log_housing_wealth {
 		
 		* Compute residuals (Note: results look weird without the constant
-		reg `var' `X_vars' 
+		if "`var'" == "log_housing_wealth"{
+			reg `var' `X_vars' if housing == 1
+		}
+		else{
+			reg `var' `X_vars' 
+		}
 		predict `var'_resid, residuals
 		replace `var'_resid = `var'_resid + _b[_cons] // add the constant back in (we want to control for someone being high or low educated... but we dont want to take out the constant) I think
 		
-		* Deal with non homeowners!
-		if "`var'" == "log_housing_wealth"{
-			replace `var'_resid = 0 if housing == 0
-			
-			* TODO: will need to do same more mortgage debt down the road
-		}
-		
+
 		* Plot the results
 		/*
 		preserve
@@ -272,6 +271,13 @@ if $residualized_vars == 1{
 		* Overwrite the original variable
 		drop `var'
 		rename `var'_resid `var'
+		
+		* Deal with non homeowners!
+		if "`var'" == "log_housing_wealth"{
+			replace `var' = 0 if housing == 0
+			* TODO: will need to do same more mortgage debt down the road
+		}
+		
 	}
 }
 
@@ -283,7 +289,6 @@ preserve
 	xtline log, title("Housing Wealth") name("HW_by_housing_status", replace)
 restore
 * TODO: what happens when you don't own a house? you should not be able to have housing wealth....
-
 
 
 ****************************************************************************************************
