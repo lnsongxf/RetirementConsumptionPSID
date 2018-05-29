@@ -11,7 +11,7 @@ global retirement_definition 0   // 0 is default (last job ended due to "Quit, R
 global allow_kids_to_leave_hh 1  // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH 
                                  // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
 
-global how_to_deal_with_spouse 3 // 1 () 2 (spouse always works) 3 (spouse has same ret transition +/- 1 wave) 4 () 5 (do not do anything special based on the spouse)
+global how_to_deal_with_spouse 1 // 1 () 2 (spouse always works) 3 (spouse has same ret transition +/- 1 wave) 4 () 5 (do not do anything special based on the spouse)
 						
 global retirement_definition_spouse 1 //// 0 is default (last job ended due to "Quit, Resigned, Retire" or "NA")
                                        // 1 is loose (does not ask why last job ended) and 2 is strict (last job ended due to "Quit, Resigned, Retire" only)			 
@@ -118,3 +118,46 @@ tsline pos_inc_ss*, name("pos_inc_ss", replace)
 * At age 65, 60.7% of heads have positive SS income
 * At age 70, 94.3% of heads have positive SS income
 */
+
+/*Next steps as of 25 May: 
+
+	1. expenditure graphs with common scale  (remove the rescale option) label for axes
+	 * Done. 
+
+	2. Caption in the graph with number of HHs (put it in a note) use note()
+	 * Done/ 
+
+	3.  Section 8 of the latex doc
+		- cleaning figures
+		- add standard errors
+				(We could not figure out way to smooth errors. Ask the professor during the meeting.)
+		- unsmoothed Version
+		- Smoothed Version
+	4.  Section 9
+		-8 expenditure categories and 5 spouse categories
+			-smoothed version
+			-subsection{Spouse Never Works}
+
+-   All these plots created using regsave instead of collapse. 
+		- Used regsave. 
+
+	-3 year MA or 5 year MA (tssmooth)
+			- Used three year	
+
+	-to compute SEs for MA... regress expenditure on time period. test whether it's equal to zero, loop over time periods
+	test (coef L.coef L2.coef)/3
+	produces se
+
+	-todo: why does the number of obs in each tertile change?
+
+
+	Just in case
+	https://www.stata.com/manuals/g-2graphtwowayrarea.pdf
+	https://tex.stackexchange.com/questions/28333/continuous-v-per-chapter-section-numbering-of-figures-tables-and-other-docume
+	*/
+	** 1. Wave greater than 2005. Where Should I add this in the section? 
+	** 2. For different categories, the number of observations for the same spouse type remains same. Should it change? 
+	** 3.
+
+
+

@@ -16,8 +16,9 @@ global retirement_definition 0   // 0 is default (last job ended due to "Quit, R
                                  // 1 is loose (does not ask why last job ended) and 2 is strict (last job ended due to "Quit, Resigned, Retire" only)
 global ret_duration_definition 2 // Defines retirement year. Can be 1, 2, or 3. My preference is 3 (for the sharp income drop) although 2 is perhaps better when looking at consumption data (for smoothness)
 global graphs_by_mean 0          // Graph by quintile. Can be 0 or 1
-global graphs_by_quintile 1      // Graph by quintile. Can be 0 or 1
+global graphs_by_quintile 0      // Graph by quintile. Can be 0 or 1
 global graphs_by_tertile 1       // Tertiles
+global make_barplots 0
 global allow_kids_to_leave_hh 1  // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH 
                                  // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
 global how_to_deal_with_spouse 1  // could be 1 2 3 4 5
@@ -37,6 +38,7 @@ do "$folder/Do/Consumption-Measures.do"
 do "$folder/Do/Scripts/Define-Quintiles.do"
 
 do "$folder/Do/Scripts/Define-Ret-Duration.do"
+
 
 ****************************************************************************************************
 ** Look at consumption based on time since retirement
@@ -146,60 +148,126 @@ local expenditure_cats_2005 total_foodexp_home_real total_foodexp_away_real ///
 		
 egen expenditure_cats_2005       = rowtotal(`expenditure_cats_2005') if wave >= 2005
 
-		
-lab var ret_duration "Duration of Head's Retirement"
+	lab var ret_duration "Duration of Head's Retirement"
+	lab var transportation_blundell "Transportation Services"
+	lab var gasolineexpenditure "Gasoline Expenditure"
+	lab var healthcareexpenditure "Health care"
+	lab var healthinsuranceexpenditure "Health insurance"
+	lab var healthservicesexpenditure "Health services"
+	lab var tripsexpenditure "Trips"
+	lab var recreationexpenditure "Recreation"
+	lab var clothingexpenditure "Clothing"
+	lab var foodathomeexpenditure "Food at home"
+	lab var foodawayfromhomeexpenditure "Food away from home"
+	lab var expenditure_blundell_eq "Nondurable Consumption (Equivalence Scale)"
+	lab var workexpenditure "Work Related Expenditure" // excludes clothing
 
+	lab var expenditure_cats_2005 "Expenditure Categories"
+	lab var total_foodexp_home_real "Food Expenditure at Home"
+	lab var total_foodexp_away_real "Food away from Home"
+	lab var	total_education_real "Education Expenditure"
+	lab var	total_healthexpense_real "Health Expenditure"
+	lab var	total_transport_real "Non Durables Transportation Expenditure"
+	lab var	transport_durables "Transportation Durables Expenditure"
+	lab var	total_housing_2005_real "Housing Expenditure"
+	lab var	total_recreation_2005_real "Recreation Expenditure"
+	lab var total_clothing_2005_real  "Clothing Expenditure"
 
 ****************************************************************************************************
 ** Graphs by tertile
 ****************************************************************************************************
 
 if $graphs_by_tertile == 1{
+
 preserve
 	cap mkdir "$folder/Results/ConsumptionPostRetirement/Tertile_$how_to_deal_with_spouse/"
 	
-	collapse `expenditure_cats' , by(ret_duration tertile)
+	collapse (mean) `expenditure_cats' (count) n = total_foodexp_home_real, by(ret_duration tertile)
+
+	lab var ret_duration "Duration of Head's Retirement"
+	lab var total_foodexp_home_real "Food Expenditure at Home"
+	lab var total_foodexp_away_real "Food away from Home"
+	lab var	total_education_real "Education Expenditure"
+	lab var	total_healthexpense_real "Health Expenditure"
+	lab var	total_transport_real "Non Durables Transportation Expenditure"
+	lab var	transport_durables "Transportation Durables Expenditure"
+	lab var total_housing_real "Housing Expenditure" 
+
+	* lab var	total_housing_2005_real "Housing Expenditure"
+	* lab var	total_recreation_2005_real "Recreation Expenditure"
+	* lab var total_clothing_2005_real  "Clothing Expenditure"
 	
 	drop if ret_duration == .
 	keep if ret_duration >= -10 & ret_duration <= 10
 
 	xtset tertile ret_duration
 		
+**	xtline total_foodexp_home_real byopts(title("Food Expenditure at Home")) name("food home", replace) ylabel(#3)
+**	graph export "$folder/Results/ConsumptionPostRetirement/Pre2005_Categories/food_at_home.pdf", as(pdf) replace
+
+**	xtline total_foodexp_away_real, byopts(title("Food Expenditure away")) name("food away", replace) ylabel(#3)
+**	graph export "$folder/Results/ConsumptionPostRetirement/Pre2005_Categories/food_away.pdf", as(pdf) replace
+
 	foreach var of varlist `expenditure_cats' {
-		xtline `var', byopts(title("`var'") rows(1) rescale ) name("`var'", replace) ylabel(#3)
+		* Make a local containing the label for this variable
+		local lab: variable label `var'
+
+		xtline `var', byopts(title("`lab'") rows(1) ) name("`var'", replace) ylabel(#3)
 		graph export "$folder/Results/ConsumptionPostRetirement/Tertile_$how_to_deal_with_spouse/`var'.pdf", as(pdf) replace
 	}
 restore
 
 
 preserve
-	keep if wave >= 2005
-	collapse `expenditure_cats_2005' , by(ret_duration tertile)
+	cap mkdir "$folder/Results/ConsumptionPostRetirement/PTertile_$how_to_deal_with_spouse/"
+
+    keep if wave >= 2005
+
+	collapse (mean) `expenditure_cats_2005' (count) n = total_foodexp_home_real, by(ret_duration tertile)
+
+	lab var total_foodexp_home_real "Food Expenditure at Home"
+	lab var total_foodexp_away_real "Food away from Home"
+	lab var	total_education_real "Education Expenditure"
+	lab var	total_healthexpense_real "Health Expenditure"
+	lab var	total_transport_real "Non Durables Transportation Expenditure"
+	lab var	transport_durables "Transportation Durables Expenditure"
+	lab var	total_housing_2005_real "Housing Expenditure"
+	lab var	total_recreation_2005_real "Recreation Expenditure"
+	lab var total_clothing_2005_real  "Clothing Expenditure"
+
+	// collapse `expenditure_cats_2005' , by(ret_duration tertile)
 	xtset tertile ret_duration
 
 	drop if ret_duration == .
 	keep if ret_duration >= -10 & ret_duration <= 10
 
 	foreach var of varlist `expenditure_cats_2005' {
-		di "`var'"
-		xtline `var', byopts(title("`var'") rescale ) name("`var'", replace) ylabel(#3) 
-		graph export "$folder/Results/ConsumptionPostRetirement/Tertile_$how_to_deal_with_spouse/`var'.pdf", as(pdf) replace
+		local lab: variable label `var'
+
+		// di "`var'"
+		xtline `var', byopts(title("`lab'") rows(1) ) name("`var'", replace) ylabel(#3) 
+		graph export "$folder/Results/ConsumptionPostRetirement/PTertile_$how_to_deal_with_spouse/`var'.pdf", as(pdf) replace
 	}
 restore
 }
 
-******************
 
 ****************************************************************************************************
 ** Stacked bar plots - how do the categories add up
 ****************************************************************************************************
+
+if $make_barplots == 1{
 
 * Compare the sum 
 preserve
 	collapse `expenditure_cats' expenditure_total_pre2005_real, by(age)
 	egen expenditure_total_imputed = rowtotal(`expenditure_cats')
 	tsset age
-	tsline expenditure_total_imputed expenditure_total_pre2005_real, name(expenditure_pre2005, replace)
+	tsline expenditure_total_imputed expenditure_total_pre2005_real, name(expenditure_pre2005, replace) ///
+	legend(label(1 "Imputed Expenditure")) legend(label(2 "Sum of Categories Pre-2005"))
+	graph export "$folder/Results/ConsumptionPostRetirement/Comparision_of_imputed_and_categorical_age.pdf", as(pdf) replace
+
+
 restore
 
 
@@ -207,21 +275,41 @@ preserve
 	collapse `expenditure_cats' expenditure_total_pre2005_real, by(ret_duration)
 	egen expenditure_total_imputed = rowtotal(`expenditure_cats')
 	tsset ret_duration
-	tsline expenditure_total_imputed expenditure_total_pre2005_real
+	tsline expenditure_total_imputed expenditure_total_pre2005_real, ///
+	legend(label(1 "Imputed Expenditure")) legend(label(2 "Sum of Categories Pre-2005"))
+	graph export "$folder/Results/ConsumptionPostRetirement/Comparision_of_imputed_and_categorical_ret.pdf", as(pdf) replace
+
 restore
 
 ** Doing this by tertile
-graph bar `expenditure_cats', over(ret_duration) stack name("fig1", replace)
+graph bar `expenditure_cats', over(ret_duration) stack name("fig1", replace) ///
+	legend(label(1 "Food Home")) legend(label(2 "Food Away")) legend(label(3 "Housing")) legend(label(4 "Education")) legend(label(5 "Health")) ///
+	legend(label(6 "Non Durable Transport")) legend(label(7 "Durable Transport"))
+
 graph bar expenditure_total_pre2005_real, over(ret_duration) stack name("fig2", replace)
 
-label variable total_foodexp_home_real "Food at Home"
-graph bar total_foodexp_home_real , over(ret_duration ) 
+//label variable total_foodexp_home_real "Food at Home"
+//graph bar total_foodexp_home_real , over(ret_duration ) 
 
 preserve
 	keep if ret_duration >= -8 & ret_duration <= 8
-	graph bar `expenditure_cats' if tertile == 1, over(ret_duration) stack name("tertile1", replace) percent title("Bottom Tertile")
-	graph bar `expenditure_cats' if tertile == 2, over(ret_duration) stack name("tertile2", replace) percent title("Middle Tertile")
-	graph bar `expenditure_cats' if tertile == 3, over(ret_duration) stack name("tertile3", replace) percent title("Top Tertile")
+	graph bar `expenditure_cats' if tertile == 1, over(ret_duration) stack name("tertile1", replace) percent title("Bottom Tertile") ///
+	legend(label(1 "Food Home")) legend(label(2 "Food Away")) legend(label(3 "Housing")) legend(label(4 "Education")) legend(label(5 "Health")) ///
+	legend(label(6 "Non Durable Transport")) legend(label(7 "Durable Transport"))
+	graph export "$folder/Results/ConsumptionPostRetirement/Tertile_Bar/tertile1.pdf", as(pdf) replace
+
+	graph bar `expenditure_cats' if tertile == 2, over(ret_duration) stack name("tertile2", replace) percent title("Middle Tertile") ///
+	legend(label(1 "Food Home")) legend(label(2 "Food Away")) legend(label(3 "Housing")) legend(label(4 "Education")) legend(label(5 "Health")) ///
+	legend(label(6 "Non Durable Transport")) legend(label(7 "Durable Transport"))
+	graph export "$folder/Results/ConsumptionPostRetirement/Tertile_Bar/tertile2.pdf", as(pdf) replace
+
+	graph bar `expenditure_cats' if tertile == 3, over(ret_duration) stack name("tertile3", replace) percent title("Top Tertile") ///
+	legend(label(1 "Food Home")) legend(label(2 "Food Away")) legend(label(3 "Housing")) legend(label(4 "Education")) legend(label(5 "Health")) ///
+	legend(label(6 "Non Durable Transport")) legend(label(7 "Durable Transport"))
+	graph export "$folder/Results/ConsumptionPostRetirement/Tertile_Bar/tertile3.pdf", as(pdf) replace
+
+	graph export "$folder/Results/ConsumptionPostRetirement/.pdf", as(pdf) replace
+
 restore
 
 ***
@@ -235,17 +323,29 @@ restore
  ****************************************************************************************************
 ** Post 2005: Stacked bar plots - how do the categories add up
 ****************************************************************************************************
-* Compare the Sum 
+* Compare the sum
 
 preserve
 	collapse `expenditure_cats_2005' expenditure_total_post2005_real, by(age)
 	egen expenditure_total_imputed_2005 = rowtotal(`expenditure_cats_2005')
 	tsset age
 	tsline expenditure_total_imputed_2005 expenditure_total_post2005_real, name(expenditure_post2005, replace)
+	graph export "$folder/Results/ConsumptionPostRetirement/Tertile_Post2005_expenditure.pdf", as(pdf) replace
+
 restore
 
 preserve
+	keep if wave >= 2005
 	collapse `expenditure_cats_2005' expenditure_total_post2005_real, by(ret_duration)
+
+	label variable total_foodexp_home_real "Food at Home Expenditure"
+	label variable total_foodexp_away_real " Expenditure"
+	label variable total_housing_2005_real " Expenditure"
+	label variable total_education_real " Expenditure"
+	label variable total_healthexpense_real " Expenditure"
+	label variable total_transport_real " Expenditure"
+	label variable transport_durables " Expenditure"
+
 	egen expenditure_total_imputed_2005 = rowtotal(`expenditure_cats_2005')
 	tsset ret_duration
 	tsline expenditure_total_imputed_2005 expenditure_total_post2005_real
@@ -253,35 +353,58 @@ restore
 
 
 * Post 2005: Doing by tertile
-
-graph bar `expenditure_cats_2005', over(ret_duration) stack name("fig3", replace)
-graph bar expenditure_total_post2005_real, over(ret_duration) stack name("fig4", replace)
-
 preserve
-	keep if ret_duration >= -8 & ret_duration <= 8
-	graph bar `expenditure_cats_2005' if tertile == 1, over(ret_duration) stack name("tertile1_post2005", replace) percent title("Bottom Tertile")
-	graph bar `expenditure_cats_2005' if tertile == 2, over(ret_duration) stack name("tertile2_post2005", replace) percent title("Middle Tertile")
-	graph bar `expenditure_cats_2005' if tertile == 3, over(ret_duration) stack name("tertile3_post2005", replace) percent title("Top Tertile")
+	keep if wave >= 2005
+	graph bar `expenditure_cats_2005', over(ret_duration) stack name("fig3", replace) ///
+	legend(label(1 "Food Home")) legend(label(2 "Food Away")) legend(label(3 "Housing")) legend(label(4 "Education")) legend(label(5 "Health")) ///
+	legend(label(6 "Non Durable Transport")) legend(label(7 "Durable Transport"))
+
+	graph bar expenditure_total_post2005_real, over(ret_duration) stack name("fig4", replace)
 restore
 
- 
+preserve
+	keep if wave >= 2005
+
+	lab var expenditure_cats_2005 "Expenditure Categories"
+	lab var total_foodexp_home_real "Food Expenditure at Home"
+	lab var total_foodexp_away_real "Food away from Home"
+	lab var	total_education_real "Education Expenditure"
+	lab var	total_healthexpense_real "Health Expenditure"
+	lab var	total_transport_real "Non Durables Transportation Expenditure"
+	lab var	transport_durables "Transportation Durables Expenditure"
+	lab var	total_housing_2005_real "Housing Expenditure"
+	lab var	total_recreation_2005_real "Recreation Expenditure"
+	lab var total_clothing_2005_real  "Clothing Expenditure"
+
+	keep if ret_duration >= -8 & ret_duration <= 8
+
+	graph bar `expenditure_cats_2005' if tertile == 1, over(ret_duration) stack name("tertile1_post2005", replace) percent title("Bottom Tertile") ///
+	legend(label(1 "Food Home")) legend(label(2 "Food Away")) legend(label(3 "Housing")) legend(label(4 "Education")) legend(label(5 "Health")) ///
+	legend(label(6 "Non Durable Transport")) legend(label(7 "Durable Transport"))
+	
+	graph bar `expenditure_cats_2005' if tertile == 2, over(ret_duration) stack name("tertile2_post2005", replace) percent title("Middle Tertile") ///
+	legend(label(1 "Food Home")) legend(label(2 "Food Away")) legend(label(3 "Housing")) legend(label(4 "Education")) legend(label(5 "Health")) ///
+	legend(label(6 "Non Durable Transport")) legend(label(7 "Durable Transport"))
+	
+	graph bar `expenditure_cats_2005' if tertile == 3, over(ret_duration) stack name("tertile3_post2005", replace) percent title("Top Tertile") ///
+	legend(label(1 "Food Home")) legend(label(2 "Food Away")) legend(label(3 "Housing")) legend(label(4 "Education")) legend(label(5 "Health")) ///
+	legend(label(6 "Non Durable Transport")) legend(label(7 "Durable Transport"))
+
+restore
+
+}
+
 * 1) make a new category of durables so that fig 1 has same as fig2 (durables in health? transportation? ...?) (any nondurables that we're missing?)
 * More or less they add up. But the category we created is slightly higher than the expenditure in total. I beleive it is mostly due to 
-
 * 2) do the same thing, post 2005 (with new variables)
 * more variation compared ot the pre 2005 calculations 
-
 * 3) make bar plots by tertile
-* plotted
-
 * 4) income graphs by different definitions of retirement (aka spouse never works, etc.)
 * Done/ Did for four categories. Since the categories. Since the category five, is 
-
 * 5) expenditure categories by retirement duration, based on the 5 definitions of what the spouse does
 **** by tertile, 1 categories, 5 definitions of what the spouse does
 * loop
 * expenditure_category_x_spouse_definition_y.pdf
-
 * 6) tertile figures - we'll make it be 3 columns
 	
 

@@ -5,7 +5,8 @@ clear all
 // https://simba.isr.umich.edu/VS/s.aspx
 
 *global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"
-global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
+* global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
+  global folder "/Users/bibekbasnet/Documents/GitHub/RetirementConsumptionPSID"
 
 ****************************************************************************************************
 ** Convert year level zip files to dta files
@@ -473,6 +474,8 @@ psid use
 	[99]ER16515B1 [01]ER20456B1 [03]ER24138B1 [05]ER28037B1 [07]ER41027B1
 	[09]ER46971B1 [11]ER52395B1 [13]ER58212B1 [15]ER65419
 
+	
+	
 	|| transportationexpenditure
 	// Total Family Transportation Expenditure: Generated variable combining
 	// expenditures for vehicle loan, lease, and down payments, insurance,
