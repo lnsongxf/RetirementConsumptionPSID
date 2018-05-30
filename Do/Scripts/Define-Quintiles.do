@@ -23,9 +23,11 @@ if $quintiles_definition == 1{
 ****************************************************************************************************
 
 if $quintiles_definition == 2{
-	by pid, sort: egen max_inc_ss_fam = max(inc_ss_fam_real)
-	xtile quintile_last               = max_inc_ss_fam if wave == max_year & retired == 1, n(5)
-	xtile tertile_last                = max_inc_ss_fam if wave == max_year & retired == 1, n(3)
+	* Done: rather than using inc_ss_fam_real use something similar with inc_ss_head_real
+	
+	by pid, sort: egen max_inc_ss_head = max(inc_ss_head_real)
+	xtile quintile_last               = max_inc_ss_head if wave == max_year & retired == 1 & max_inc_ss_head != 0, n(5)
+	xtile tertile_last                = max_inc_ss_head if wave == max_year & retired == 1 & max_inc_ss_head != 0, n(3)
 	by pid, sort: egen quintile       = max(quintile_last)
 	by pid, sort: egen tertile        = max(tertile_last)
 
@@ -36,30 +38,10 @@ if $quintiles_definition == 2{
 	** So the lowest quintile isn't made of households with the lowest permanent income
 	* hist max_inc_ss_fam if wave == max_year & retired == 1, name("hist_max", replace)
 	
-	* TEMPORARY FIX
-	* TODO: do something better with these people
-	drop if max_inc_ss_fam == 0
-	
-	* by pid, sort: egen max_retired = max(retired)
-	* sort pid wave
-	* edit pid wave age sex_head retired inc_ss_fam inc_ss_head if max_retired == 1 & quintile == 1
-	
-	* Look into the people with 0 inc_ss_fam
-	by pid, sort: egen max_age = max(age)
-	sort pid wave
-	tab max_age if retired == 1 & L.retired == 0 & max_inc_ss_fam == 0
-	tab max_age if retired == 1 & L.retired == 0 & max_inc_ss_fam > 0
-	
-	* I think we're catching the young households in quintile 1
-	* For instance, 65% of individuals with max_inc_ss_fam == 0 are last observed at age <= 62
-	
-	* The average person in quintile 1 retired at age 60
-	* The average person in quintile 2-5 retired at age 63-64
-	reg age i.quintile  if retired == 1 & L.retired == 0
-	
-	* The average person in quintile 1 is last observed at age 62
-	* The average person in quintile 2-5 is last observed between 68-70
-	reg max_age i.quintile  if retired == 1 & L.retired == 0
+	* Deal with people with no ss income
+	replace tertile = 1 if max_inc_ss_head == 0 & educhead < 12
+	replace tertile = 2 if max_inc_ss_head == 0 & educhead >= 12 & educhead < 16
+	replace tertile = 3 if max_inc_ss_head == 0 & educhead >= 16
 
 }
 

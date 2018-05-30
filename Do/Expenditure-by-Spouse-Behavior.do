@@ -86,12 +86,15 @@ cap mkdir "$folder/Results/ConsumptionPostRetirement_by_SpouseDef"
 	replace ret_duration = ret_duration + 100
 
 	tempfile results	
-	qui reg nondurable_expenditure_real ibn.ret_duration if tertile == 1, nocon 
+	qui xtreg nondurable_expenditure_real ibn.ret_duration if tertile == 1, fe 
 	regsave using `results', addlabel(tertile, "Bottom Tertile") replace
-	qui reg nondurable_expenditure_real ibn.ret_duration if tertile == 2, nocon
+	qui xtreg nondurable_expenditure_real ibn.ret_duration if tertile == 2, fe
 	regsave using `results', addlabel(tertile, "Middle Tertile") append
-	reg nondurable_expenditure_real ibn.ret_duration if tertile == 3, nocon
+	xtreg nondurable_expenditure_real ibn.ret_duration if tertile == 3, fe
 	regsave using `results', addlabel(tertile, "Top Tertile") append
+
+
+	* xtreg nondurable_expenditure_real ibn.ret_duration if tertile == 3, fe
 
 	* xtset pid ret_duration, delta(2)
 	* test ( F.ret_duration + ret_duration + L.ret_duration)
@@ -105,6 +108,11 @@ cap mkdir "$folder/Results/ConsumptionPostRetirement_by_SpouseDef"
 	count if tertile == 3 & ret_duration == 100
 	local count3 `r(N)'
 
+	***********************************************************************************
+	** Produce regression results using saved coefs
+	** NOTE: we do not smooth SEs correctly in this version
+	***********************************************************************************
+	/*
 	preserve
 		* Find coefs by age
 		use `results', clear
@@ -144,7 +152,97 @@ cap mkdir "$folder/Results/ConsumptionPostRetirement_by_SpouseDef"
 			graph export "$folder/Results/ConsumptionPostRetirement_by_SpouseDef/Smoothed/spouse_def_`spouse_def'.pdf", as(pdf) replace
 
 	restore
+	*/
 
+	***********************************************************************************
+	** Produced smoothed regression results using lincom command
+	***********************************************************************************
+
+	* Create empty variables where we can store reg results
+	gen reg_coef = .
+	gen reg_se = .
+	gen reg_coef_ma = .
+	gen reg_se_ma = .
+	gen reg_ret_duration = .
+	gen reg_tertile = .
+	local counter 1
+	
+	* loop over tertiles
+	forvalues n_tertile = 1/3{
+		* Step 1: run the regression
+		qui xtreg nondurable_expenditure_real ibn.ret_duration if tertile == `n_tertile', fe 
+
+		* loop over ret_duration: 80 to 120
+		forvalues n = 80(2)120{
+			local nPlus = `n' + 2
+			local nMinus = `n' - 2
+
+			* Step 2: save the raw coef and se
+			capture lincom _cons + i`n'.ret_duration
+			* if lincom did not throw an error, then save the results
+			if _rc == 0 {
+				qui replace reg_coef = r(estimate) in `counter'
+				qui replace reg_se = r(se) in `counter'
+				qui replace reg_ret_duration = `n' in `counter'
+				qui replace reg_tertile = `n_tertile' in `counter'
+			}			
+
+			* Step 3: save the moving average coef and se
+			* lincom will compute moving average based on coefs
+			* capture will hide error msg (for instance if we're looking for coefs that dont exist)
+			capture lincom _cons + (i`nMinus'.ret_duration + i`n'.ret_duration + i`nPlus'.ret_duration) / 3
+
+			* if lincom did not throw an error, then save the results
+			if _rc == 0 {
+				qui replace reg_coef_ma = r(estimate) in `counter'
+				qui replace reg_se_ma = r(se) in `counter'
+			}
+
+			local counter = `counter' + 1
+		}
+	}
+
+	** New Version : error bands computed correctly
+	 preserve
+
+		replace reg_ret_duration = reg_ret_duration - 100
+
+		lab var reg_coef_ma "Smoothed Mean Expenditure"
+		lab var reg_coef "UnSmoothed Mean Expenditure"
+
+
+		keep if reg_ret_duration >= -10 & reg_ret_duration <= 10
+
+		keep reg_coef reg_se reg_ret_duration reg_tertile reg_coef_ma reg_se_ma
+		* keep if reg_ret_duration != .
+		
+		xtset reg_tertile reg_ret_duration
+		xtline reg_coef reg_coef_ma, name("tertile", replace) ytitle(, margin(0 2 0 0)) ///
+		byopts(title("Nondurable expenditure by Tertile(Spouse Def = `spouse_def')") rows(1)) ///
+		legend(label(1 "UnSmoothed Expenditure")) legend(label(2 "Smoothed Expenditure"))
+		graph export "$folder/Results/ConsumptionPostRetirement_by_SpouseDef/Comparision/SmoothedvsUnsmoothed_`spouse_def'.pdf", as(pdf) replace
+
+		//xtline reg_coef reg_coef_ma, name("Smoothed Vs Non Smoothed Non-Durable Expenditure", replace)
+		//xtline reg_coef reg_coef_ma, byopts(title("Smoothed Vs Non Smoothed Non-Durable Expenditure") rows(1)) name("Non-Durable Expenditure", replace) ylabel(#3)
+		// graph export "$folder/Results/ConsumptionPostRetirement/Tertile_$how_to_deal_with_spouse/`var'.pdf", as(pdf) replace
+
+		gen se_ub_ma = reg_coef_ma + reg_se_ma
+		gen se_lb_ma = reg_coef_ma - reg_se_ma
+
+		xtline reg_coef_ma, name("Fig1_ma", replace)  ytitle(, margin(0 2 0 0)) ///
+		byopts(title("Nondurable Expenditure by Tertile (Spouse Def = `spouse_def')") note("# Households in Tertile 1 = `count1'; Households in Tertile 2 = `count2'; Households in Tertile 3 = `count3'") rows(1) ) ylabel(#3) ///
+ 		addplot( rarea se_ub_ma se_lb_ma reg_ret_duration, below )
+		graph export "$folder/Results/ConsumptionPostRetirement_by_SpouseDef/Smoothed/spouse_def_`spouse_def'.pdf", as(pdf) replace
+
+		gen se_ub = reg_coef + reg_se
+		gen se_lb = reg_coef - reg_se
+
+		xtline reg_coef, name("Fig2", replace)  ytitle(, margin(0 2 0 0)) ///
+		byopts(title("Nondurable Expenditure by Tertile (Spouse Def = `spouse_def')") note("# Households in Tertile 1 = `count1'; Households in Tertile 2 = `count2'; Households in Tertile 3 = `count3'") rows(1) ) ylabel(#3) ///
+		addplot( rarea se_ub se_lb reg_ret_duration, below)
+		graph export "$folder/Results/ConsumptionPostRetirement_by_SpouseDef/UnSmoothed/spouse_def_`spouse_def'.pdf", as(pdf) replace
+
+	 restore
 
 	***********************************************************************************
 	** Original version: collapse
@@ -163,3 +261,5 @@ cap mkdir "$folder/Results/ConsumptionPostRetirement_by_SpouseDef"
 	}
 */
 }
+
+

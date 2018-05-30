@@ -362,6 +362,13 @@ gen inc_fam_real_2015 = 100 * inc_fam / CPI_all_base_2015
 
 gen inc_ss_fam_real   = 100 * inc_ss_fam / CPI_all_base_2015
 
+
+gen inc_head_real      = 100 * inc_head / CPI_all
+gen inc_head_real_2015 = 100 * inc_head / CPI_all_base_2015
+ 
+gen inc_ss_head_real   = 100 * inc_ss_head / CPI_all_base_2015
+ 
+
 ****************************************************************************************************
 ** Wealth
 ****************************************************************************************************

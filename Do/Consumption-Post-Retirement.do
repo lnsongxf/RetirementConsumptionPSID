@@ -18,7 +18,7 @@ global ret_duration_definition 2 // Defines retirement year. Can be 1, 2, or 3. 
 global graphs_by_mean 0          // Graph by quintile. Can be 0 or 1
 global graphs_by_quintile 0      // Graph by quintile. Can be 0 or 1
 global graphs_by_tertile 1       // Tertiles
-global make_barplots 0
+global make_barplots 1
 global allow_kids_to_leave_hh 1  // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH 
                                  // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
 global how_to_deal_with_spouse 1  // could be 1 2 3 4 5
@@ -293,17 +293,17 @@ graph bar expenditure_total_pre2005_real, over(ret_duration) stack name("fig2", 
 
 preserve
 	keep if ret_duration >= -8 & ret_duration <= 8
-	graph bar `expenditure_cats' if tertile == 1, over(ret_duration) stack name("tertile1", replace) percent title("Bottom Tertile") ///
+	graph bar `expenditure_cats' if tertile == 1, over(ret_duration) stack name("tertile1", replace) percent title("Expenditure for Bottom Tertile") ///
 	legend(label(1 "Food Home")) legend(label(2 "Food Away")) legend(label(3 "Housing")) legend(label(4 "Education")) legend(label(5 "Health")) ///
 	legend(label(6 "Non Durable Transport")) legend(label(7 "Durable Transport"))
 	graph export "$folder/Results/ConsumptionPostRetirement/Tertile_Bar/tertile1.pdf", as(pdf) replace
 
-	graph bar `expenditure_cats' if tertile == 2, over(ret_duration) stack name("tertile2", replace) percent title("Middle Tertile") ///
+	graph bar `expenditure_cats' if tertile == 2, over(ret_duration) stack name("tertile2", replace) percent title("Expenditure for Middle Tertile") ///
 	legend(label(1 "Food Home")) legend(label(2 "Food Away")) legend(label(3 "Housing")) legend(label(4 "Education")) legend(label(5 "Health")) ///
 	legend(label(6 "Non Durable Transport")) legend(label(7 "Durable Transport"))
 	graph export "$folder/Results/ConsumptionPostRetirement/Tertile_Bar/tertile2.pdf", as(pdf) replace
 
-	graph bar `expenditure_cats' if tertile == 3, over(ret_duration) stack name("tertile3", replace) percent title("Top Tertile") ///
+	graph bar `expenditure_cats' if tertile == 3, over(ret_duration) stack name("tertile3", replace) percent title("Expenditure for Top Tertile") ///
 	legend(label(1 "Food Home")) legend(label(2 "Food Away")) legend(label(3 "Housing")) legend(label(4 "Education")) legend(label(5 "Health")) ///
 	legend(label(6 "Non Durable Transport")) legend(label(7 "Durable Transport"))
 	graph export "$folder/Results/ConsumptionPostRetirement/Tertile_Bar/tertile3.pdf", as(pdf) replace

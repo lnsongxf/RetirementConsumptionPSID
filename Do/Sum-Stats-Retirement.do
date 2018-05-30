@@ -120,7 +120,6 @@ tsline pos_inc_ss*, name("pos_inc_ss", replace)
 */
 
 /*Next steps as of 25 May: 
-
 	1. expenditure graphs with common scale  (remove the rescale option) label for axes
 	 * Done. 
 
@@ -147,15 +146,26 @@ tsline pos_inc_ss*, name("pos_inc_ss", replace)
 	-to compute SEs for MA... regress expenditure on time period. test whether it's equal to zero, loop over time periods
 	test (coef L.coef L2.coef)/3
 	produces se
-
 	-todo: why does the number of obs in each tertile change?
 
-
-	Just in case
-	https://www.stata.com/manuals/g-2graphtwowayrarea.pdf
-	https://tex.stackexchange.com/questions/28333/continuous-v-per-chapter-section-numbering-of-figures-tables-and-other-docume
-	*/
 	** 1. Wave greater than 2005. Where Should I add this in the section? 
+
+/*
+1. Standard Error done properly. In Section 8 and section 9. 
+	- Fixed effect to the regression - 
+	- One set of graph controlled for spouse working. 
+	- Do not control for anything. 
+
+3. (Nevermind: Just drop the Early Retirees)
+4. Do all the dropping consistently. Early. 
+
+5. Done - Take the people who retire early. check their education. If college graduate= top, high school drop out = botton. 
+Between put in the middle. 
+
+6. Go with heads social security income
+7. Take the maximum - already doing, but for the family ... will need to change to be for the head
+
+
 	** 2. For different categories, the number of observations for the same spouse type remains same. Should it change? 
 	** 3.
 
