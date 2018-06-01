@@ -1,6 +1,7 @@
 	set more off
 	graph close
 	*set autotabgraphs on
+	clear
 
 	*global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"
 	* global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
@@ -8,19 +9,19 @@
 
 	cap mkdir "$folder/Results/ConsumptionPostRetirement_by_SpouseDef_Cats"
 
-		local expenditure_cats_all total_foodexp_home_real total_foodexp_away_real total_housing_real  ///
-		total_education_real total_healthexpense_real total_transport_real
+	local expenditure_cats_all total_recreation_2005_real total_clothing_2005_real total_foodexp_home_real total_foodexp_away_real total_housing_real  ///
+	total_education_real total_healthexpense_real total_transport_real total_clothing_2005_real ///
+	total_recreation_2005_real
 		
-	 	forvalues spouse_def = 1/5{
+	forvalues spouse_def = 1/8{
+		* local spouse_def 1
 
-	 	foreach var of varlist `expenditure_cats_all' {
+	 	foreach var in `expenditure_cats_all' {
+	 	* local var total_foodexp_home_real
 
-		local lab: variable label `var'
-/*
-		* if "`var'" == "total_clothing_2005_real" {
-		* 	keep if wave >= 2005
-		* }
-*/
+	 	** LOAD AND PREPARE DATA
+		use "$folder/Data/Intermediate/Basic-Panel.dta", clear
+		
 		//local spouse_def 1
 		//display "Spouse def = `spouse_def'"
 
@@ -38,10 +39,7 @@
 		global how_to_deal_with_spouse `spouse_def'  // could be 1 2 3 4 5
 		global retirement_definition_spouse 1 //// 0 is default (last job ended due to "Quit, Resigned, Retire" or "NA")
 	                                       // 1 is loose (does not ask why last job ended) and 2 is strict (last job ended due to "Quit, Resigned, Retire" only)			 							 
-							
-		** LOAD AND PREPARE DATA
-		use "$folder/Data/Intermediate/Basic-Panel.dta", clear
-						 
+												 
 		* Sample selection: households with same husband-wife over time
 		quietly do "$folder/Do/Sample-Selection.do"
 
@@ -58,7 +56,6 @@
 
 		// egen nondurable_expenditure_real = rowtotal( `expenditure_cats_all' )
 		// label variable nondurable_expenditure_real "Real Nondurable Expenditure"
-		
 
 		lab var ret_duration "Duration of Head's Retirement"
 		lab var transportation_blundell "Transportation Services"
@@ -83,11 +80,40 @@
 		lab var	transport_durables "Transportation Durables Expenditure"
 		lab var total_housing_real "Total Housing Expenditure"
 		// lab var	total_housing_2005_real "Housing Expenditure"
-		// lab var	total_recreation_2005_real "Recreation Expenditure"
-		// lab var total_clothing_2005_real  "Clothing Expenditure"
-		// lab var total_housing_real "Housing Expenditure"
+		 lab var	total_recreation_2005_real "Recreation Expenditure"
+		 lab var total_clothing_2005_real  "Clothing Expenditure"
+		 lab var total_housing_real "Housing Expenditure"
 
-	//	local expenditure_cats nondurable_expenditure_real
+		//	local expenditure_cats nondurable_expenditure_real
+
+		local lab: variable label `var'
+
+		***********************************************************************************
+		** APC
+		***********************************************************************************
+
+		* Create normalized year dummies, where year dummies are normalized so that Ed_year=0 and Cov(d_year,trend)=0
+		* Deaton-Paxson Normalization to solve multicollinearity in the age-period-cohort model
+		* See for instance Aguiar and Hurst 2013
+		* if using data from 1999 to 2015, use 3/9 (because there are 9 waves)
+		* if using data from 2005 to 2015, use 3/6 (because there are 6 waves)
+		if "`var'" == "total_clothing_2005_real" | "`var'" == "total_recreation_2005_real"{
+			keep if wave >= 2005
+
+			quietly tab wave, gen(year_cat)
+			foreach num of numlist 3/6 { 
+				gen d_year_`num'=year_cat`num'+(1-`num')*year_cat2+(`num'-2)*year_cat1
+			}		
+		}
+		else{
+			quietly tab wave, gen(year_cat)
+			foreach num of numlist 3/9 { 
+				gen d_year_`num'=year_cat`num'+(1-`num')*year_cat2+(`num'-2)*year_cat1
+			}
+		}
+		* xtreg .... d_year*
+
+
 		***********************************************************************************
 		** New Version: regression
 		***********************************************************************************
@@ -96,11 +122,11 @@
 		replace ret_duration = ret_duration + 100
 
 		tempfile results	
-		qui xtreg `var' ibn.ret_duration if tertile == 1, fe 
+		qui xtreg `var' ibn.ret_duration d_year* if tertile == 1, fe 
 		regsave using `results', addlabel(tertile, "Bottom Tertile") replace
-		qui xtreg `var' ibn.ret_duration if tertile == 2, fe
+		qui xtreg `var' ibn.ret_duration d_year* if tertile == 2, fe
 		regsave using `results', addlabel(tertile, "Middle Tertile") append
-		xtreg `var' ibn.ret_duration if tertile == 3, fe
+		qui xtreg `var' ibn.ret_duration d_year* if tertile == 3, fe
 		regsave using `results', addlabel(tertile, "Top Tertile") append
 
 		* xtset pid ret_duration, delta(2)
@@ -162,10 +188,9 @@
 
 		restore
 	*/
-
 	***********************************************************************************
 		** Produced smoothed regression results using lincom command
-		***********************************************************************************
+	***********************************************************************************
 
 		* Create empty variables where we can store reg results
 		gen reg_coef = .
@@ -179,7 +204,7 @@
 		* loop over tertiles
 		forvalues n_tertile = 1/3{
 			* Step 1: run the regression
-			qui xtreg `var' ibn.ret_duration if tertile == `n_tertile', fe 
+			qui xtreg `var' ibn.ret_duration d_year* if tertile == `n_tertile', fe 
 
 			* loop over ret_duration: 80 to 120
 			forvalues n = 80(2)120{
@@ -208,13 +233,11 @@
 				}
 
 				local counter = `counter' + 1
-
 			}
 		}
 
 		* New Version : error bands computed correctly
 		 preserve
-
 			replace reg_ret_duration = reg_ret_duration - 100
 
 			lab var reg_coef_ma "Smoothed Mean Expenditure"
@@ -226,6 +249,17 @@
 			* keep if reg_ret_duration != .	
 		
 			xtset reg_tertile reg_ret_duration
+
+			* Save these results in a tempfile (so that we can sum up later)
+			gen category = "`var'"
+			gen spouse_def = `spouse_def'
+			local var_sub = substr("`var'", 7, 10)
+			tempfile results_`var_sub'_SP`spouse_def'
+
+			di "results_`var_sub'_SP`spouse_def'"
+			save `results_`var_sub'_SP`spouse_def'', replace
+			
+
 		/*
 			xtline reg_coef reg_coef_ma, name("tertile", replace) ytitle(, margin(0 2 0 0)) ///
 			byopts(title("Nondurable expenditure by Tertile(Spouse Def = `spouse_def')") rows(1)) ///
@@ -236,10 +270,12 @@
 			gen se_ub_ma = reg_coef_ma + reg_se_ma
 			gen se_lb_ma = reg_coef_ma - reg_se_ma
 
+			
 			xtline reg_coef_ma, name("`var'", replace)  ytitle(, margin(0 2 0 0)) ///
 			byopts(title(" `lab'_(Spouse Def = `spouse_def')") note("# Households in Tertile 1 = `count1'; Households in Tertile 2 = `count2'; Households in Tertile 3 = `count3'") rows(1) ) ylabel(#3) ///
 			addplot( rarea se_ub_ma se_lb_ma reg_ret_duration, below )
 			graph export "$folder/Results/ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/`spouse_def'/spouse_def_`var'.pdf", as(pdf) replace
+			
 
 /*			*This is Unsmoothed Version
 			gen se_ub = reg_coef + reg_se
@@ -253,4 +289,35 @@
 		 restore
 
 	}
+}
+
+* Look at whether these coefs add up
+* Here we create a dataset that includes coefs by tertile, category, and spouse def
+
+use `results_foodexp_ho_SP1', clear
+gen to_drop = 1
+forvalues spouse_def = 1/1{
+	foreach var in `expenditure_cats_all' {
+		local var_sub = substr("`var'", 7, 10)
+		append using `results_`var_sub'_SP`spouse_def''
+	}
+}
+
+drop if to_drop == 1
+save cat_spouse_def_results, replace
+
+use cat_spouse_def_results, clear
+collapse (sum) reg_coef , by(spouse_def reg_ret_duration reg_tertile)
+
+xtset reg_tertile reg_ret_duration
+
+xtline reg_coef, name("try", replace)  ytitle(, margin(0 2 0 0)) ///
+byopts(title("dfd = `spouse_def')") rows(1) ) ylabel(#3) 
+
+/*
+forvalues spouse_def = 1/1 {
+	preserve
+		keep if spouse_def == 1
+		xtset reg_tertile reg_ret_duration	
+restore
 }

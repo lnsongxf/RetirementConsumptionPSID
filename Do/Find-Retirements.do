@@ -65,6 +65,7 @@ replace ret_year = wave if retirement_transition == 1 & ret_year >= 9997
 gen dif          = ret_year - wave if retirement_transition == 1 
 * It's worrisome that some people have a ret_year so much earlier than the year they are listed as retiring
 * tab dif
+
 * TODO: try dropping families for which dif <= -3
 
 ****************************************************************************************************
@@ -108,7 +109,7 @@ by pid, sort: egen back_to_work_spouse  = max(back_to_work_sp)
 drop back_to_work_sp
 
 * Replace all retirement transitions with zero if they go back to work
-replace retirement_transition_spouse        = 0 if back_to_work_spouse == 1
+replace retirement_transition_spouse   = 0 if back_to_work_spouse == 1
 replace retirement_transition_loose_s  = 0 if back_to_work_spouse == 1
 replace retirement_transition_strict_s = 0 if back_to_work_spouse == 1
 
@@ -162,6 +163,13 @@ replace retired_spouse = 0 if retired == .
 * by pid, sort: egen max_retired = max(retired)
 * edit pid wave retirement_transition retired inc_ss_fam inc_ss_head if max_r == 1
 
+* Trying to define spouse retirement for people who are single. The questions is does it apply to both head and spouse? 
+ * Married is defined only for the head of the family. 
+
+	gen not_married = .
+	replace not_married = 0 if married == 1
+	replace not_married = 1 if married != 1
+
 ****************************************************************************************************
 ** Partners retirement status
 ****************************************************************************************************
@@ -171,7 +179,13 @@ replace retired_spouse = 0 if retired == .
 	* aka set retirement_transition == .
 
 if $how_to_deal_with_spouse == 1{
-	** 	option 1: Spouse never works during observed sample period
+*		1 option: ignore the spouse (keep doing what we currently do)
+		* no need to modify retirement_transition b/c we already defined it for the head
+}
+
+
+if $how_to_deal_with_spouse == 2{
+	** 	option 2: Spouse never works during observed sample period
 	gen not_working_spouse = ( emp_status_spouse != 1 & emp_status_spouse_2 != 1 & emp_status_spouse_3 != 1 ) 
 	by pid, sort: egen never_work_spouse = min(not_working_spouse)
 	
@@ -184,8 +198,8 @@ if $how_to_deal_with_spouse == 1{
  ** the person never retired, is not working now, person is not on temporary leave or maternity leave, is not looking for work and the person is not disabled.)	
 }
 
-if $how_to_deal_with_spouse == 2{
-**  option: 2 Spouse always works
+if $how_to_deal_with_spouse == 3{
+**  option: 3 Spouse always works
 	gen spouse_working = ( emp_status_spouse == 1 | emp_status_spouse_2 == 1 | emp_status_spouse_3 == 1 ) // by wave and HH
 	by pid, sort: egen always_work_spouse = min(spouse_working) // by HH (if they have a single wave not working, this var will be zero)
 	
@@ -197,8 +211,8 @@ if $how_to_deal_with_spouse == 2{
 	replace retirement_transition = retirement_transition * always_work_spouse // if single period not working, make retirement transition 0
 	}
 	
-if $how_to_deal_with_spouse == 3{
-*		option 3: Spouse has same* retirement transition *for +/- one wave
+if $how_to_deal_with_spouse == 4{
+*		option 4: Spouse has same* retirement transition *for +/- one wave
 
 		* will use retirement_transition_spouse
 		rename retirement_transition retirement_transition_head
@@ -210,8 +224,8 @@ if $how_to_deal_with_spouse == 3{
 
 		}
 	
-if $how_to_deal_with_spouse == 4{
-*		option 4: Spouse has a different retirement transition
+if $how_to_deal_with_spouse == 5{
+*		option 5: Spouse has a different retirement transition
 		// replace ret_year_spouse = wave if retirement_transition_spouse == 1 & ret_year >= 9997
 		// gen diff = ret_year_spouse - wave if retirement_transition_spouse == 1 
 		rename retirement_transition retirement_transition_head
@@ -220,18 +234,46 @@ if $how_to_deal_with_spouse == 4{
 		
 		tab retirement_transition retirement_transition_head
 		}
-	
-if $how_to_deal_with_spouse == 5{
-*		5 option: ignore the spouse (keep doing what we currently do)
-		* no need to modify retirement_transition b/c we already defined it for the head
-}
-*	- Five versions:
-*		- Spouse never works (currently)
-*		- Spouse always works
-*		- Spouse has same* retirement transition *for +/- one wave
-*		- Spouse has a different retirement transition
-*		- 5 option: ignore the spouse (keep doing what we currently do)
 
+if $how_to_deal_with_spouse == 6{
+	//option 6: Spouse retired after the head retired
+	rename retirement_transition retirement_transition_head
+	gen retirement_transition = retirement_transition_head if (ret_year_spouse > ret_year & ret_year != 0)
+	replace retirement_transition = 0 if retirement_transition == .
+
+	tab retirement_transition retirement_transition_head
+}
+
+if $how_to_deal_with_spouse == 7{
+	//option 7: Spouse retired before the head retired
+	rename retirement_transition retirement_transition_head
+	gen retirement_transition = retirement_transition_head if (ret_year_spouse < ret_year & ret_year_spouse != 0)
+	replace retirement_transition = 0 if retirement_transition == .
+
+	tab retirement_transition retirement_transition_head
+}
+
+
+
+if $how_to_deal_with_spouse == 8{
+	//option 7: Spouse retired before the head retired
+
+	rename retirement_transition retirement_transition_head
+	gen retirement_transition = retirement_transition_head if (not_married == 1)
+	replace retirement_transition = 0 if retirement_transition == .
+
+	tab retirement_transition retirement_transition_head
+}
+
+
+
+*	- Five versions:*
+* 		- 1 ignore the spouse (keep doing what we currently do)
+*		- 2 - Spouse never works (currently)
+*		- 3- Spouse always works
+*		- 4- Spouse has same* retirement transition *for +/- one wave
+*		- 5- Spouse has a different retirement transition
+*	
 /* Total expenditure for each each tertile
 * total expenditure by social security income - 3 tertiles
 

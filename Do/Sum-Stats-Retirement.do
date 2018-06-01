@@ -11,7 +11,7 @@ global retirement_definition 0   // 0 is default (last job ended due to "Quit, R
 global allow_kids_to_leave_hh 1  // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH 
                                  // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
 
-global how_to_deal_with_spouse 1 // 1 () 2 (spouse always works) 3 (spouse has same ret transition +/- 1 wave) 4 () 5 (do not do anything special based on the spouse)
+global how_to_deal_with_spouse 1 // 1 Ignore the spouse () 2 Spouse never works  3.(spouse always works) 4 (spouse has same ret transition +/- 1 wave) 4. Spouse has a different transition
 						
 global retirement_definition_spouse 1 //// 0 is default (last job ended due to "Quit, Resigned, Retire" or "NA")
                                        // 1 is loose (does not ask why last job ended) and 2 is strict (last job ended due to "Quit, Resigned, Retire" only)			 
@@ -119,55 +119,60 @@ tsline pos_inc_ss*, name("pos_inc_ss", replace)
 * At age 70, 94.3% of heads have positive SS income
 */
 
-/*Next steps as of 25 May: 
-	1. expenditure graphs with common scale  (remove the rescale option) label for axes
-	 * Done. 
-
-	2. Caption in the graph with number of HHs (put it in a note) use note()
-	 * Done/ 
-
-	3.  Section 8 of the latex doc
-		- cleaning figures
-		- add standard errors
-				(We could not figure out way to smooth errors. Ask the professor during the meeting.)
-		- unsmoothed Version
-		- Smoothed Version
-	4.  Section 9
-		-8 expenditure categories and 5 spouse categories
-			-smoothed version
-			-subsection{Spouse Never Works}
-
--   All these plots created using regsave instead of collapse. 
-		- Used regsave. 
-
-	-3 year MA or 5 year MA (tssmooth)
-			- Used three year	
-
-	-to compute SEs for MA... regress expenditure on time period. test whether it's equal to zero, loop over time periods
-	test (coef L.coef L2.coef)/3
-	produces se
-	-todo: why does the number of obs in each tertile change?
-
-	** 1. Wave greater than 2005. Where Should I add this in the section? 
-
 /*
-1. Standard Error done properly. In Section 8 and section 9. 
-	- Fixed effect to the regression - 
-	- One set of graph controlled for spouse working. 
-	- Do not control for anything. 
+Next Step as of:
+Wednesday, May 30, 2018
 
-3. (Nevermind: Just drop the Early Retirees)
-4. Do all the dropping consistently. Early. 
+1. Spouse retired before the head of household and after the head of the household
+	Added in the defination.
+ 	Def-6 - Retires after the head
+ 	Def 7 - Retires after the defination
+ 	Have not updated the Categorical, Spouse Defination. - Section 9 yet. Updated the section 8 already. 
+ 	Wierd number of observations for spouse retire after the head?? 
 
-5. Done - Take the people who retire early. check their education. If college graduate= top, high school drop out = botton. 
-Between put in the middle. 
+2. Drop the unsmoothed from section 8
+- DONE
 
-6. Go with heads social security income
-7. Take the maximum - already doing, but for the family ... will need to change to be for the head
+3. put the def 5 in the first
+ - Done. The new number 1 is: Ignore the Spouse. Work only with the head/ 
+
+4. Age Period  - multicollinearity problem. 
+	cohort effects/ time effects/ 
+		patrick has the code for this. We can use it. 
+		Patrick has updated the code for section 9. I need copy it for section 8. 
+
+7. Do the coefficients add up? For the categories to total imputed categories? 
+ 	Check this. 
 
 
-	** 2. For different categories, the number of observations for the same spouse type remains same. Should it change? 
-	** 3.
+8. Add clothing and recreation?
+	Add clothing and recreation in section 9. 
 
+
+This is a task mostly for Monday. No need to do it before Friday. 
+9. Demand model for 0 working, one working, 2 working
+10. Life cycle modeling: 
+Every household. One in four type. 
+
+
+ - High and low men and women income. 
+ - We keep five groups. 
+ Every household has two different entries. 
+ 	- for household A:
+ 	 - enter in the dataset twice, consumption data same, labor supply data will be different.
+
+ - Who are the head of household? Are they all male or female?
+ - What if they are not couple? 
+ 		- which group of definition are they included in? 
+ - Singles add a new definition on the spouse group
+
+
+ Income for different definition of spouse retirement
+ 		This is section 7. We already have income graphs based on five definations of spouse retirement. 
+ 		Need to add three more in Section 3. 
+
+ - In page 8, relabel work related expenditure graph. 
+
+*/
 
 
