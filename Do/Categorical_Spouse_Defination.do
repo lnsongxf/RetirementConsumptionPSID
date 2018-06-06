@@ -298,7 +298,6 @@
 
 	}
 }
-
 * Look at whether these coefs add up
 * Here we create a dataset that includes coefs by tertile, category, and spouse def
 
@@ -310,7 +309,6 @@ forvalues spouse_def = 1/1{
 		append using `results_`var_sub'_SP`spouse_def''
 	}
 }
-
 drop if to_drop == 1
 save cat_spouse_def_results, replace
 
@@ -322,7 +320,6 @@ xtset reg_tertile reg_ret_duration
 xtline reg_coef, name("sumreg", replace)  ytitle(, margin(0 2 0 0)) ///
 xscale(r(-15 15)) xlabel( -15(15)15 ) byopts(title("Sum of Reg Coefficients") rows(1) ) ylabel(#3)
 graph export "$folder/Results/ConsumptionPostRetirement_by_SpouseDef_Cats/SumCoef/spouse_def_1.pdf", as(pdf) replace
-
 /*
 forvalues spouse_def = 1/1 {
 	preserve
