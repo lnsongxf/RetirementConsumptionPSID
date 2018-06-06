@@ -68,18 +68,6 @@ gen dif          = ret_year - wave if retirement_transition == 1
 
 * TODO: try dropping families for which dif <= -3
 
-****************************************************************************************************
-** Show retirement
-****************************************************************************************************
-
-* Flag anyone after a retirement transition
-gen retired = 1 if retirement_transition == 1
-replace retired = 1 if L.retired == 1
-replace retired = 0 if retired == .
-
-* by pid, sort: egen max_retired = max(retired)
-* edit pid wave retirement_transition retired inc_ss_fam inc_ss_head if max_r == 1
-
 
 ** PART B
 ****************************************************************************************************
@@ -158,7 +146,7 @@ gen diff          = ret_year_spouse - wave if retirement_transition_spouse == 1
 * Flag anyone after a retirement transition
 gen retired_spouse = 1 if retirement_transition_spouse == 1
 replace retired_spouse = 1 if L.retired_spouse == 1
-replace retired_spouse = 0 if retired == .
+replace retired_spouse = 0 if retired_spouse == .
 
 * by pid, sort: egen max_retired = max(retired)
 * edit pid wave retirement_transition retired inc_ss_fam inc_ss_head if max_r == 1
@@ -254,7 +242,6 @@ if $how_to_deal_with_spouse == 7{
 }
 
 
-
 if $how_to_deal_with_spouse == 8{
 	//option 7: Spouse retired before the head retired
 
@@ -265,8 +252,6 @@ if $how_to_deal_with_spouse == 8{
 	tab retirement_transition retirement_transition_head
 }
 
-
-
 *	- Five versions:*
 * 		- 1 ignore the spouse (keep doing what we currently do)
 *		- 2 - Spouse never works (currently)
@@ -274,13 +259,26 @@ if $how_to_deal_with_spouse == 8{
 *		- 4- Spouse has same* retirement transition *for +/- one wave
 *		- 5- Spouse has a different retirement transition
 *	
-/* Total expenditure for each each tertile
+* Total expenditure for each each tertile
 * total expenditure by social security income - 3 tertiles
 
 
-Task 1: Graphs on expenditure with different how_to_deal_with_spouse based on tertile level = 15 total graphs
+* Task 1: Graphs on expenditure with different how_to_deal_with_spouse based on tertile level = 15 total graphs
 
-Task 2: Graphs on expenditure with different how_to_deal_with_spouse based on social security level = 15 graphs in total
+* Task 2: Graphs on expenditure with different how_to_deal_with_spouse based on social security level = 15 graphs in total
+
+****************************************************************************************************
+** Show retirement
+****************************************************************************************************
+
+* Flag anyone after a retirement transition
+sort pid wave
+gen retired = 1 if retirement_transition == 1
+replace retired = 1 if L.retired == 1
+replace retired = 0 if retired == .
+
+* by pid, sort: egen max_retired = max(retired)
+* edit pid wave retirement_transition retired inc_ss_fam inc_ss_head if max_r == 1
 
 
 

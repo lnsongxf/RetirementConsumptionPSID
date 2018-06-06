@@ -117,47 +117,49 @@ tsline pos_inc_ss*, name("pos_inc_ss", replace)
 * At age 62, 29.4% of heads have positive SS income
 * At age 65, 60.7% of heads have positive SS income
 * At age 70, 94.3% of heads have positive SS income
-*/
-
 /*
 Next Step as of:
 Wednesday, May 30, 2018
 
 1. Spouse retired before the head of household and after the head of the household
-	Added in the defination.
- 	Def-6 - Retires after the head
- 	Def 7 - Retires after the defination
- 	Have not updated the Categorical, Spouse Defination. - Section 9 yet. Updated the section 8 already. 
- 	Wierd number of observations for spouse retire after the head?? 
+	DONE. Added in the defination.
+ 	Def-6 - Spouse retires after the head
+ 	Def 7 - Spouse retires before the head
+ 	Def 8 - Retirement of the head when the head is single
 
 2. Drop the unsmoothed from section 8
-- DONE
+	DONE
 
 3. put the def 5 in the first
- - Done. The new number 1 is: Ignore the Spouse. Work only with the head/ 
+ 	DONE. Now the category starts with 1 - Ignoring the Spouse.
 
 4. Age Period  - multicollinearity problem. 
-	cohort effects/ time effects/ 
-		patrick has the code for this. We can use it. 
-		Patrick has updated the code for section 9. I need copy it for section 8. 
+	DONE. Added this in both section 9 and 10. Section 9 is mean expenditure of total non durables. 
+	Section 10 is - mean expenditure on each categorical variable 
 
 7. Do the coefficients add up? For the categories to total imputed categories? 
- 	Check this. 
-
+	Added this in the section 8. We have checked the sum for defination of spouse retirement for the first three category only. 
 
 8. Add clothing and recreation?
-	Add clothing and recreation in section 9. 
+	Added clothing and recreation in section 10. 
+
+QUESTIONS to THINK:
+1. Retirement defination should we change. 
+		When spouse retires after the head, we have very small number of observations. (4, 6, 4)
 
 
-This is a task mostly for Monday. No need to do it before Friday. 
-9. Demand model for 0 working, one working, 2 working
-10. Life cycle modeling: 
-Every household. One in four type. 
+Next Step as of:
+2. Friday, June 01, 2018
+ 
+1. Demand model for 0 working, one working, 2 working
 
+2. Life cycle modeling
+		Ask Patrick to send me the information about this. 
+		Every household. One in four type. 
 
  - High and low men and women income. 
  - We keep five groups. 
- Every household has two different entries. 
+ 	Every household has two different entries. 
  	- for household A:
  	 - enter in the dataset twice, consumption data same, labor supply data will be different.
 
@@ -174,5 +176,30 @@ Every household. One in four type.
  - In page 8, relabel work related expenditure graph. 
 
 */
+Meeting June 01, 2018, Friday
+- Error bands (-15, 15) in retirrement x axis
+- Done. But the x-axis changes to -15 to 25. Ask Patrick about it.
+
+subtract health expenditure from non durable 
+ 	add in controls for number for kids
+ 	dummy for one, dummy for two, dummy for three or more
+ 
+ June 04
+
+ 1. Side by side for expenditure with health and non health in total non durables
+ For each spouse defination, 3 graphs:
+ 1. Total spending including health and education
+ 2 .side by side: one subtracting health  and one subtracting both health and education
+
+ 3. Keep the defination of retirement/ no change needed
+ 4. Keep all the conditions
+ 	1. Child
+ 	2. Age
+ 	3. put retirement dummy
+ 	One version with age/ and one without age
+ 	
+ 	Column 1: no conditioning variable
+ 	Column 2: 
+
 
 
