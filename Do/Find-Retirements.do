@@ -56,8 +56,11 @@ if $retirement_definition == 2{
 ** Look into the difference between observed retirement and reported retirement
 ****************************************************************************************************
 
-* gen ret_year_computed = wave if retirement_transition == 1 
-* tab ret_year ret_year_computed
+
+ gen ret_year_computed_ = wave if retirement_transition == 1 
+ by pid, sort: egen ret_year_computed = max(ret_year_computed_)
+ 
+ * tab ret_year ret_year_computed
 
 * Look at difference in self reported retirement year and the wave that they are first observed retired 
 * NOTE: any value < -2 is suspicious!
@@ -241,7 +244,6 @@ if $how_to_deal_with_spouse == 7{
 	tab retirement_transition retirement_transition_head
 }
 
-
 if $how_to_deal_with_spouse == 8{
 	//option 7: Spouse retired before the head retired
 
@@ -261,7 +263,6 @@ if $how_to_deal_with_spouse == 8{
 *	
 * Total expenditure for each each tertile
 * total expenditure by social security income - 3 tertiles
-
 
 * Task 1: Graphs on expenditure with different how_to_deal_with_spouse based on tertile level = 15 total graphs
 

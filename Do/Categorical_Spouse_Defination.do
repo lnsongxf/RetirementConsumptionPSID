@@ -268,7 +268,6 @@
 			save `results_`var_sub'_SP`spouse_def'', replace
 			
 
-		/*
 			xtline reg_coef reg_coef_ma, name("tertile", replace) ytitle(, margin(0 2 0 0)) ///
 			byopts(title("Nondurable expenditure by Tertile(Spouse Def = `spouse_def')") rows(1)) ///
 			legend(label(1 "UnSmoothed Expenditure")) legend(label(2 "Smoothed Expenditure"))

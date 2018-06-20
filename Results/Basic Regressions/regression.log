@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  6 JUN 2018 16:18
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  13 JUN 2018 09:10
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -877,7 +877,7 @@ Here is how much of TeX's memory you used:
 ></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb>
 </usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></
 usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb>
-Output written on regression.pdf (44 pages, 105319 bytes).
+Output written on regression.pdf (44 pages, 102511 bytes).
 PDF statistics:
  426 PDF objects out of 1000 (max. 8388607)
  372 compressed objects within 4 object streams

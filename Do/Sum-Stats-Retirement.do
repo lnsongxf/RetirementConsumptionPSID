@@ -93,8 +93,6 @@ preserve
 	tsline `inc_measures', title("Income based on time since head's retirement") name("income_by_ret_duration_3_SP$how_to_deal_with_spouse", replace) ylabel(#3)
 restore
 
-
-
 ****************************************************************************************************
 * Check about the zero social security. I would hope there are very few 
 * households with zero Social Security who have reached age 65?
@@ -184,22 +182,127 @@ subtract health expenditure from non durable
  	add in controls for number for kids
  	dummy for one, dummy for two, dummy for three or more
  
- June 04
+ June 06
 
  1. Side by side for expenditure with health and non health in total non durables
- For each spouse defination, 3 graphs:
- 1. Total spending including health and education
- 2 .side by side: one subtracting health  and one subtracting both health and education
+ 	-Done
+ 		- side by side: one subtracting health  and one subtracting both health and education
+ 		 4. Keep all the conditions
+2. Drawing regression table for different combinations of categories and nondurable consumptions
 
- 3. Keep the defination of retirement/ no change needed
- 4. Keep all the conditions
- 	1. Child
- 	2. Age
- 	3. put retirement dummy
- 	One version with age/ and one without age
- 	
- 	Column 1: no conditioning variable
- 	Column 2: 
+
+1. Using post 2005 data. including both recreating and clothing
+	Doing. Will do in a separate tex file for convinience
+
+2. Defination 8 - look at the outlier for driving the mean up
+	Need to check this later. 
+
+3. Interact i.retired with three different social security tertiles
+	Did this for a single defination. Question about interaction presentation. 
+
+
+4. Do the post 2005 data in subfigures - 3 figures a page
+	Same as one. Will include clothing/ recreation and housing in all of these cases. 
+
+Jan - 7
+1. Category by category
+2. Post 2005 graphs/ including clothing and recreation/ goes down by a lot unlike other two graphs in section 9. 
+- Potential causes:
+	-is it caused by the recession?
+	-looks like the time fixed effects are not picking up the full effect of the recession
+	-could use the full sample (including those who do not retire) to better estimate those time fixed effects?
+	-does deaton paxon break down when the length of the sample gets too short? for instance, if we only had 2 periods, deaton paxon normalization would not work
+	-if so, any way we could use the longer sample while also incorporating in recreation/trips/clothing? either as imputed consumption. or time fixed effects controlling for the increase in 2005?
+
+
+
+.3 Check the oulier in defination 8, when the head is single using histograms. 
+
+
+4. Make a table how the sample size reduces as we apply constraints
+	- to track how how the numbers decrease
+
+5. 
+1. 
+
+gen drop_bc_age = 1 or 0
+gen keep_bc_retiring = 1 or 0
+
+count
+local c1 = r(N)
+drop if drop_bc_age == 1
+count
+local c2 = r(N)
+keep if keep_bc_retiring == 1
+count
+local c3 = r(N)
+
+
+JUNE 08, 2018
+1. OVERLAY
+	Due to regression framework, difficult to combine so far as we use two different data sets. 
+	Will Chat with Patrick tomorrow morning. 
+
+2. DROP THE TIME COEFFICIENT
+	I did in one of the regressions. Not much change.
+
+3. DO a version without Deaton Paxson
+	Did it. BAsically it is same as removing the time variable. 
+(assuming time shocks are same on average across different age group)
+
+6. For headline -IGNORING THE SPOUSE
+	1. Just look at only OLS
+	2. One FE
+	3. no time
+	4. no age
+	5. no children dummy
+
+Just for one category and see how it changes. 
+
+Overall new and old categories
+
+- New Time period/ post 2005
+- Overall two graphs old categories new 
+- old graphs new categories. 
+
+TASKS I COMPLETED:
+
+REGRESSION TABLE: temporary file_working file_name
+1. Complete regression (3 non durable categories + 8 individual categories with fixed effect)
+
+2. Do the table for defination 1 with different variations:
+	1. Table with OLS, FE, no FE in all other interactions
+
+3. Made tables with different combinations based on Spouse defination 1
+  1. All waves- six categories
+  2. Post 2005 - Six categories
+  3. Post 2005 - 8 categories
+  4. Post 2005 - 8/ no clothing/ no recreation
+
+People who retire during the recession - draw another overlay graph
+
+age cohort graph - different lines
+ keep people who retired during the recession
+ who retired after the recession
+ Line 237 in Exp_by_souse_behaviour- follow up
+
+ 1. Xtline overlay options:/this produces three different graphs and combine
+ 2. Graph combine - multiple subplots
+ 3. Graph twoway - multiple lines
+
+Potential tests to see what are the variables: 
+1. 
+
+TASK: WEDNESDAY
+1. N TEH regression table, remove column 1 to 5. Only keep it for the retired households
+
+
+2. In the expenditure/income, we want to include expenditure fall or growth as a proportion rather than numbers. 
+AS a result we see higher proportion increase or decrease for people in first quartule as they have lower income. 
+
+
+3. Different version for graph comparisions. No controls at all. Both pre and post 2005
+
 
 
 

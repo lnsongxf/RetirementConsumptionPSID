@@ -11,19 +11,19 @@
 	cap mkdir "$folder_output"
 	cap ssc install outreg2
 
-	local expenditure_cats_all total_foodexp_home_real total_foodexp_away_real total_housing_real  ///
-		total_education_real total_transport_real total_recreation_2005_real total_clothing_2005_real
+	local expenditure_cats_all total_foodexp_home_real total_foodexp_away_real total_housing_real ///
+		total_education_real total_transport_real total_recreation_2005_real total_clothing_2005_real total_healthexpense_real
 
-	// forvalues spouse_def = 1/1 {
+	 forvalues spouse_def = 1/3 {
 		 	
-		 	foreach var in `expenditure_cats_all' {
+		 *	foreach var in `expenditure_cats_all' {
 		 	* local var total_foodexp_home_real
 
 		 	 //LOAD AND PREPARE DATA
 			 use "$folder/Data/Intermediate/Basic-Panel.dta", clear
 			
-			local spouse_def 1
-			display "Spouse def = `spouse_def'"
+			// local spouse_def 1
+		// display "Spouse def = `spouse_def'"
 
 		* Switches
 		global quintiles_definition 2    // Defines quintiles. Can be 1, 2, 3, or 4. My preference is 4. I think the next best option is 2
@@ -105,7 +105,7 @@
 		* See for instance Aguiar and Hurst 2013
 		* if using data from 1999 to 2015, use 3/9 (because there are 9 waves)
 		* if using data from 2005 to 2015, use 3/6 (because there are 6 waves)
-	/*	
+		
 		quietly tab wave, gen(year_cat)
 		foreach num of numlist 3/9 { 
 			gen d_year_`num'=year_cat`num'+(1-`num')*year_cat2+(`num'-2)*year_cat1
@@ -150,44 +150,44 @@
 	foreach var in `expenditure_categories_all' {
 		
 		qui reg `var' i.retired
-		outreg2 using "$folder_output/test_`var'.tex", ctitle("test 1") tex(frag) replace addtext(HH FE, No, Age Dummies, No, Dummy Children, No, Time, No) keep(i.retired) nocons // keep() addtext() ///
+		outreg2 using "$folder_output/Def_`spouse_def'/test_`var'.tex", ctitle("OLS") tex(frag) replace addtext(HH FE, No, Age Dummies, No, Dummy Children, No, Time, No) keep(i.retired) nocons // keep() addtext() ///
 
 		qui xtreg `var' i.retired, fe
-		outreg2 using "$folder_output/test_`var'.tex", ctitle("test 2") tex(frag) addtext(HH FE, Yes, Age Dummies, No, Dummy Children, No, Time, No) keep(i.retired) nocons
+		outreg2 using "$folder_output/Def_`spouse_def'/test_`var'.tex", ctitle("test 2") tex(frag) addtext(HH FE, Yes, Age Dummies, No, Dummy Children, No, Time, No) keep(i.retired) nocons
 
 		qui xtreg `var' i.age i.retired, fe
-		outreg2 using "$folder_output/test_`var'.tex", ctitle("test 3") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, No, Time, No) keep(i.retired) nocons
+		outreg2 using "$folder_output/Def_`spouse_def'/test_`var'.tex", ctitle("test 3") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, No, Time, No) keep(i.retired) nocons
 
 		qui xtreg `var' i.age i.retired i.dummy_children, fe
-		outreg2 using "$folder_output/test_`var'.tex", ctitle("test 4") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, No) keep(i.retired) nocons
+		outreg2 using "$folder_output/Def_`spouse_def'/test_`var'.tex", ctitle("test 4") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, No) keep(i.retired) nocons
 
 		qui xtreg `var' i.age i.retired i.dummy_children d_year*, fe
-		outreg2 using "$folder_output/test_`var'.tex", ctitle("test 5") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, Yes)  keep(i.retired) nocons
+		outreg2 using "$folder_output/Def_`spouse_def'/test_`var'.tex", ctitle("test 5") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, Yes)  keep(i.retired) nocons
 
 	* edit pid wave retired do_they_ever_retire if do_they_ever_retire == 1 & pid == 11003
 
 		local conditions "if do_they_ever_retire == 1"
 
 		qui reg `var' i.retired `conditions'
-		outreg2 using "$folder_output/test_`var'.tex", ctitle("test 6") tex(frag) addtext(HH FE, No, Age Dummies, No, Dummy Children, No, Time, No) keep(i.retired) nocons // keep() addtext() ///
+		outreg2 using "$folder_output/Def_`spouse_def'/test_`var'.tex", ctitle("test 6") tex(frag) addtext(HH FE, No, Age Dummies, No, Dummy Children, No, Time, No) keep(i.retired) nocons // keep() addtext() ///
 
 		qui xtreg `var' i.retired `conditions', fe
-		outreg2 using "$folder_output/test_`var'.tex", ctitle("test 7") tex(frag) addtext(HH FE, Yes, Age Dummies, No, Dummy Children, No, Time, No) keep(i.retired) nocons
+		outreg2 using "$folder_output/Def_`spouse_def'/test_`var'.tex", ctitle("test 7") tex(frag) addtext(HH FE, Yes, Age Dummies, No, Dummy Children, No, Time, No) keep(i.retired) nocons
 
 		qui xtreg `var' i.age i.retired `conditions', fe
-		outreg2 using "$folder_output/test_`var'.tex", ctitle("test 8") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, No, Time, No) keep(i.retired) nocons
+		outreg2 using "$folder_output/Def_`spouse_def'/test_`var'.tex", ctitle("test 8") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, No, Time, No) keep(i.retired) nocons
 
 		qui xtreg `var' i.age i.retired i.dummy_children `conditions', fe
-		outreg2 using "$folder_output/test_`var'.tex", ctitle("test 9") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, No) keep(i.retired) nocons
+		outreg2 using "$folder_output/Def_`spouse_def'/test_`var'.tex", ctitle("test 9") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, No) keep(i.retired) nocons
 
 		qui xtreg `var' i.age i.retired i.dummy_children d_year* `conditions', fe
-		outreg2 using "$folder_output/test_`var'.tex", ctitle("test 10") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, Yes)  keep(i.retired) nocons
+		outreg2 using "$folder_output/Def_`spouse_def'/test_`var'.tex", ctitle("test 10") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, Yes)  keep(i.retired) nocons
 
 
 }
 	
 */
-
+/*
 	****************************************************************************************
 	* SECTION 2: 
 	* Part A: Creates 8 regression tables for 8 different conpumption category based on a defination of spouse retirement
@@ -211,37 +211,38 @@
 			 }
 
 		qui reg `var' i.retired
-		outreg2 using "$folder_output/`spouse_def'_test_`var'.tex", ctitle("test 1") tex(frag) replace addtext(HH FE, No, Age Dummies, No, Dummy Children, No, Time, No) keep(i.retired) nocons // keep() addtext() ///
+		outreg2 using "$folder_output/Def_`spouse_def'/`spouse_def'_test_`var'.tex", ctitle("OLS") tex(frag) replace addtext(HH FE, No, Age Dummies, No, Dummy Children, No, Time, No) keep(i.retired) nocons // keep() addtext() ///
 
 		qui xtreg `var' i.retired, fe
-		outreg2 using "$folder_output/`spouse_def'_test_`var'.tex", ctitle("test 2") tex(frag) addtext(HH FE, Yes, Age Dummies, No, Dummy Children, No, Time, No) keep(i.retired) nocons
+		outreg2 using "$folder_output/Def_`spouse_def'/`spouse_def'_test_`var'.tex", ctitle("test 2") tex(frag) addtext(HH FE, Yes, Age Dummies, No, Dummy Children, No, Time, No) keep(i.retired) nocons
 
 		qui xtreg `var' i.age i.retired, fe
-		outreg2 using "$folder_output/`spouse_def'_test_`var'.tex", ctitle("test 3") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, No, Time, No) keep(i.retired) nocons
+		outreg2 using "$folder_output/Def_`spouse_def'/`spouse_def'_test_`var'.tex", ctitle("test 3") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, No, Time, No) keep(i.retired) nocons
 
 		qui xtreg `var' i.age i.retired i.dummy_children, fe
-		outreg2 using "$folder_output/`spouse_def'_test_`var'.tex", ctitle("test 4") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, No) keep(i.retired) nocons
+		outreg2 using "$folder_output/Def_`spouse_def'/`spouse_def'_test_`var'.tex", ctitle("test 4") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, No) keep(i.retired) nocons
 
 		qui xtreg `var' i.age i.retired i.dummy_children d_year*, fe
-		outreg2 using "$folder_output/`spouse_def'_test_`var'.tex", ctitle("test 5") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, Yes) keep(i.retired) nocons
+		outreg2 using "$folder_output/Def_`spouse_def'/`spouse_def'_test_`var'.tex", ctitle("test 5") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, Yes) keep(i.retired) nocons
 
 
 		local conditions "if do_they_ever_retire == 1"
 		
 		qui reg `var' i.retired `conditions'
-		outreg2 using "$folder_output/`spouse_def'_test_`var'.tex", ctitle("test 6") tex(frag) addtext(HH FE, No, Age Dummies, No, Dummy Children, No, Time, No) keep(i.retired) nocons // keep() addtext() ///
+		outreg2 using "$folder_output/Def_`spouse_def'/`spouse_def'_test_`var'.tex", ctitle("test 6") tex(frag) addtext(HH FE, No, Age Dummies, No, Dummy Children, No, Time, No) keep(i.retired) nocons // keep() addtext() ///
 
 		qui xtreg `var' i.retired `conditions', fe
-		outreg2 using "$folder_output/`spouse_def'_test_`var'.tex", ctitle("test 7") tex(frag) addtext(HH FE, Yes, Age Dummies, No, Dummy Children, No, Time, No) keep(i.retired) nocons
+		outreg2 using "$folder_output/Def_`spouse_def'/`spouse_def'_test_`var'.tex", ctitle("test 7") tex(frag) addtext(HH FE, Yes, Age Dummies, No, Dummy Children, No, Time, No) keep(i.retired) nocons
 
 		qui xtreg `var' i.age i.retired `conditions', fe
-		outreg2 using "$folder_output/`spouse_def'_test_`var'.tex", ctitle("test 8") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, No, Time, No) keep(i.retired) nocons
+		outreg2 using "$folder_output/Def_`spouse_def'/`spouse_def'_test_`var'.tex", ctitle("test 8") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, No, Time, No) keep(i.retired) nocons
 
 		qui xtreg `var' i.age i.retired i.dummy_children `conditions', fe
-		outreg2 using "$folder_output/`spouse_def'_test_`var'.tex", ctitle("test 9") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, No) keep(i.retired) nocons
+		outreg2 using "$folder_output/Def_`spouse_def'/`spouse_def'_test_`var'.tex", ctitle("test 9") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, No) keep(i.retired) nocons
 
 		qui xtreg `var' i.age i.retired i.dummy_children d_year* `conditions', fe
-		outreg2 using "$folder_output/`spouse_def'_test_`var'.tex", ctitle("test 10") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, Yes)  keep(i.retired) nocons
+		outreg2 using "$folder_output/Def_`spouse_def'/`spouse_def'_test_`var'.tex", ctitle("test 10") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, Yes)  keep(i.retired) nocons
 
 	}
-
+	*/
+}

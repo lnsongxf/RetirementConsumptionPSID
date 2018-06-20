@@ -1,0 +1,15 @@
+	(1)	(2)	(3)	(4)	(5)	(6)	(7)	(8)	(9)	(10)
+VARIABLES	OLS	test 2	test 3	test 4	test 5	test 6	test 7	test 8	test 9	test 10
+										
+1.retired	656.2	-1,450***	-1,693***	-1,515***	-1,409**	-1,427*	-1,450**	-1,184	-1,166	-787.8
+	(631.4)	(559.2)	(563.9)	(558.9)	(554.2)	(779.7)	(633.0)	(896.3)	(894.2)	(901.5)
+										
+Observations	69,862	69,862	69,862	69,862	69,862	1,500	1,500	1,500	1,500	1,500
+R-squared	0.000	0.000	0.040	0.057	0.073	0.002	0.004	0.192	0.199	0.216
+HH FE	No	Yes	Yes	Yes	Yes	No	Yes	Yes	Yes	Yes
+Age Dummies	No	No	Yes	Yes	Yes	No	No	Yes	Yes	Yes
+Dummy Children	No	No	No	Yes	Yes	No	No	No	Yes	Yes
+Time	No	No	No	No	Yes	No	No	No	No	Yes
+Number of pid		18,085	18,085	18,085	18,085		205	205	205	205
+Standard errors in parentheses										
+*** p<0.01, ** p<0.05, * p<0.1										
