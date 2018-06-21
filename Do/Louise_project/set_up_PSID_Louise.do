@@ -4,8 +4,8 @@ clear all
 // PSID Variable Search:
 // https://simba.isr.umich.edu/VS/s.aspx
 
-* global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
-  global folder "/Users/bibekbasnet/Documents/GitHub/RetirementConsumptionPSID"
+global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
+* global folder "/Users/bibekbasnet/Documents/GitHub/RetirementConsumptionPSID"
   //change the folder if you want to use it from your computer
 
 ****************************************************************************************************
@@ -149,9 +149,10 @@ psid use
     [99]ER16516 [01]ER20457 [03]ER24148 [05]ER28047 [07]ER41037 [09]ER46981
     [11]ER52405 [13]ER58223 [15]ER65459
 
-//Spouse's/Partner's Completed Education Level
+	//Spouse's/Partner's Completed Education Level
     || educspouse
-    [94]ER4159 [95]ER6999 [96]ER9250 [97]ER12223 [99]ER16517 [01]ER20458 [03]ER24149 
+    //[94]ER4159 [95]ER6999 [96]ER9250 [97]ER12223 
+	[99]ER16517 [01]ER20458 [03]ER24149 
     [05]ER28048 [07]ER41038 [09]ER46982 [11]ER52406 [13]ER58224 [15]ER65460
     // # in FU
     || fsize
@@ -940,7 +941,7 @@ psid use
 
     // Pat Note: Alt Q to wrap text
     using "$folder/Data/Raw/PSID_Install", clear design(1)
-    dofile(psid-rep-louise, replace);
+    dofile("$folder/Do/Louise_project/psid-rep-louise", replace);
 
     // Pat Note: Alt Q to wrap text
    // using "$folder/Data/Raw/PSID_Install", clear design(1)
@@ -1063,6 +1064,31 @@ label define type_mortgage
 9 "NA; refused"
 0 "Inap.";
 
+label define spouse_father_educlevel
+1 "Completed 0-5 grades"
+2 "Completed 6-8 grades" // "grade school"; DK but mentions could read and write
+3 "Completed 9-11 grades" // (some high school); junior high
+4 "Completed 12 grades" //(completed high school); "high school"
+5 "Completed 12 grades" // plus nonacademic training; R.N. (no further elaboration)
+6 "Completed 13-14 years" //  Some college, no degree; Associate's degree
+7 "Completed 15-16 years" // College BA and no advanced degree mentioned; normal school; R.N. with 3 years college; "college"
+8 "Completed 17 or more years" //; College, advanced or professional degree, some graduate work; close to receiving degree
+99 "NA; refused"
+0 "Inap.";
+
+
+label define spouse_mother_educlevel
+1 "Completed 0-5 grades"
+2 "Completed 6-8 grades" // "grade school"; DK but mentions could read and write
+3 "Completed 9-11 grades" // (some high school); junior high
+4 "Completed 12 grades" //(completed high school); "high school"
+5 "Completed 12 grades" // plus nonacademic training; R.N. (no further elaboration)
+6 "Completed 13-14 years" //  Some college, no degree; Associate's degree
+7 "Completed 15-16 years" // College BA and no advanced degree mentioned; normal school; R.N. with 3 years college; "college"
+8 "Completed 17 or more years" //; College, advanced or professional degree, some graduate work; close to receiving degree
+99 "NA; refused"
+0 "Inap.";
+
 #delimit cr
 
 psid long
@@ -1155,31 +1181,6 @@ rename x11102 family_id
 * same 1968 ID as the family they moved out of, and keep that same 1968 ID each
 * year. All families with the same 1968 ID contain at least one of the original
 * members from the 1968 family or their lineal descendents born after 1968.
-
-level define spouse_father_educlevel
-1 "Completed 0-5 grades"
-2 "Completed 6-8 grades" // "grade school"; DK but mentions could read and write
-3 "Completed 9-11 grades" // (some high school); junior high
-4 "Completed 12 grades" //(completed high school); "high school"
-5 "Completed 12 grades" // plus nonacademic training; R.N. (no further elaboration)
-6 "Completed 13-14 years" //  Some college, no degree; Associate's degree
-7 "Completed 15-16 years" // College BA and no advanced degree mentioned; normal school; R.N. with 3 years college; "college"
-8 "Completed 17 or more years" //; College, advanced or professional degree, some graduate work; close to receiving degree
-99 "NA; refused"
-0 "Inap.";
-
-
-level define spouse_mother_educlevel
-1 "Completed 0-5 grades"
-2 "Completed 6-8 grades" // "grade school"; DK but mentions could read and write
-3 "Completed 9-11 grades" // (some high school); junior high
-4 "Completed 12 grades" //(completed high school); "high school"
-5 "Completed 12 grades" // plus nonacademic training; R.N. (no further elaboration)
-6 "Completed 13-14 years" //  Some college, no degree; Associate's degree
-7 "Completed 15-16 years" // College BA and no advanced degree mentioned; normal school; R.N. with 3 years college; "college"
-8 "Completed 17 or more years" //; College, advanced or professional degree, some graduate work; close to receiving degree
-99 "NA; refused"
-0 "Inap.";
 
 
 replace foodstamp       = 0 if foodstamp >= 999998
@@ -1305,9 +1306,11 @@ save "$folder/Data/Intermediate/Basic-Panel_Louise.dta", replace
 //if we need larger sample size, we can look at female who are no legal spouse but cohabitants
 
 //must needed variables
-dependent variable: annual hours of work
-regressors and instruments
-wage  dividing by revenue
+//dependent variable: annual hours of work
+//regressors and instruments
+//wage  dividing by revenue
 
+// todo: add the new variables (work hours per year, etc)
+// todo: look into top coding in any of the new variables
 
 
