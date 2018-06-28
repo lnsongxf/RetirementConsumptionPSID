@@ -82,6 +82,13 @@ gen illiq_wealth = fam_wealth_real - fam_liq_wealth_real // NOTE: we do not use 
 gen hand_to_mouth = liq_wealth <= (income / 24)
 gen dummy_mort = mortgage>0
 
+if housing ==1 {
+     gen dummy_justbought =1
+     replace dummy_justbought = 0 if L.housing==1   
+}
+
+
+
 * New variables
 // housevalue_real
 // mortgage_debt_real
@@ -90,7 +97,7 @@ gen dummy_mort = mortgage>0
 if $aux_model_in_logs == 1{
   * Run the model in logs
   local level_vars consumption liq_wealth housing_wealth income mortgage
-  local endog_vars housing hand_to_mouth dummy_mort
+  local endog_vars housing hand_to_mouth dummy_mort dummy_justbought
   foreach var of varlist `level_vars' {
     gen log_`var' = log(`var')
     replace log_`var' = log(1) if `var' <= 0 & `var' != .
@@ -377,13 +384,13 @@ if $estimate_reg_by_age == 0{
 		rename xvar1 Y
 		rename L_log_consumption L_log_cons
 		rename L_log_housing_wealth L_log_h_wealth
-		* dataout, save("$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs") tex replace auto(3)
+		* dataout, save("$folder/Results/Aux_Model_Estimates/AuxModelLatex_v4/coefs") tex replace auto(3)
 		mkmat L* cons age*, matrix(newcoefs) rownames(Y)
-		outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs", nobox mat(newcoefs) replace f(%9.3f)
+		outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex_v4/coefs", nobox mat(newcoefs) replace f(%9.3f)
 	restore
 	
 	// export var covar to latex
-	outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex/sigma", ///
+	outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex_v4/sigma", ///
 		nobox mat(sigma) replace f(%9.3f) caption("Variance Covariance Matrix")
 		
 	// export RMSE
@@ -404,7 +411,7 @@ if $estimate_reg_by_age == 0{
 		local counter = `counter' + 1
 	}
 	mkmat RSS RMSE, matrix(RMSE) rownames(Equation)
-	outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex/rmse", ///
+	outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex_v4/rmse", ///
 		nobox mat(RMSE) replace f(%9.0fc %9.3f)
 	restore
 	
