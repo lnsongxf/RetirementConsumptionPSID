@@ -8,6 +8,7 @@ set autotabgraphs on
 
 global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 use "$folder\Data\Intermediate\Basic-Panel.dta", clear
+cap mkdir "$folder/Results/Aux_Model_Estimates/AuxModelLatex/"
 
 * Switches
 global allow_kids_to_leave_hh 1 // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH
@@ -355,6 +356,36 @@ if $estimate_reg_by_age == 0{
     local filename ""
     mat2txt, matrix(coefs) saving("$folder/Results/Aux_Model_Estimates/coefs`filename'.txt") replace
     mat2txt, matrix(sigma) saving("$folder/Results/Aux_Model_Estimates/sigma`filename'.txt") replace
+
+	// export coefs to latex
+// 	outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs", ///
+// 		nobox mat(coefs) replace f(%9.3f)
+	
+	// export coefs to latex
+	preserve
+		matrix c = e(b)'
+		xsvmat c, norestore roweqname(xvar)
+		split xvar, parse(":")
+		drop xvar
+		replace xvar2 = subinstr(xvar2, ".", "_", .)
+		reshape wide c1, i(xvar1) j(xvar2) string
+		rename c1_cons c1constant
+		foreach var of varlist c1* {
+			local newname = substr("`var'", 3, .)
+			rename `var' `newname'
+		}
+		rename xvar1 Y
+		* dataout, save("$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs") tex replace auto(3)
+		mkmat L* cons age*, matrix(newcoefs) rownames(Y)
+		outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs", nobox mat(newcoefs) replace f(%9.3f)
+	restore
+	
+	// export var covar to latex
+	outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex/sigma", ///
+		nobox mat(sigma) replace f(%9.3f)
+		
+		
+		
     gen sample = e(sample)
 
 
@@ -380,6 +411,8 @@ else if $estimate_reg_by_age == 1{
 
   gen sample = sample_below + sample_above
 }
+
+sdfsdf
 
 ****************************************************************************************************
 ** Generate initial data for simulation
