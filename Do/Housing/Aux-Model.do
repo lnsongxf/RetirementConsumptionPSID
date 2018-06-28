@@ -389,19 +389,21 @@ if $estimate_reg_by_age == 0{
 	gen Equation = ""
 	gen RSS = .
 	gen RMSE = .
+	gen R2 = .
 	local counter = 1
 	foreach var in `e(depvar)' {
 		set obs `counter'
 		replace Equation = "`var'" in `counter'
 		replace RSS = e(rss_`counter') in `counter'
 		replace RMSE = e(rmse_`counter') in `counter'
+		replace R2 = e(r2_`counter') in `counter'
 		di "`counter'"
 		di e(rmse_`counter')
 		local counter = `counter' + 1
 	}
-	mkmat RSS RMSE, matrix(RMSE) rownames(Equation)
+	mkmat RSS RMSE R2, matrix(RMSE) rownames(Equation)
 	outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex/rmse", ///
-		nobox mat(RMSE) replace f(%9.0fc %9.3f) caption("Model Fit")
+		nobox mat(RMSE) replace f(%9.0fc %9.3f %9.3f) caption("Model Fit")
 	restore
 	
     gen sample = e(sample)
