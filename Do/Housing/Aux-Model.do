@@ -358,10 +358,6 @@ if $estimate_reg_by_age == 0{
     mat2txt, matrix(sigma) saving("$folder/Results/Aux_Model_Estimates/sigma`filename'.txt") replace
 
 	// export coefs to latex
-// 	outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs", ///
-// 		nobox mat(coefs) replace f(%9.3f)
-	
-	// export coefs to latex
 	preserve
 		matrix c = e(b)'
 		xsvmat c, norestore roweqname(xvar)
@@ -375,6 +371,8 @@ if $estimate_reg_by_age == 0{
 			rename `var' `newname'
 		}
 		rename xvar1 Y
+		rename L_log_consumption L_log_cons
+		rename L_log_housing_wealth L_log_h_wealth
 		* dataout, save("$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs") tex replace auto(3)
 		mkmat L* cons age*, matrix(newcoefs) rownames(Y)
 		outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs", nobox mat(newcoefs) replace f(%9.3f)
@@ -382,10 +380,30 @@ if $estimate_reg_by_age == 0{
 	
 	// export var covar to latex
 	outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex/sigma", ///
-		nobox mat(sigma) replace f(%9.3f)
+		nobox mat(sigma) replace f(%9.3f) caption("Variance Covariance Matrix")
 		
-		
-		
+	// export RMSE
+	preserve
+	clear
+	set obs 1
+	gen Equation = ""
+	gen RSS = .
+	gen RMSE = .
+	local counter = 1
+	foreach var in `e(depvar)' {
+		set obs `counter'
+		replace Equation = "`var'" in `counter'
+		replace RSS = e(rss_`counter') in `counter'
+		replace RMSE = e(rmse_`counter') in `counter'
+		di "`counter'"
+		di e(rmse_`counter')
+		local counter = `counter' + 1
+	}
+	mkmat RSS RMSE, matrix(RMSE) rownames(Equation)
+	outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex/rmse", ///
+		nobox mat(RMSE) replace f(%9.0fc %9.3f)
+	restore
+	
     gen sample = e(sample)
 
 
