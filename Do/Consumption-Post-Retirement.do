@@ -56,7 +56,7 @@ if $graphs_by_mean == 1{
 	collapse *expenditure* transportation_blundell (count) n = expenditure_blundell, by(ret_duration)
 	
 	drop if ret_duration == .
-	keep if ret_duration >= -10 & ret_duration <= 10
+	keep if ret_duration >= -15 & ret_duration <= 15
 
 	tsset ret_duration
 
@@ -93,7 +93,7 @@ if $graphs_by_quintile == 1{
 	collapse *expenditure* transportation_blundell (count) n = expenditure_blundell, by(ret_duration quintile)
 	
 	drop if ret_duration == .
-	keep if ret_duration >= -10 & ret_duration <= 10
+	keep if ret_duration >= -15 & ret_duration <= 15
 
 	xtset quintile ret_duration
 	
@@ -111,7 +111,7 @@ if $graphs_by_quintile == 1{
 	lab var expenditure_blundell_eq "Nondurable Consumption (Equivalence Scale)"
 	lab var workexpenditure "Work Related Expenditure" // excludes clothing
 	
-	xtline workexpenditure if (ret_duration != 10 | quintile != 3), byopts(title("Work Related Expenditure")) name("work_expenditure", replace) ylabel(#3)
+	xtline workexpenditure if (ret_duration != 15 | quintile != 3), byopts(title("Work Related Expenditure")) name("work_expenditure", replace) ylabel(#3)
 	graph export "$folder/Results/ConsumptionPostRetirement/work.pdf", as(pdf) replace
 
 	xtline expenditure_blundell, byopts(title("Blundell Expenditure")) name("expenditure_blundell", replace) ylabel(#3)
@@ -198,7 +198,7 @@ preserve
 	* lab var total_clothing_2005_real  "Clothing Expenditure"
 	
 	drop if ret_duration == .
-	keep if ret_duration >= -10 & ret_duration <= 10
+	keep if ret_duration >= -15 & ret_duration <= 15
 
 	xtset tertile ret_duration
 		
@@ -239,7 +239,7 @@ preserve
 	xtset tertile ret_duration
 
 	drop if ret_duration == .
-	keep if ret_duration >= -10 & ret_duration <= 10
+	keep if ret_duration >= -15 & ret_duration <= 15
 
 	foreach var of varlist `expenditure_cats_2005' {
 		local lab: variable label `var'
@@ -376,7 +376,7 @@ preserve
 	lab var	total_recreation_2005_real "Recreation Expenditure"
 	lab var total_clothing_2005_real  "Clothing Expenditure"
 
-	keep if ret_duration >= -8 & ret_duration <= 8
+	keep if ret_duration >= -15 & ret_duration <= 15
 
 	graph bar `expenditure_cats_2005' if tertile == 1, over(ret_duration) stack name("tertile1_post2005", replace) percent title("Bottom Tertile") ///
 	legend(label(1 "Food Home")) legend(label(2 "Food Away")) legend(label(3 "Housing")) legend(label(4 "Education")) legend(label(5 "Health")) ///

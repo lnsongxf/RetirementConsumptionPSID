@@ -1,0 +1,23 @@
+	(1)	(2)	(3)	(4)	(5)
+VARIABLES	OLS	test 7	test 8	test 9	test 10
+					
+2.tertile	-0.176		-0.131	-0.175	0.0146
+	(0.832)		(0.894)	(0.900)	(0.890)
+3.tertile	-0.290		-0.611	-0.636	-0.407
+	(0.794)		(0.862)	(0.864)	(0.855)
+1.retired#1b.tertile	0.337	-1.165	0.0703	0.0460	0.796
+	(0.599)	(0.709)	(0.607)	(0.608)	(0.621)
+1.retired#2.tertile	-0.717	-1.514*	-1.030	-1.033	-0.465
+	(0.658)	(0.848)	(0.690)	(0.694)	(0.698)
+1.retired#3.tertile	-0.426	-0.826	-0.530	-0.538	0.0247
+	(0.609)	(0.784)	(0.646)	(0.647)	(0.654)
+					
+Observations	1,455	1,455	1,455	1,455	1,455
+R-squared	0.012	0.007			
+HH FE	No	Yes	No	No	No
+Age Dummies	No	No	Yes	Yes	Yes
+Dummy Children	No	No	No	Yes	Yes
+Time	No	No	No	No	Yes
+Number of pid		454	454	454	454
+Standard errors in parentheses					
+*** p<0.01, ** p<0.05, * p<0.1					

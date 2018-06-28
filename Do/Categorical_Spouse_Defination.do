@@ -9,11 +9,10 @@
 
 	cap mkdir "$folder/Results/ConsumptionPostRetirement_by_SpouseDef_Cats"
 
-	local expenditure_cats_all total_recreation_2005_real total_clothing_2005_real total_foodexp_home_real total_foodexp_away_real total_housing_real  ///
-	total_education_real total_healthexpense_real total_transport_real total_clothing_2005_real ///
-	total_recreation_2005_real
+	local expenditure_cats_all total_foodexp_home_real total_foodexp_away_real total_housing_real  ///
+	total_education_real total_transport_real total_recreation_2005_real total_clothing_2005_real
 		
-	forvalues spouse_def = 1/8{
+	forvalues spouse_def = 1/1{
 		* local spouse_def 1
 
 	 	foreach var in `expenditure_cats_all' {
@@ -88,6 +87,12 @@
 
 		local lab: variable label `var'
 
+		gen dummy_children = .
+		replace dummy_children = 0 if children == 0
+		replace dummy_children = 1 if children == 1
+		replace dummy_children = 2 if children == 2
+		replace dummy_children = 3 if children >= 3
+		
 		***********************************************************************************
 		** APC
 		***********************************************************************************
@@ -97,6 +102,8 @@
 		* See for instance Aguiar and Hurst 2013
 		* if using data from 1999 to 2015, use 3/9 (because there are 9 waves)
 		* if using data from 2005 to 2015, use 3/6 (because there are 6 waves)
+		
+		* Doing this to get the sum of coefficients of non-durable expenditure
 		if "`var'" == "total_clothing_2005_real" | "`var'" == "total_recreation_2005_real"{
 			keep if wave >= 2005
 
@@ -105,12 +112,13 @@
 				gen d_year_`num'=year_cat`num'+(1-`num')*year_cat2+(`num'-2)*year_cat1
 			}		
 		}
-		else{
+		else{ 
+
 			quietly tab wave, gen(year_cat)
 			foreach num of numlist 3/9 { 
 				gen d_year_`num'=year_cat`num'+(1-`num')*year_cat2+(`num'-2)*year_cat1
 			}
-		}
+		 }
 		* xtreg .... d_year*
 
 
@@ -122,11 +130,11 @@
 		replace ret_duration = ret_duration + 100
 
 		tempfile results	
-		qui xtreg `var' ibn.ret_duration d_year* if tertile == 1, fe 
+		qui xtreg `var' ibn.ret_duration i.dummy_children d_year* if tertile == 1, fe 
 		regsave using `results', addlabel(tertile, "Bottom Tertile") replace
-		qui xtreg `var' ibn.ret_duration d_year* if tertile == 2, fe
+		qui xtreg `var' ibn.ret_duration i.dummy_children d_year* if tertile == 2, fe
 		regsave using `results', addlabel(tertile, "Middle Tertile") append
-		qui xtreg `var' ibn.ret_duration d_year* if tertile == 3, fe
+		qui xtreg `var' ibn.ret_duration i.dummy_children d_year* if tertile == 3, fe
 		regsave using `results', addlabel(tertile, "Top Tertile") append
 
 		* xtset pid ret_duration, delta(2)
@@ -204,7 +212,7 @@
 		* loop over tertiles
 		forvalues n_tertile = 1/3{
 			* Step 1: run the regression
-			qui xtreg `var' ibn.ret_duration d_year* if tertile == `n_tertile', fe 
+			qui xtreg `var' ibn.ret_duration i.dummy_children d_year* if tertile == `n_tertile', fe 
 
 			* loop over ret_duration: 80 to 120
 			forvalues n = 80(2)120{
@@ -243,7 +251,7 @@
 			lab var reg_coef_ma "Smoothed Mean Expenditure"
 			lab var reg_coef "UnSmoothed Mean Expenditure"
 
-			keep if reg_ret_duration >= -10 & reg_ret_duration <= 10
+			keep if reg_ret_duration >= -15 & reg_ret_duration <= 15
 
 			keep reg_coef reg_se reg_ret_duration reg_tertile reg_coef_ma reg_se_ma
 			* keep if reg_ret_duration != .	
@@ -260,7 +268,6 @@
 			save `results_`var_sub'_SP`spouse_def'', replace
 			
 
-		/*
 			xtline reg_coef reg_coef_ma, name("tertile", replace) ytitle(, margin(0 2 0 0)) ///
 			byopts(title("Nondurable expenditure by Tertile(Spouse Def = `spouse_def')") rows(1)) ///
 			legend(label(1 "UnSmoothed Expenditure")) legend(label(2 "Smoothed Expenditure"))
@@ -270,12 +277,12 @@
 			gen se_ub_ma = reg_coef_ma + reg_se_ma
 			gen se_lb_ma = reg_coef_ma - reg_se_ma
 
-			
+			/*
 			xtline reg_coef_ma, name("`var'", replace)  ytitle(, margin(0 2 0 0)) ///
-			byopts(title(" `lab'_(Spouse Def = `spouse_def')") note("# Households in Tertile 1 = `count1'; Households in Tertile 2 = `count2'; Households in Tertile 3 = `count3'") rows(1) ) ylabel(#3) ///
+			xscale(r(-15 15)) xlabel( -15(15)15 ) byopts(title(" `lab'_(Spouse Def = `spouse_def')") note("# Households in Tertile 1 = `count1'; Households in Tertile 2 = `count2'; Households in Tertile 3 = `count3'") rows(1) ) ylabel(#3) ///
 			addplot( rarea se_ub_ma se_lb_ma reg_ret_duration, below )
 			graph export "$folder/Results/ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/`spouse_def'/spouse_def_`var'.pdf", as(pdf) replace
-			
+			*/
 
 /*			*This is Unsmoothed Version
 			gen se_ub = reg_coef + reg_se
@@ -290,7 +297,6 @@
 
 	}
 }
-
 * Look at whether these coefs add up
 * Here we create a dataset that includes coefs by tertile, category, and spouse def
 
@@ -302,7 +308,6 @@ forvalues spouse_def = 1/1{
 		append using `results_`var_sub'_SP`spouse_def''
 	}
 }
-
 drop if to_drop == 1
 save cat_spouse_def_results, replace
 
@@ -311,9 +316,9 @@ collapse (sum) reg_coef , by(spouse_def reg_ret_duration reg_tertile)
 
 xtset reg_tertile reg_ret_duration
 
-xtline reg_coef, name("try", replace)  ytitle(, margin(0 2 0 0)) ///
-byopts(title("dfd = `spouse_def')") rows(1) ) ylabel(#3) 
-
+xtline reg_coef, name("sumreg", replace)  ytitle(, margin(0 2 0 0)) ///
+xscale(r(-15 15)) xlabel( -15(15)15 ) byopts(title("Sum of Reg Coefficients") rows(1) ) ylabel(#3)
+graph export "$folder/Results/ConsumptionPostRetirement_by_SpouseDef_Cats/SumCoef/spouse_def_1.pdf", as(pdf) replace
 /*
 forvalues spouse_def = 1/1 {
 	preserve

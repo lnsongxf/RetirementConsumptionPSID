@@ -8,7 +8,7 @@ global folder "/Users/bibekbasnet/Documents/GitHub/RetirementConsumptionPSID"
 
 cap mkdir "$folder/Results/ConsumptionPostRetirement_by_SpouseDef"
 
- forvalues spouse_def = 1/8{
+  forvalues spouse_def = 1/3{
 
 	//local spouse_def 1
 	//display "Spouse def = `spouse_def'"
@@ -27,7 +27,8 @@ cap mkdir "$folder/Results/ConsumptionPostRetirement_by_SpouseDef"
 	global how_to_deal_with_spouse `spouse_def'  // could be 1 2 3 4 5
 	global retirement_definition_spouse 1 //// 0 is default (last job ended due to "Quit, Resigned, Retire" or "NA")
                                        // 1 is loose (does not ask why last job ended) and 2 is strict (last job ended due to "Quit, Resigned, Retire" only)			 							 
-						
+	global use_post_2005_data 0 // use 2005+ data only -- this includes recreation/trips/clothing 
+
 	** LOAD AND PREPARE DATA
 	use "$folder/Data/Intermediate/Basic-Panel.dta", clear
 					 
@@ -45,9 +46,18 @@ cap mkdir "$folder/Results/ConsumptionPostRetirement_by_SpouseDef"
 
 	quietly do "$folder/Do/Scripts/Define-Ret-Duration.do"
 
-		
-	local expenditure_cats_all total_foodexp_home_real total_foodexp_away_real total_housing_real ///
-	total_education_real total_healthexpense_real total_transport_real 
+	if $use_post_2005_data == 1 {
+	local expenditure_cats_all total_foodexp_home_real total_foodexp_away_real ///
+		total_transport_real total_housing_real total_healthexpense_real total_education_real 
+		total_recreation_2005_real total_clothing_2005_real///
+		 
+	}
+
+	else{
+		local expenditure_cats_all total_foodexp_home_real total_foodexp_away_real ///
+		total_transport_real total_housing_real total_healthexpense_real total_education_real
+	}
+
 	egen nondurable_expenditure_real = rowtotal( `expenditure_cats_all' )
 	label variable nondurable_expenditure_real "Real Nondurable Expenditure"
 	
@@ -78,6 +88,13 @@ cap mkdir "$folder/Results/ConsumptionPostRetirement_by_SpouseDef"
 
 	local expenditure_cats nondurable_expenditure_real
 
+	gen dummy_children = .
+	replace dummy_children = 0 if children == 0
+	replace dummy_children = 1 if children == 1
+	replace dummy_children = 2 if children == 2
+	replace dummy_children = 3 if children >= 3
+
+
 	// local lab: variable label `var'
 
 		***********************************************************************************
@@ -89,11 +106,37 @@ cap mkdir "$folder/Results/ConsumptionPostRetirement_by_SpouseDef"
 		* See for instance Aguiar and Hurst 2013
 		* if using data from 1999 to 2015, use 3/9 (because there are 9 waves)
 		* if using data from 2005 to 2015, use 3/6 (because there are 6 waves)
+
+/*
+			if $use_post_2005_data == 1 {
+					keep if wave >= 2005
+					tab ret_duration 
+
+					* only keep those who we observe transition
+					by pid, sort: egen min_ret = min(ret_duration)
+					keep if min_ret < 0
+					
+
+					quietly tab wave, gen(year_cat)
+					foreach num of numlist 3/6 { 
+						gen d_year_`num'=year_cat`num'+(1-`num')*year_cat2+(`num'-2)*year_cat1
+					}		
+				}
+
+				else{
+					 keep if wave >= 2005 //delete this later and make 3/9 instead
+
+					quietly tab wave, gen(year_cat)
+					foreach num of numlist 3/9 { 
+						gen d_year_`num'=year_cat`num'+(1-`num')*year_cat2+(`num'-2)*year_cat1
+					}
+				}
+
 		quietly tab wave, gen(year_cat)
 		foreach num of numlist 3/9 { 
 			gen d_year_`num'=year_cat`num'+(1-`num')*year_cat2+(`num'-2)*year_cat1
 		}
-
+*/
 		* xtreg .... d_year*
 
 	***********************************************************************************
@@ -104,11 +147,12 @@ cap mkdir "$folder/Results/ConsumptionPostRetirement_by_SpouseDef"
 	replace ret_duration = ret_duration + 100
 
 	tempfile results	
-	qui xtreg nondurable_expenditure_real ibn.ret_duration d_year* if tertile == 1, fe 
+	xtreg nondurable_expenditure_real ibn.ret_duration i.dummy_children /*d_year**/ if tertile == 1, fe 
 	regsave using `results', addlabel(tertile, "Bottom Tertile") replace
-	qui xtreg nondurable_expenditure_real ibn.ret_duration d_year* if tertile == 2, fe
+
+	qui xtreg nondurable_expenditure_real ibn.ret_duration i.dummy_children /*d_year* */if tertile == 2, fe
 	regsave using `results', addlabel(tertile, "Middle Tertile") append
-	xtreg nondurable_expenditure_real ibn.ret_duration d_year* if tertile == 3, fe
+	xtreg nondurable_expenditure_real ibn.ret_duration i.dummy_children /*d_year* */ if tertile == 3, fe
 	regsave using `results', addlabel(tertile, "Top Tertile") append
 
 
@@ -125,6 +169,7 @@ cap mkdir "$folder/Results/ConsumptionPostRetirement_by_SpouseDef"
 
 	count if tertile == 3 & ret_duration == 100
 	local count3 `r(N)'
+
 
 	***********************************************************************************
 	** Produce regression results using saved coefs
@@ -184,11 +229,15 @@ cap mkdir "$folder/Results/ConsumptionPostRetirement_by_SpouseDef"
 	gen reg_ret_duration = .
 	gen reg_tertile = .
 	local counter 1
+
 	
 	* loop over tertiles
 	forvalues n_tertile = 1/3{
 		* Step 1: run the regression
-		qui xtreg nondurable_expenditure_real ibn.ret_duration d_year* if tertile == `n_tertile', fe 
+
+	// 	xtreg nondurable_expenditure_real ibn.ret_duration i.dummy_children d_year*  if tertile == `n_tertile', fe 
+xtreg nondurable_expenditure_real ibn.ret_duration i.dummy_children /*d_year* */if tertile == `n_tertile' & ret_year_computed < 2007 & ret_year_computed < 1999, fe
+// How does different income tertile pattern change using this creteria? 
 
 		* loop over ret_duration: 80 to 120
 		forvalues n = 80(2)120{
@@ -223,11 +272,11 @@ cap mkdir "$folder/Results/ConsumptionPostRetirement_by_SpouseDef"
 	** New Version : error bands computed correctly
 	 preserve
 
+
 		replace reg_ret_duration = reg_ret_duration - 100
 
 		lab var reg_coef_ma "Smoothed Mean Expenditure"
 		lab var reg_coef "UnSmoothed Mean Expenditure"
-
 
 		keep if reg_ret_duration >= -10 & reg_ret_duration <= 10
 
@@ -241,26 +290,48 @@ cap mkdir "$folder/Results/ConsumptionPostRetirement_by_SpouseDef"
 		legend(label(1 "UnSmoothed Expenditure")) legend(label(2 "Smoothed Expenditure"))
 		graph export "$folder/Results/ConsumptionPostRetirement_by_SpouseDef/Comparision/SmoothedvsUnsmoothed_`spouse_def'.pdf", as(pdf) replace
 		*/
-		* Smoothed version
+* Smoothed version
+		
 		gen se_ub_ma = reg_coef_ma + reg_se_ma
 		gen se_lb_ma = reg_coef_ma - reg_se_ma
 
+
+*Total nondurables
 		xtline reg_coef_ma, name("Fig1_ma", replace)  ytitle(, margin(0 2 0 0)) ///
-		byopts(title("Nondurable Expenditure by Tertile (Spouse Def = `spouse_def')") note("# Households in Tertile 1 = `count1'; Households in Tertile 2 = `count2'; Households in Tertile 3 = `count3'") rows(1) ) ylabel(#3) ///
+		xscale(r(-10 10)) xlabel( -10(10)10 ) byopts(title("Nondurable Expenditure by Tertile (Spouse Def = `spouse_def')") note("# Households in Tertile 1 = `count1'; Households in Tertile 2 = `count2'; Households in Tertile 3 = `count3'") rows(1) ) ylabel(#3) ///
+ 	addplot( rarea se_ub_ma se_lb_ma reg_ret_duration, below)
+ 	// addplot ( rarea se_ub_ma se_lb_ma reg_ret_duration. color("red%50"))
+		graph export "$folder/Results/ConsumptionPostRetirement_by_SpouseDef/Smoothed/pre2007_spouse_def_`spouse_def'.pdf", as(pdf) replace
+
+
+/*
+* Nondurables without health
+		xtline reg_coef_ma, name("Fig1_ma", replace)  ytitle(, margin(0 2 0 0)) ///
+		xscale(r(-10 10)) xlabel( -10(10)10 ) byopts(title("Nondurable Expenditure by Tertile (Spouse Def = `spouse_def')") note("# Households in Tertile 1 = `count1'; Households in Tertile 2 = `count2'; Households in Tertile 3 = `count3'") rows(1) ) ylabel(#3) ///
  		addplot( rarea se_ub_ma se_lb_ma reg_ret_duration, below )
-		graph export "$folder/Results/ConsumptionPostRetirement_by_SpouseDef/Smoothed/spouse_def_`spouse_def'.pdf", as(pdf) replace
+		graph export "$folder/Results/ConsumptionPostRetirement_by_SpouseDef/Smoothed_xhealth/post_2005/six_cats/spouse_def_noyeard_`spouse_def'.pdf", as(pdf) replace
+
+
+*Nondurables without health and education
+		xtline reg_coef_ma, name("Fig1_ma", replace)  ytitle(, margin(0 2 0 0)) ///
+		xscale(r(-10 10)) xlabel( -10(10)10 ) byopts(title("Nondurable Expenditure by Tertile (Spouse Def = `spouse_def')") note("# Households in Tertile 1 = `count1'; Households in Tertile 2 = `count2'; Households in Tertile 3 = `count3'") rows(1) ) ylabel(#3) ///
+ 		addplot( rarea se_ub_ma se_lb_ma reg_ret_duration, below )
+		graph export "$folder/Results/ConsumptionPostRetirement_by_SpouseDef/Smoothed_xhealth_educ/post_2005/six_cats/spouse_def_noyeard_`spouse_def'.pdf", as(pdf) replace
+
 
 		* Unsmoothed version
-		*Dropp this part
-		
+		* Dropp this part
+/*
 				gen se_ub = reg_coef + reg_se
 				gen se_lb = reg_coef - reg_se
 
 				xtline reg_coef, name("Fig2", replace)  ytitle(, margin(0 2 0 0)) ///
-				byopts(title("Nondurable Expenditure by Tertile (Spouse Def = `spouse_def')") note("# Households in Tertile 1 = `count1'; Households in Tertile 2 = `count2'; Households in Tertile 3 = `count3'") rows(1) ) ylabel(#3) ///
+				xscale(r(-10 10)) xlabel( -10(10)10) byopts(title("Nondurable Expenditure by Tertile (Spouse Def = `spouse_def')") note("# Households in Tertile 1 = `count1'; Households in Tertile 2 = `count2'; Households in Tertile 3 = `count3'") rows(1) ) ylabel(#3) ///
 				addplot( rarea se_ub se_lb reg_ret_duration, below)
-				graph export "$folder/Results/ConsumptionPostRetirement_by_SpouseDef/UnSmoothed/spouse_def_`spouse_def'.pdf", as(pdf) replace
-		
+				graph export "$folder/Results/ConsumptionPostRetirement_by_SpouseDef/Unsmoothed_xhealth_educ/spouse_def_`spouse_def'.pdf", as(pdf) replace
+	*/
+	*/
+
 	 restore
 }
 
