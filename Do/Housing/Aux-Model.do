@@ -90,7 +90,7 @@ gen dummy_mort = mortgage>0
 if $aux_model_in_logs == 1{
   * Run the model in logs
   local level_vars consumption liq_wealth housing_wealth income mortgage
-  local endog_vars housing
+  local endog_vars housing hand_to_mouth dummy_mort
   foreach var of varlist `level_vars' {
     gen log_`var' = log(`var')
     replace log_`var' = log(1) if `var' <= 0 & `var' != .
@@ -155,7 +155,7 @@ if $drop_top_x > 0{
 
 gen age_cubic = age^3
 
-local control_vars age age_sq age_cubic hand_to_mouth dummy_mort
+local control_vars age age_sq age_cubic
 * local control_vars hand_to_mouth age age_sq
 
 ****************************************************************************************************
