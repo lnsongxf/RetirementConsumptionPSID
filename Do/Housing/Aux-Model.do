@@ -6,10 +6,9 @@ set more off
 graph close
 set autotabgraphs on
 
-
-//global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
-global folder "/Users/agneskaa/Documents/GitHub/RetirementConsumptionPSID"
-use "$folder/Data/Intermediate/Basic-Panel.dta", clear
+global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
+use "$folder\Data\Intermediate\Basic-Panel.dta", clear
+cap mkdir "$folder/Results/Aux_Model_Estimates/AuxModelLatex/"
 
 * Switches
 global allow_kids_to_leave_hh 1 // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH
@@ -37,10 +36,10 @@ global house_price_by_age 0 // plot distribution of house price by age?
 ****************************************************************************************************
 
 * Sample selection: households with same husband-wife over time
-qui do "$folder/Do/Sample-Selection.do"
+qui do "$folder\Do\Sample-Selection.do"
 
 * Generate aggregate consumption (following Blundell et al)
-qui do "$folder/Do/Consumption-Measures.do"
+qui do "$folder\Do\Consumption-Measures.do"
 
 * TODO: make income / wealth real
 
@@ -63,7 +62,7 @@ drop if fam_wealth_real - L.fam_wealth_real > 100 * inc_fam_real & fam_wealth !=
 * drop if housingstatus == 8 // neither own nor rent
 
 * Find first home purcahses (two alternative definitions)
-qui do "$folder/Do/Housing/Find-First-Home-Purchase.do"
+qui do "$folder\Do\Housing\Find-First-Home-Purchase.do"
 
 ****************************************************************************************************
 ** Define variables
@@ -75,12 +74,10 @@ gen consumption = expenditure_exH_real_2015 // blundell expenditure excluding ho
 gen liq_wealth = fam_liq_wealth_real // 2015 dollars
 * gen housing_wealth = fam_LiqAndH_wealth_real - fam_liq_wealth_real // 2015 dollars (includes other housing wealth)
 gen housing_wealth = homeequity_real
-gen mortgage       = mortgage_debt_real
 gen housing = housingstatus == 1 // renting or living with parents are considered as the same
 gen income = inc_fam_real_2015 // TODO: will need to subtract out taxes using NBER TAXSIM
 gen illiq_wealth = fam_wealth_real - fam_liq_wealth_real // NOTE: we do not use this in the regressions, just use it for our alternative measure of WHtM
 gen hand_to_mouth = liq_wealth <= (income / 24)
-gen dummy_mort = mortgage>0
 
 * New variables
 // housevalue_real
@@ -89,8 +86,8 @@ gen dummy_mort = mortgage>0
 
 if $aux_model_in_logs == 1{
   * Run the model in logs
-  local level_vars consumption liq_wealth housing_wealth income mortgage
-  local endog_vars housing hand_to_mouth dummy_mort
+  local level_vars consumption liq_wealth housing_wealth income
+  local endog_vars housing
   foreach var of varlist `level_vars' {
     gen log_`var' = log(`var')
     replace log_`var' = log(1) if `var' <= 0 & `var' != .
@@ -100,7 +97,7 @@ if $aux_model_in_logs == 1{
 else if $aux_model_in_logs == 0{
   * Run the model in levels
   local level_vars
-  local endog_vars housing consumption liq_wealth housing_wealth income mortgage
+  local endog_vars housing consumption liq_wealth housing_wealth income
 }
 
 
@@ -153,9 +150,8 @@ if $drop_top_x > 0{
 
 }
 
-gen age_cubic = age^3
 
-local control_vars age age_sq age_cubic
+local control_vars age age_sq
 * local control_vars hand_to_mouth age age_sq
 
 ****************************************************************************************************
@@ -250,7 +246,7 @@ if $residualized_vars == 1{
 
 	// 	local var log_income
 	
-	foreach var of varlist log_income log_consumption log_liq_wealth log_housing_wealth log_mortgage {
+	foreach var of varlist log_income log_consumption log_liq_wealth log_housing_wealth {
 		
 		* Compute residuals (Note: results look weird without the constant
 		if "`var'" == "log_housing_wealth"{
@@ -379,7 +375,7 @@ if $estimate_reg_by_age == 0{
 		rename L_log_housing_wealth L_log_h_wealth
 		* dataout, save("$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs") tex replace auto(3)
 		mkmat L* cons age*, matrix(newcoefs) rownames(Y)
-		outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs", nobox mat(newcoefs) replace f(%9.3f)
+		outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs", nobox mat(newcoefs) replace f(%9.3f)  caption("Coefficients")
 	restore
 	
 	// export var covar to latex
@@ -405,7 +401,7 @@ if $estimate_reg_by_age == 0{
 	}
 	mkmat RSS RMSE, matrix(RMSE) rownames(Equation)
 	outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex/rmse", ///
-		nobox mat(RMSE) replace f(%9.0fc %9.3f)
+		nobox mat(RMSE) replace f(%9.0fc %9.3f) caption("Model Fit")
 	restore
 	
     gen sample = e(sample)
@@ -461,7 +457,7 @@ preserve
   keep if F.sample == 1 & age == 25 // just look at the youngest age
   
   sum housing
-  collapse (mean) log_consumption log_liq_wealth log_housing_wealth log_income log_mortgage `control_vars', by(housing)
+  collapse (mean) log_consumption log_liq_wealth log_housing_wealth log_income `control_vars', by(housing)
   gen pid = 1
   keep pid `endog_vars' `control_vars'
   order pid `endog_vars' `control_vars'
