@@ -30,6 +30,7 @@ global residualized_vars 1 // original version was 0 (no residualization) (NOTE:
 global house_price_by_age 0 // plot distribution of house price by age?
 
 global compute_htm_persistence 0
+global makeplots 0
 
 * TODO: add in mortgage debt vs house value
 
@@ -76,10 +77,12 @@ gen consumption = expenditure_exH_real_2015 // blundell expenditure excluding ho
 gen liq_wealth = fam_liq_wealth_real // 2015 dollars
 * gen housing_wealth = fam_LiqAndH_wealth_real - fam_liq_wealth_real // 2015 dollars (includes other housing wealth)
 gen housing_wealth = homeequity_real
+gen mortgage       = mortgage_debt_real
 gen housing = housingstatus == 1 // renting or living with parents are considered as the same
 gen income = inc_fam_real_2015 // TODO: will need to subtract out taxes using NBER TAXSIM
 gen illiq_wealth = fam_wealth_real - fam_liq_wealth_real // NOTE: we do not use this in the regressions, just use it for our alternative measure of WHtM
 gen hand_to_mouth = liq_wealth <= (income / 24)
+gen dummy_mort = mortgage>0
 
 * New variables
 // housevalue_real
@@ -88,8 +91,8 @@ gen hand_to_mouth = liq_wealth <= (income / 24)
 
 if $aux_model_in_logs == 1{
   * Run the model in logs
-  local level_vars consumption liq_wealth housing_wealth income
-  local endog_vars housing
+  local level_vars consumption liq_wealth housing_wealth income mortgage
+  local endog_vars housing hand_to_mouth dummy_mort
   foreach var of varlist `level_vars' {
     gen log_`var' = log(`var')
     replace log_`var' = log(1) if `var' <= 0 & `var' != .
@@ -99,7 +102,7 @@ if $aux_model_in_logs == 1{
 else if $aux_model_in_logs == 0{
   * Run the model in levels
   local level_vars
-  local endog_vars housing consumption liq_wealth housing_wealth income
+  local endog_vars housing consumption liq_wealth housing_wealth income mortgage
 }
 
 
@@ -152,8 +155,8 @@ if $drop_top_x > 0{
 
 }
 
-
-local control_vars age age_sq
+gen age_cubic = age^3
+local control_vars age age_sq age_cubic
 * local control_vars hand_to_mouth age age_sq
 
 ****************************************************************************************************
@@ -189,13 +192,10 @@ collapse (median) log_consumption log_liq_wealth log_housing_wealth log_income c
 ****************************************************************************************************
 
 drop if housing == 0 & housing_wealth != 0
+drop if housing == 0 & mortgage != 0 // no such people anyway :)
 
 /*sum housing_wealth if housing == 1
 sum housing_wealth if housing == 0*/
-
-
-
-
 
 ****************************************************************************************************
 ** Look at distribution of house prices based on income
@@ -259,12 +259,13 @@ forvalues i = 1/8 {
 ** Convert endogenous variables to "residualized" variables
 ****************************************************************************************************
 
+if $makeplots == 1{
 preserve
-	collapse log_housing_wealth , by(housing age)
+	collapse log_housing_wealth log_mortgage , by(housing age)
 	xtset housing age
-	xtline log, title("Housing Wealth") name("HW_by_housing_status_ORIG", replace)
+	xtline log*, title("Housing Wealth") name("HW_by_housing_status_ORIG", replace)
 restore
-
+}
 
 if $residualized_vars == 1{
 	* Generate controls
@@ -275,7 +276,7 @@ if $residualized_vars == 1{
 	gen metro2 = metro == 2 // 3 categories, but category 0 is very small
 	
 // 	egen cohort = cut(year_born), at( 1920, 1940(10)1980, 2000 ) icodes label
-	egen cohort = cut(year_born), at( 1920, 1950(10)1980, 2000 ) icodes label
+	egen cohort = cut(year_born), at( 1920, 1950(20)2000 ) icodes label
 	
 	* Define Regression
 	* PROBLEM: cohort picks up a lot of the age effect, b/c people born early are the ones who are old in our sample
@@ -283,7 +284,7 @@ if $residualized_vars == 1{
 
 	// 	local var log_income
 	
-	foreach var of varlist log_income log_consumption log_liq_wealth log_housing_wealth {
+	foreach var of varlist log_income log_consumption log_liq_wealth log_housing_wealth log_mortgage {
 		
 		* Compute residuals (Note: results look weird without the constant
 		if "`var'" == "log_housing_wealth"{
@@ -297,7 +298,7 @@ if $residualized_vars == 1{
 		
 
 		* Plot the results
-		/*
+		if $makeplots == 1{
 		preserve
 			collapse `var' `var'_resid, by(age)
 			tsset age
@@ -305,14 +306,19 @@ if $residualized_vars == 1{
 			tsline `var', name(`var', replace)
 			tsline `var'_resid, name(`var'_resid, replace)
 		restore
-		*/
+		}
+		
 		* Overwrite the original variable
 		drop `var'
 		rename `var'_resid `var'
 		
 		* Deal with non homeowners!
-		if "`var'" == "log_housing_wealth"{
+		if "`var'" == "log_housing_wealth" | "`var'" == "log_mortgage"{
 			replace `var' = 0 if housing == 0
+			* TODO: will need to do same more mortgage debt down the road
+		}
+		if "`var'" == "log_mortgage"{
+			replace `var' = 0 if dummy_mort == 0
 			* TODO: will need to do same more mortgage debt down the road
 		}
 		
@@ -321,15 +327,22 @@ if $residualized_vars == 1{
 
 
 * WARNING!!! Make sure you cannot have housing wealth if you don't own a house!
+if $makeplots == 1{
 preserve
-	collapse log_housing_wealth , by(housing age)
+	collapse log_housing_wealth log_mortgage, by(housing age)
 	xtset housing age
-	xtline log, title("Housing Wealth") name("HW_by_housing_status", replace)
+	xtline log*, title("Housing Wealth") name("HW_by_housing_status", replace)
 restore
+preserve
+	collapse log_mortgage, by(dummy_mort age)
+	xtset dummy_mort age
+	xtline log*, title("Mortgage Debt") name("mortgage_by_mort_dummy", replace)
+restore
+}
+
 * TODO: what happens when you don't own a house? you should not be able to have housing wealth....
 
 * TODO: make sure you cannot have mortgage debt if you don't own a house
-
 ****************************************************************************************************
 ** Look at wealth by age
 ****************************************************************************************************
@@ -409,8 +422,12 @@ if $estimate_reg_by_age == 0{
 			rename `var' `newname'
 		}
 		rename xvar1 Y
-		rename L_log_consumption L_log_cons
-		rename L_log_housing_wealth L_log_h_wealth
+		rename L_log_consumption L_logC
+		rename L_log_housing_wealth L_logHW
+		rename L_hand_to_mouth L_HtM
+		rename L_log_income L_logY
+		rename L_log_liq_wealth L_logLiqW
+		rename L_log_mortgage L_logM
 		* dataout, save("$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs") tex replace auto(3)
 		mkmat L* cons age*, matrix(newcoefs) rownames(Y)
 		outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs", nobox mat(newcoefs) replace f(%9.3f)  caption("Coefficients")
@@ -497,7 +514,7 @@ preserve
   keep if F.sample == 1 & age == 25 // just look at the youngest age
   
   sum housing
-  collapse (mean) log_consumption log_liq_wealth log_housing_wealth log_income `control_vars', by(housing)
+  collapse (mean) log_consumption log_liq_wealth log_housing_wealth log_income log_mortgage `control_vars', by(housing)
   gen pid = 1
   keep pid `endog_vars' `control_vars'
   order pid `endog_vars' `control_vars'
