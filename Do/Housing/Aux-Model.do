@@ -29,6 +29,8 @@ global no_age_coefs 0 // default is  0 (include age and age2). NOTE: I manually 
 global residualized_vars 1 // original version was 0 (no residualization) (NOTE: only works for log variables)
 global house_price_by_age 0 // plot distribution of house price by age?
 
+global compute_htm_persistence 0
+
 * TODO: add in mortgage debt vs house value
 
 ****************************************************************************************************
@@ -217,6 +219,41 @@ hist log_house_price_meaninc_ratio, name("hist_log_mean_inc", replace) graphregi
 by pid, sort: egen log_housevalue_real_mean = mean(log_housevalue_real)
 }
 
+****************************************************************************************************
+** HtM Persistence
+****************************************************************************************************
+
+// logit hand_to_mouth L.hand_to_mouth
+// logit hand_to_mouth L2.hand_to_mouth
+// logit hand_to_mouth L3.hand_to_mouth
+
+if $compute_htm_persistence == 1{
+forvalues i = 1/8 {
+	gen L`i'_hand_to_mouth = L`i'.hand_to_mouth
+	if `i' == 1{
+		local outreg_opt replace
+	}
+	else{
+		local outreg_opt
+	}
+	
+	local outreg_opt_all drop(0bn.L`i'_hand_to_mouth) tex(frag pretty) label title("Probability of HtM status conditional on past HtM status")  ctitle("Margins")
+	local n = `i' * 2
+	label var L`i'_hand_to_mouth "\$ {HtM}_{i, t-`n'} $"
+	
+	logit hand_to_mouth i.L`i'_hand_to_mouth
+	margins L`i'_hand_to_mouth, atmeans post
+	outreg2 using "$folder/Results/Aux_Model_Estimates/HtM_Persistence", `outreg_opt' `outreg_opt_all' ///
+	addnote("Each cell represents the marginal probability of being HtM today conditional on being HtM x years ago,", "where marginal probabilities are evaluated at the means.")
+	* ctitle(margins)
+	
+	logit hand_to_mouth i.L`i'_hand_to_mouth L`i'.log_income
+	margins L`i'_hand_to_mouth, atmeans post
+	outreg2 using "$folder/Results/Aux_Model_Estimates/HtM_Persistence_Control_Income", `outreg_opt' `outreg_opt_all' ///
+	addnote("Each cell represents the marginal probability of being HtM today conditional on being HtM x years ago,", "controlling for lagged income, where marginal probabilities are evaluated at the means.")
+
+}
+}
 
 ****************************************************************************************************
 ** Convert endogenous variables to "residualized" variables
@@ -291,6 +328,7 @@ preserve
 restore
 * TODO: what happens when you don't own a house? you should not be able to have housing wealth....
 
+* TODO: make sure you cannot have mortgage debt if you don't own a house
 
 ****************************************************************************************************
 ** Look at wealth by age
