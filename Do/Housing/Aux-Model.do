@@ -81,23 +81,35 @@ gen mortgage       = mortgage_debt_real
 gen housing = housingstatus == 1 // renting or living with parents are considered as the same
 gen income = inc_fam_real_2015 // TODO: will need to subtract out taxes using NBER TAXSIM
 gen illiq_wealth = fam_wealth_real - fam_liq_wealth_real // NOTE: we do not use this in the regressions, just use it for our alternative measure of WHtM
-gen hand_to_mouth = liq_wealth <= (income / 24)
+gen HtM = liq_wealth <= (income / 24)
 gen dummy_mort = mortgage>0
+gen bought = 0 
+replace bought = 1 if housing ==1 & L.housing==0
+
+gen WHtM = HtM & housing == 1
+gen PHtM = HtM & housing == 0
 
 * New variables
 // housevalue_real
 // mortgage_debt_real
 * TODO: if I combine these, do I get housing_wealth?
 
+local non_log_endog_vars housing WHtM PHtM dummy_mort bought
+
+* HtM
+
 if $aux_model_in_logs == 1{
   * Run the model in logs
   local level_vars consumption liq_wealth housing_wealth income mortgage
-  local endog_vars housing hand_to_mouth dummy_mort
+  local endog_vars 
   foreach var of varlist `level_vars' {
     gen log_`var' = log(`var')
     replace log_`var' = log(1) if `var' <= 0 & `var' != .
     local endog_vars `endog_vars' log_`var'
   }
+  
+  * Now add in the remaining "non log" variables
+  local endog_vars `endog_vars' `non_log_endog_vars'
 }
 else if $aux_model_in_logs == 0{
   * Run the model in levels
@@ -155,9 +167,9 @@ if $drop_top_x > 0{
 
 }
 
-gen age_cubic = age^3
-local control_vars age age_sq age_cubic
-* local control_vars hand_to_mouth age age_sq
+rename age_sq age2
+gen age3 = age^3
+local control_vars age age2 age3
 
 ****************************************************************************************************
 ** Consumption before purchase
@@ -223,13 +235,13 @@ by pid, sort: egen log_housevalue_real_mean = mean(log_housevalue_real)
 ** HtM Persistence
 ****************************************************************************************************
 
-// logit hand_to_mouth L.hand_to_mouth
-// logit hand_to_mouth L2.hand_to_mouth
-// logit hand_to_mouth L3.hand_to_mouth
+// logit HtM L.HtM
+// logit HtM L2.HtM
+// logit HtM L3.HtM
 
 if $compute_htm_persistence == 1{
 forvalues i = 1/8 {
-	gen L`i'_hand_to_mouth = L`i'.hand_to_mouth
+	gen L`i'_HtM = L`i'.HtM
 	if `i' == 1{
 		local outreg_opt replace
 	}
@@ -237,18 +249,18 @@ forvalues i = 1/8 {
 		local outreg_opt
 	}
 	
-	local outreg_opt_all drop(0bn.L`i'_hand_to_mouth) tex(frag pretty) label title("Probability of HtM status conditional on past HtM status")  ctitle("Margins")
+	local outreg_opt_all drop(0bn.L`i'_HtM) tex(frag pretty) label title("Probability of HtM status conditional on past HtM status")  ctitle("Margins")
 	local n = `i' * 2
-	label var L`i'_hand_to_mouth "\$ {HtM}_{i, t-`n'} $"
+	label var L`i'_HtM "\$ {HtM}_{i, t-`n'} $"
 	
-	logit hand_to_mouth i.L`i'_hand_to_mouth
-	margins L`i'_hand_to_mouth, atmeans post
+	logit HtM i.L`i'_HtM
+	margins L`i'_HtM, atmeans post
 	outreg2 using "$folder/Results/Aux_Model_Estimates/HtM_Persistence", `outreg_opt' `outreg_opt_all' ///
 	addnote("Each cell represents the marginal probability of being HtM today conditional on being HtM x years ago,", "where marginal probabilities are evaluated at the means.")
 	* ctitle(margins)
 	
-	logit hand_to_mouth i.L`i'_hand_to_mouth L`i'.log_income
-	margins L`i'_hand_to_mouth, atmeans post
+	logit HtM i.L`i'_HtM L`i'.log_income
+	margins L`i'_HtM, atmeans post
 	outreg2 using "$folder/Results/Aux_Model_Estimates/HtM_Persistence_Control_Income", `outreg_opt' `outreg_opt_all' ///
 	addnote("Each cell represents the marginal probability of being HtM today conditional on being HtM x years ago,", "controlling for lagged income, where marginal probabilities are evaluated at the means.")
 
@@ -384,9 +396,6 @@ corr resid1 resid2, covariance
 ** For more info, see Wooldridge screen shots in the Notes folder
 */
 
-****************************************************************************************************
-** Run SU regression
-****************************************************************************************************
 if $no_age_coefs == 0 {
 	local exog_vars `control_vars'
 }
@@ -395,9 +404,52 @@ if $no_age_coefs == 1 {
 	local exog_vars 
 }
 
+****************************************************************************************************
+** SUREG with contemporaneous terms
+****************************************************************************************************
+
+local sureg_command = ""
+foreach var in `endog_vars'{
+	
+	* remove var from the list of endog_vars
+	* for info on using subinstr in this way, see "help extended_fcn"
+	local endog_vars_string "`endog_vars' "
+	local contemp_var : subinstr loc endog_vars_string "`var' " " "
+	* reg `var' `contemp_var' L.(`endog_vars') `exog_vars'
+	
+	* append to the sureg command
+	local sureg_command "`sureg_command' (`var' = `contemp_var' L.(`endog_vars') `exog_vars' )"
+}
+di "`sureg_command'"		 
+sureg `sureg_command'
+		 
+
+
+****************************************************************************************************
+** Run SU regression
+****************************************************************************************************
+
+
+
+// qui reg housing log_consumption log_liq_wealth log_housing_wealth log_income log_mortgage L.(`endog_vars') `exog_vars' 
+// di e(rmse)
+// qui reg  log_consumption housing log_liq_wealth log_housing_wealth log_income log_mortgage L.(`endog_vars') `exog_vars' 
+// di e(rmse)
+// qui reg log_liq_wealth housing log_consumption log_housing_wealth log_income log_mortgage L.(`endog_vars') `exog_vars' 
+// di e(rmse)
+// qui reg log_housing_wealth housing log_consumption log_liq_wealth log_income log_mortgage L.(`endog_vars') `exog_vars' 
+// di e(rmse)
+// qui reg log_income housing log_consumption log_liq_wealth log_housing_wealth log_mortgage L.(`endog_vars') `exog_vars' 
+// di e(rmse)
+// qui reg log_mortgage housing log_consumption log_liq_wealth log_housing_wealth log_income L.(`endog_vars') `exog_vars' 
+// di e(rmse)
+
+
+
+
 
 if $estimate_reg_by_age == 0{
-    sureg (`endog_vars' =  L.(`endog_vars') `exog_vars' )
+    * sureg (`endog_vars' =  L.(`endog_vars') `exog_vars' )
 
     * matrix list e(b) // coefs
     mat coefs = e(b)
@@ -424,10 +476,14 @@ if $estimate_reg_by_age == 0{
 		rename xvar1 Y
 		rename L_log_consumption L_logC
 		rename L_log_housing_wealth L_logHW
-		rename L_hand_to_mouth L_HtM
 		rename L_log_income L_logY
-		rename L_log_liq_wealth L_logLiqW
+		rename L_log_liq_wealth L_logLW
 		rename L_log_mortgage L_logM
+		rename L_dummy_mort L_mort
+		rename L_housing L_H
+		
+		list
+		
 		* dataout, save("$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs") tex replace auto(3)
 		mkmat L* cons age*, matrix(newcoefs) rownames(Y)
 		outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs", nobox mat(newcoefs) replace f(%9.3f)  caption("Coefficients")

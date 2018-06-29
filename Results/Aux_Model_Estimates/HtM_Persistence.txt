@@ -1,0 +1,26 @@
+Probability of HtM status conditional on past HtM status									
+		(1)	(2)	(3)	(4)	(5)	(6)	(7)	(8)
+VARIABLES	LABELS	Margins	Margins	Margins	Margins	Margins	Margins	Margins	Margins
+									
+1.L1_HtM	$ {HtM}_{i, t-2} $ = 1	0.776***							
+		(0.00285)							
+1.L2_HtM	$ {HtM}_{i, t-4} $ = 1		0.756***						
+			(0.00346)						
+1.L3_HtM	$ {HtM}_{i, t-6} $ = 1			0.739***					
+				(0.00419)					
+1.L4_HtM	$ {HtM}_{i, t-8} $ = 1				0.730***				
+					(0.00504)				
+1.L5_HtM	$ {HtM}_{i, t-10} $ = 1					0.728***			
+						(0.00608)			
+1.L6_HtM	$ {HtM}_{i, t-12} $ = 1						0.732***		
+							(0.00753)		
+1.L7_HtM	$ {HtM}_{i, t-14} $ = 1							0.717***	
+								(0.0101)	
+1.L8_HtM	$ {HtM}_{i, t-16} $ = 1								0.724***
+									(0.0154)
+									
+Observations		41,457	30,431	22,170	15,865	10,961	7,090	4,067	1,730
+Standard errors in parentheses									
+*** p<0.01, ** p<0.05, * p<0.1									
+Each cell represents the marginal probability of being HtM today conditional on being HtM x years ago,									
+where marginal probabilities are evaluated at the means.									
