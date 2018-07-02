@@ -408,6 +408,7 @@ if $no_age_coefs == 1 {
 ** SUREG with contemporaneous terms
 ****************************************************************************************************
 
+/*
 local sureg_command = ""
 foreach var in `endog_vars'{
 	
@@ -423,6 +424,7 @@ foreach var in `endog_vars'{
 di "`sureg_command'"		 
 sureg `sureg_command'
 		 
+*/
 
 
 ****************************************************************************************************
@@ -449,7 +451,8 @@ sureg `sureg_command'
 
 
 if $estimate_reg_by_age == 0{
-    * sureg (`endog_vars' =  L.(`endog_vars') `exog_vars' )
+	di "sureg (`endog_vars' =  L.(`endog_vars') `exog_vars' )"
+    sureg (`endog_vars' =  L.(`endog_vars') `exog_vars' )
 
     * matrix list e(b) // coefs
     mat coefs = e(b)
