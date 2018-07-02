@@ -467,26 +467,38 @@ if $estimate_reg_by_age == 0{
 		split xvar, parse(":")
 		drop xvar
 		replace xvar2 = subinstr(xvar2, ".", "_", .)
-		reshape wide c1, i(xvar1) j(xvar2) string
-		rename c1_cons c1constant
+// 		reshape wide c1, i(xvar1) j(xvar2) string
+		reshape wide c1, i(xvar2) j(xvar1) string
+
+// 		rename c1_cons c1constant
 		foreach var of varlist c1* {
 			local newname = substr("`var'", 3, .)
 			rename `var' `newname'
 		}
-		rename xvar1 Y
-		rename L_log_consumption L_logC
-		rename L_log_housing_wealth L_logHW
-		rename L_log_income L_logY
-		rename L_log_liq_wealth L_logLW
-		rename L_log_mortgage L_logM
-		rename L_dummy_mort L_mort
-		rename L_housing L_H
+		rename xvar Y
+// 		rename L_log_consumption L_logC
+// 		rename L_log_housing_wealth L_logHW
+// 		rename L_log_income L_logY
+// 		rename L_log_liq_wealth L_logLW
+// 		rename L_log_mortgage L_logM
+// 		rename L_dummy_mort L_mort
+// 		rename L_housing L_H
+		
+		desc
+		rename log_consumption logC
+		rename log_housing_wealth logHW
+		rename log_income logY
+		rename log_liq_wealth logLW
+		rename log_mortgage logM
+		rename dummy_mort mort
+		rename housing H
 		
 		list
 		
 		* dataout, save("$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs") tex replace auto(3)
-		mkmat L* cons age*, matrix(newcoefs) rownames(Y)
-		outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs", nobox mat(newcoefs) replace f(%9.3f)  caption("Coefficients")
+// 		mkmat L* cons age*, matrix(newcoefs) rownames(Y)
+		mkmat PHtM-logM , matrix(newcoefs) rownames(Y)
+		outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs", nobox mat(newcoefs) replace f(%9.3f)  caption("Coefficients (transposed)")
 	restore
 	
 	// export var covar to latex
