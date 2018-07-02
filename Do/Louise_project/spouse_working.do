@@ -11,7 +11,17 @@ use "$folder/Data/Intermediate/Basic-Panel_Louise.dta", clear
 keep if sex_indiv == 2
 // only those who are female
 
-// collapse (mean) status_average = emp_status_spouse, by(pid)
+preserve
+
+drop if emp_status_spouse == . 
+* Create a dummy variable of 1 if a spouse works, 0 otherwise
+gen spouse_is_working = (emp_status_spouse == 1)
+
+* Collapse by wave
+collapse (mean) percent_of_spouses_working = spouse_is_working, by(wave)
+
+restore
+
 //count if status_average == 1 
 
 // based on family_id, it creates mean of emp_status_spouse. 
@@ -23,10 +33,10 @@ keep if sex_indiv == 2
 // keep if emp_status_spouse == 1 | emp_status_spouse_2 == 1 | emp_status_spouse_3 == 1
 //keeps data of those who said they are working
 
-tab emp_status_spouse if emp_status_spouse == 1 & wave == 1999
+// tab emp_status_spouse if emp_status_spouse == 1 & wave == 1999
 // 2,540  this is the total number of women who report that they are working in 1999
 
-table wave emp_status_spouse if emp_status_spouse == 1
+// table wave emp_status_spouse if emp_status_spouse == 1
 // note: We are using a very strict defination of employment_status of women. If the number of observations is low, 
 // we can use a different defination. We are using self reported status of working. This does not include part time work. 
 // We can probably people who work part time if we need higher sample size. 
@@ -35,7 +45,6 @@ table wave emp_status_spouse if emp_status_spouse == 1
 
 // count if emp_status_spouse == 1 & year == 1999 & emp_status_spouse == 1 & year == 2001 ///
 // emp_status_spouse == 1 & year == 2003
-
 
 keep pid wave family_id rel2head age sex_indiv children fsize ///
 emp_status_spouse hours_annual_female inc_head inc_fam inc_spouse inc_fam_nofemale ///

@@ -46,9 +46,6 @@ do "$folder/Do/Scripts/Define-Ret-Duration.do"
 ****************************************************************************************************
 
 
-
-
-
 ** Only keep those who are observed for at least n waves
 * by pid, sort: egen waves = count(wave)
 * keep if waves >= 5
