@@ -1,0 +1,26 @@
+Probability of HtM status conditional on past HtM status									
+		(1)	(2)	(3)	(4)	(5)	(6)	(7)	(8)
+VARIABLES	LABELS	Margins	Margins	Margins	Margins	Margins	Margins	Margins	Margins
+									
+1.L1_HtM	$ {HtM}_{i, t-2} $ = 1	0.760***							
+		(0.00306)							
+1.L2_HtM	$ {HtM}_{i, t-4} $ = 1		0.735***						
+			(0.00375)						
+1.L3_HtM	$ {HtM}_{i, t-6} $ = 1			0.713***					
+				(0.00458)					
+1.L4_HtM	$ {HtM}_{i, t-8} $ = 1				0.701***				
+					(0.00555)				
+1.L5_HtM	$ {HtM}_{i, t-10} $ = 1					0.698***			
+						(0.00672)			
+1.L6_HtM	$ {HtM}_{i, t-12} $ = 1						0.703***		
+							(0.00830)		
+1.L7_HtM	$ {HtM}_{i, t-14} $ = 1							0.686***	
+								(0.0111)	
+1.L8_HtM	$ {HtM}_{i, t-16} $ = 1								0.690***
+									(0.0172)
+									
+Observations		41,457	30,431	22,170	15,865	10,961	7,090	4,067	1,730
+Standard errors in parentheses									
+*** p<0.01, ** p<0.05, * p<0.1									
+Each cell represents the marginal probability of being HtM today conditional on being HtM x years ago,									
+controlling for lagged income, where marginal probabilities are evaluated at the means.									
