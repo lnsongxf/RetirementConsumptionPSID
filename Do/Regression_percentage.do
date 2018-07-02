@@ -1,13 +1,15 @@
-    clear all
+
     set more off
     graph close
+
+   
     *set autotabgraphs on
     *set trace on
 
     * global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"
     * global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
     global folder "/Users/bibekbasnet/Documents/GitHub/RetirementConsumptionPSID"
-    global folder_output "$folder/Results/Regression_Table"
+   // global folder_output "$folder/Results/Regression_Table"
 
     cap mkdir "$folder_output"
     cap ssc install outreg2
@@ -16,7 +18,9 @@
         total_education_real total_transport_real total_recreation_2005_real total_clothing_2005_real total_healthexpense_real
 
  // forvalues spouse_def = 1/1 {   
-/*
+
+use "$folder/Data/Intermediate/Basic-Panel.dta", clear
+
 * Switches
 global quintiles_definition 2    // Defines quintiles. Can be 1, 2, 3, or 4. My preference is 4. I think the next best option is 2
                                  // Note: if you want tertiles, must use definition 2
@@ -34,7 +38,7 @@ global retirement_definition_spouse 1 //// 0 is default (last job ended due to "
                                        // 1 is loose (does not ask why last job ended) and 2 is strict (last job ended due to "Quit, Resigned, Retire" only)             
                                  
 * Sample selection: households with same husband-wife over time
-do "$folder/Do/Sample-Selection.do"
+//do "$folder/Do/Sample-Selection.do"
 
 * Look for retirement transitions of the head
 do "$folder/Do/Find-Retirements.do"
@@ -46,32 +50,40 @@ do "$folder/Do/Consumption-Measures.do"
 do "$folder/Do/Scripts/Define-Quintiles.do"
 
 do "$folder/Do/Scripts/Define-Ret-Duration.do"
-*/
 
-use "$folder/Data/Intermediate/Basic-Panel.dta", clear
+ gen year = wave - 1 // note that expenditure data is for year prior to interview
+ merge m:1 year using "$folder/Data/Intermediate/CPI.dta"
+ drop if _m == 2
+ drop year _m
+
+gen year = wave - 1 // note that expenditure data is for year prior to interview
+merge m:1 year using "$folder/Data/Raw/bead.dta"
+drop if _m == 2
+drop year _m
+
+
 
 destring bend_point_1, gen(bend_1)
 destring bend_point_2, gen(bend_2) ignore(",")
 
-//drop bend_point_1
+// drop bend_point_1
 // drop bend_point_2
 
 gen ea_head = .
 
-gen inc_ss_head_6 = .
-replace inc_ss_head_6 = inc_ss_head if age == 65
-replace inc_ss_head_6 = inc_ss_head if age == 66 & inc_ss_head_6 == .
-replace inc_ss_head_6 = inc_ss_head if age == 64 & inc_ss_head_6 == .
+/*
+gen inc_ss_head_65 = .
+replace inc_ss_head_66 = inc_ss_head if age == 65
+replace inc_ss_head_65 = inc_ss_head if age == 66 & inc_ss_head_65 == .
+replace inc_ss_head_65 = inc_ss_head if age == 64 & inc_ss_head_65 == .
 
-replace inc_ss_head_6 = inc_ss_head if age == 67 & inc_ss_head_6 == .
-replace inc_ss_head_6 = inc_ss_head if age == 68 & inc_ss_head_6 == .
-replace inc_ss_head_6 = inc_ss_head if age == 63 & inc_ss_head_6 == .
-replace inc_ss_head_6 = inc_ss_head if age == 62 & inc_ss_head_6 == .
+replace inc_ss_head_65 = inc_ss_head if age == 67 & inc_ss_head_65 == .
+replace inc_ss_head_65 = inc_ss_head if age == 68 & inc_ss_head_65 == .
+replace inc_ss_head_65 = inc_ss_head if age == 63 & inc_ss_head_65 == .
+replace inc_ss_head_65 = inc_ss_head if age == 62 & inc_ss_head_65 == .
+*/
 
-
-
-
-by pid, sort: generate inc_ss_head_65 = inc_ss_head if age == 65
+// by pid, sort: generate inc_ss_head_65 = inc_ss_head if age == 65
 
 replace ea_head  = inc_ss_head / 0.9 if inc_ss_head <  bend_1/0.9
 
@@ -86,19 +98,10 @@ drop bend_point_1
 drop bend_point_2
 
 
-git config --global user.email "bibek.basnet@yale.edu"
-git config --global user.name "bibekbasnet"
-
-
-
-
-
-
 // 1. social security income for people when they are closest to 65. 
-
-
 // 2. Most of the observations in the table do not have a social security income because they have not retired, 
-
+// 3. I see the social security as in 2004 dollar. Need to change that. 
+///4. How do we use the 
 
 
 /*
