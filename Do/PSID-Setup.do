@@ -5,8 +5,8 @@ clear all
 // https://simba.isr.umich.edu/VS/s.aspx
 
 *global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"
-* global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
-  global folder "/Users/bibekbasnet/Documents/GitHub/RetirementConsumptionPSID"
+ global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
+* global folder "/Users/bibekbasnet/Documents/GitHub/RetirementConsumptionPSID"
 
 ****************************************************************************************************
 ** Convert year level zip files to dta files
