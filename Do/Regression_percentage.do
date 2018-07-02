@@ -1,12 +1,15 @@
+
     set more off
     graph close
+
+   
     *set autotabgraphs on
     *set trace on
 
     * global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"
     * global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
     global folder "/Users/bibekbasnet/Documents/GitHub/RetirementConsumptionPSID"
-    global folder_output "$folder/Results/Regression_Table"
+   // global folder_output "$folder/Results/Regression_Table"
 
     cap mkdir "$folder_output"
     cap ssc install outreg2
@@ -14,51 +17,91 @@
     local expenditure_cats_all total_foodexp_home_real total_foodexp_away_real total_housing_real ///
         total_education_real total_transport_real total_recreation_2005_real total_clothing_2005_real total_healthexpense_real
 
-     forvalues spouse_def = 1/1 {   
+ // forvalues spouse_def = 1/1 {   
 
-             //LOAD AND PREPARE DATA
-             use "$folder/Data/Intermediate/Basic-Panel.dta", clear
-            
-            // local spouse_def 1
-        // display "Spouse def = `spouse_def'"
+use "$folder/Data/Intermediate/Basic-Panel.dta", clear
 
-        * Switches
-        global quintiles_definition 2    // Defines quintiles. Can be 1, 2, 3, or 4. My preference is 4. I think the next best option is 2
-                                     // Note: if you want tertiles, must use definition 2
-        global retirement_definition 0   // 0 is default (last job ended due to "Quit, Resigned, Retire" or "NA")
-                                     // 1 is loose (does not ask why last job ended) and 2 is strict (last job ended due to "Quit, Resigned, Retire" only)
-        global ret_duration_definition 2 // Defines retirement year. Can be 1, 2, or 3. My preference is 3 (for the sharp income drop) although 2 is perhaps better when looking at consumption data (for smoothness)
-        global graphs_by_mean 0          // Graph by quintile. Can be 0 or 1
-        global graphs_by_quintile 0      // Graph by quintile. Can be 0 or 1
-        global graphs_by_tertile 1       // Tertiles
-        global allow_kids_to_leave_hh 1  // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH 
-                                     // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
-        global how_to_deal_with_spouse `spouse_def'  // could be 1 2 3 4 5
-        global retirement_definition_spouse 1 //// 0 is default (last job ended due to "Quit, Resigned, Retire" or "NA")
-                                          // 1 is loose (does not ask why last job ended) and 2 is strict (last job ended due to "Quit, Resigned, Retire" only)                                      
-                     
-        * Sample selection: households with same husband-wife over time
-        quietly do "$folder/Do/Sample-Selection.do"
+* Switches
+global quintiles_definition 2    // Defines quintiles. Can be 1, 2, 3, or 4. My preference is 4. I think the next best option is 2
+                                 // Note: if you want tertiles, must use definition 2
+global retirement_definition 0   // 0 is default (last job ended due to "Quit, Resigned, Retire" or "NA")
+                                 // 1 is loose (does not ask why last job ended) and 2 is strict (last job ended due to "Quit, Resigned, Retire" only)
+global ret_duration_definition 2 // Defines retirement year. Can be 1, 2, or 3. My preference is 3 (for the sharp income drop) although 2 is perhaps better when looking at consumption data (for smoothness)
+global graphs_by_mean 0          // Graph by quintile. Can be 0 or 1
+global graphs_by_quintile 0      // Graph by quintile. Can be 0 or 1
+global graphs_by_tertile 1       // Tertiles
+global make_barplots 1
+global allow_kids_to_leave_hh 1  // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH 
+                                 // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
+global how_to_deal_with_spouse 1  // could be 1 2 3 4 5
+global retirement_definition_spouse 1 //// 0 is default (last job ended due to "Quit, Resigned, Retire" or "NA")
+                                       // 1 is loose (does not ask why last job ended) and 2 is strict (last job ended due to "Quit, Resigned, Retire" only)             
+                                 
+* Sample selection: households with same husband-wife over time
+//do "$folder/Do/Sample-Selection.do"
 
-        * Look for retirement transitions of the head
-        quietly do "$folder/Do/Find-Retirements.do"
-        * NOTE: could also define retirement based on whether you worked < 500 hours that year. Might be worth exploring
+* Look for retirement transitions of the head
+do "$folder/Do/Find-Retirements.do"
+* NOTE: could also define retirement based on whether you worked < 500 hours that year. Might be worth exploring
 
-        * Generate aggregate consumption (following Blundell et al)
-        quietly do "$folder/Do/Consumption-Measures.do"
-        
-        quietly do "$folder/Do/Scripts/Define-Quintiles.do"
+* Generate aggregate consumption (following Blundell et al)
+do "$folder/Do/Consumption-Measures.do"
 
-        quietly do "$folder/Do/Scripts/Define-Ret-Duration.do"
+do "$folder/Do/Scripts/Define-Quintiles.do"
+
+do "$folder/Do/Scripts/Define-Ret-Duration.do"
+
+ gen year = wave - 1 // note that expenditure data is for year prior to interview
+ merge m:1 year using "$folder/Data/Intermediate/CPI.dta"
+ drop if _m == 2
+ drop year _m
+
+gen year = wave - 1 // note that expenditure data is for year prior to interview
+merge m:1 year using "$folder/Data/Raw/bead.dta"
+drop if _m == 2
+drop year _m
 
 
-gen average_earning_head = .
 
-replace average_earning_head  = inc_ss_head / 0.9 if inc_ss_head <  896
+destring bend_point_1, gen(bend_1)
+destring bend_point_2, gen(bend_2) ignore(",")
 
-replace average_earning_head  = inc_ss_head / 0.9 + (inc_ss_head - 896)/0.3  if inc_ss_head > 856 & inc_ss_head < 5399
+// drop bend_point_1
+// drop bend_point_2
 
-replace average_earning_head  = inc_ss_head / 0.9 + (inc_ss_head - 896)/0.3  + (inc_ss_head - 5399)/0.15  if inc_ss_head > 5399 
+gen ea_head = .
+
+/*
+gen inc_ss_head_65 = .
+replace inc_ss_head_66 = inc_ss_head if age == 65
+replace inc_ss_head_65 = inc_ss_head if age == 66 & inc_ss_head_65 == .
+replace inc_ss_head_65 = inc_ss_head if age == 64 & inc_ss_head_65 == .
+
+replace inc_ss_head_65 = inc_ss_head if age == 67 & inc_ss_head_65 == .
+replace inc_ss_head_65 = inc_ss_head if age == 68 & inc_ss_head_65 == .
+replace inc_ss_head_65 = inc_ss_head if age == 63 & inc_ss_head_65 == .
+replace inc_ss_head_65 = inc_ss_head if age == 62 & inc_ss_head_65 == .
+*/
+
+// by pid, sort: generate inc_ss_head_65 = inc_ss_head if age == 65
+
+replace ea_head  = inc_ss_head / 0.9 if inc_ss_head <  bend_1/0.9
+
+replace ea_head  = bend_1/0.9 + (inc_ss_head - bend_1)/0.32 if inc_ss_head > bend_1/0.9 & inc_ss_head < bend_2/0.32
+
+replace ea_head  = bend_1/0.9 + (bend_2 - bend_1)/0.32 + inc_ss_head/0.15 if inc_ss_head > bend_2/0.32
+
+by pid, sort: egen they_ever_retire = max(retired)
+keep if they_ever_retire == 1
+
+drop bend_point_1
+drop bend_point_2
+
+
+// 1. social security income for people when they are closest to 65. 
+// 2. Most of the observations in the table do not have a social security income because they have not retired, 
+// 3. I see the social security as in 2004 dollar. Need to change that. 
+///4. How do we use the 
 
 
 /*
@@ -124,7 +167,6 @@ Source: 2018 US conversation statistics
         }
 
         * local lab: variable label `var'
-
         ****************************************************************************************
         * SECTION 1: 
         * Part A: Creates 3 regression tables for 3 definations of total non durable consuptions
@@ -143,11 +185,10 @@ Source: 2018 US conversation statistics
 
         local expenditure_categories_3 total_foodexp_home_real total_foodexp_away_real total_housing_real ///
         total_transport_real 
-
+/*
             egen nond_expenditure_categories_1 = rowtotal( `expenditure_categories_1' )
             label variable nond_expenditure_categories_1 "Real Nondurable Expenditure"
             replace nond_expenditure_categories_1 = nond_expenditure_categories_1/average_earning_head
-
 
             egen nond_expenditure_categories_2 = rowtotal( `expenditure_categories_2' )
             label variable nond_expenditure_categories_2 "Real Nondurable Expenditure less Health"
@@ -157,12 +198,13 @@ Source: 2018 US conversation statistics
             egen nond_expenditure_categories_3 = rowtotal( `expenditure_categories_3' )
             label variable nond_expenditure_categories_3 "Real Nondurable Expenditure less Health & Education"
             replace nond_expenditure_categories_3 = nond_expenditure_categories_3/average_earning_head
+*/
 
     local expenditure_categories_all nond_expenditure_categories_1 nond_expenditure_categories_2 nond_expenditure_categories_3
 
     * by pid, sort: egen do_they_ever_retire = max(retired)
     * edit pid wave retired do_they_ever_retire if do_they_ever_retire == 1 & pid == 11003
-
+/*
     foreach var in `expenditure_categories_all' {
     
         qui reg `var' i.tertile i.retired#i.tertile
@@ -200,6 +242,6 @@ Source: 2018 US conversation statistics
         qui xtreg `var' i.age i.tertile i.retired#i.tertile i.dummy_children d_year* `conditions'
         outreg2 using "$folder_output/NO_FE/Defff_`spouse_def'/test_`var'.tex", ctitle("test 10") tex(frag) addtext(HH FE, No, Age Dummies, Yes, Dummy Children, Yes, Time, Yes)  nocons  keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile)
 */
-}
-}
+// }
+
     

@@ -4,8 +4,8 @@ clear all
 // PSID Variable Search:
 // https://simba.isr.umich.edu/VS/s.aspx
 
-global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
-* global folder "/Users/bibekbasnet/Documents/GitHub/RetirementConsumptionPSID"
+*global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
+global folder "/Users/bibekbasnet/Documents/GitHub/RetirementConsumptionPSID"
   //change the folder if you want to use it from your computer
 
 ****************************************************************************************************
@@ -154,6 +154,16 @@ psid use
     //[94]ER4159 [95]ER6999 [96]ER9250 [97]ER12223 
 	[99]ER16517 [01]ER20458 [03]ER24149 
     [05]ER28048 [07]ER41038 [09]ER46982 [11]ER52406 [13]ER58224 [15]ER65460
+
+
+    || spouse_mother_educlevel
+    [99]ER15818 [01]ER19879 [03]ER23316 [05]ER27277 [07]ER40452 [09]ER46424 [11]ER51785 
+    [13]ER57522 [15]ER64644
+
+    || spouse_father_educlevel
+    [99]ER15809 [01]ER19870 [03]ER23307 [05]ER27267 [07]ER40442 [09]ER46414 [11]ER51775 
+    [13]ER57512 [15]ER64634
+
     // # in FU
     || fsize
     // [68]V115 [69]V549 [70]V1238 [71]V1941 [72]V2541 [73]V3094 [74]V3507
@@ -296,6 +306,10 @@ psid use
     [99]ER14010 [01]ER18109 [03]ER21434 [05]ER25431 [07]ER36436 [09]ER42463
     [11]ER47781 [13]ER53487 [15]ER60502
 
+    || emp_status_indiv
+    //employment status of an individual
+    [99]ER33512 [01]ER33612 [03]ER33712 [05]ER33813 [07]ER33913 //
+    [09]ER34016 [11]ER34116 [13]ER34216 [15]ER34317
 
     //////////////////////////////////////////////////////////////////////////
     // INCOME
@@ -357,6 +371,9 @@ psid use
     [99]ER16465 [01]ER20447 [03]ER24135 [05]ER27943 [07]ER40933 [09]ER46841
     [11]ER52249 [13]ER58050 [15]ER65244
 
+    || inc_spouse_all
+    [99]ER14757 [01]ER18930 [03]ER22300 [05]ER26281 [07]ER37299 [09]ER43290 
+    [11]ER48615 [13]ER54309 [15]ER61349
     // TODO: could look into social security. Questionnaire says: Did you
     // (HEAD) (or anyone else in the family there) receive any income in 2004
     // from Social Security? Was that disability, retirement, survivor's
@@ -367,6 +384,26 @@ psid use
     // Administration for a servicemen's, (widow's,) or survivor's pension,
     // service disability, or the GI bill? Did you (HEAD) receive any income
     // in 2004 from other retirement pay, pensions, or annuities?
+
+    || total_hours_head
+    [99]ER16471 [01]ER20399 [03]ER24080 [05]ER27886 [07]ER40876 [09]ER46767 [11]ER52175 
+    [13]ER57976 [15]ER65156
+    //The values for this variable represent Head's total annual work hours on all 
+    //jobs including overtime in 2014.
+
+    || total_hours_spouse
+    [99]ER16482 [01]ER20410 [03]ER24091 [05]ER27897 [07]ER40887 [09]ER46788 [11]ER52196 
+    [13]ER57997 [15]ER65177
+
+    ||wage_rate_head
+    //The values for this variable represent dollars and cents per hour. 
+    [99]ER16514 [01]ER20451 [03]ER24137 [05]ER28003 [07]ER40993 [09]ER46901 
+    [11]ER52309 [13]ER58118 [15]ER65315
+
+    || wage_rate_spouse
+    //The values for this variable represent dollars and cents per hour.
+    [99]ER16515 [01]ER20452 [03]ER24138 [05]ER28004 [07]ER40994 [09]ER46902 [11]ER52310 
+    [13]ER58119 [15]ER65316
 
     // Head and spouse's transfer income (except social security)
     || inc_transfer
@@ -404,8 +441,12 @@ psid use
     // [94]ER4152 [95]ER6992 [96]ER9243 [97]ER12077
     [99]ER16460 [01]ER20455 [03]ER24104
 
+    ||year_left_college
+    [15]ER34376
     // NOTE: between 99 and 03, we have inc_ss_fam. between 05 and 15, sum up inc_ss_head, inc_ss_spouse, and inc_ss_ofum
 
+    //////////////////////////////////////////////////////////////////////////
+   
 
     //////////////////////////////////////////////////////////////////////////
     // EXPENDITURE
@@ -889,7 +930,6 @@ psid use
     // [94]ER3848
     [99]ER15127 [01]ER19323 [03]ER22718 [05]ER26699 [07]ER37717 [09]ER43708
     [11]ER49053 [13]ER54809 [15]ER61929
-
     //////////////////////////////////////////////////////////////////////////
     // WEIGHTS
     //////////////////////////////////////////////////////////////////////////
@@ -1048,11 +1088,6 @@ label define why_last_job_end
 9 "DK; NA; refused"
 0 "Inap."; // : did not work for money in 2002 or has not worked for money since January 1, 2001 (ER21127=5, 8, or 9); began working for this employer in 2003 (ER21130=2003); still working for this employer
 
-label define housingstatus
-1 "Owns" // Owns or is buying home, either fully or jointly; mobile home owners who rent lots are included here
-5 "Rents"
-8 "Neither";
-
 label define type_mortgage
 1 "Mortgage"
 2 "Land contract, loan from seller"
@@ -1118,7 +1153,6 @@ label values married married
 label values racehead race
 label values why_last_job_end why_last_job_end
 label values why_last_job_end_spouse why_last_job_end
-label values housingstatus housingstatus
 label values type_mortgage1 type_mortgage
 label values type_mortgage2 type_mortgage
 
@@ -1299,17 +1333,32 @@ replace income_female = inc_spouse if sex_indiv == 2 & income_female == .
 inspect income_female
 sum income_female inc_fam
 
-//keep inc_fam inc_head inc_spouse
+gen wage_rate_female = .
+replace wage_rate_female = wage_rate_head if sex_head == 2
+replace wage_rate_female = wage_rate_spouse if sex_indiv == 2 & wage_rate_female == .
+inspect wage_rate_female
+
+gen hours_annual_female = .
+replace hours_annual_female =  total_hours_head if sex_head == 2
+replace hours_annual_female =  total_hours_spouse if sex_indiv == 2 & hours_annual_female == .
+
+gen educ_female = .
+replace educ_female =  educhead if sex_head == 2
+replace educ_female =  educspouse if sex_indiv == 2 & educ_female == .
+
+gen inc_fam_nofemale = .
+replace inc_fam_nofemale = inc_fam - inc_head if sex_head == 2
+replace inc_fam_nofemale = inc_fam - inc_spouse if sex_indiv == 2 & inc_fam_nofemale == . 
+
+//egen total_working = total(emp_status_spouse == 1), by(wave)
 
 save "$folder/Data/Intermediate/Basic-Panel_Louise.dta", replace
 
-//if we need larger sample size, we can look at female who are no legal spouse but cohabitants
-
-//must needed variables
-//dependent variable: annual hours of work
-//regressors and instruments
-//wage  dividing by revenue
-
+// if we need larger sample size, we can look at female who are no legal spouse but cohabitants
+// must needed variables
+// dependent variable: annual hours of work
+// regressors and instruments
+// wage  dividing by revenue
 // todo: add the new variables (work hours per year, etc)
 // todo: look into top coding in any of the new variables
 
