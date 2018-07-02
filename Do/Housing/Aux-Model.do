@@ -448,7 +448,7 @@ sureg `sureg_command'
 
 
 
-
+ 
 
 if $estimate_reg_by_age == 0{
 	di "sureg (`endog_vars' =  L.(`endog_vars') `exog_vars' )"
