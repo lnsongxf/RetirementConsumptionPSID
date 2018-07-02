@@ -6,7 +6,6 @@ graph close
 * global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 global folder "/Users/bibekbasnet/Documents/GitHub/RetirementConsumptionPSID"
 
-
 use "$folder/Data/Intermediate/Basic-Panel.dta", clear
 
 * Switches
@@ -45,6 +44,10 @@ do "$folder/Do/Scripts/Define-Ret-Duration.do"
 ** Here retirement year is defined as the first survey wave where they say they are retired
 ** (though I exclude cases where the self reported ret_year is far from the observed transition)
 ****************************************************************************************************
+
+
+
+
 
 ** Only keep those who are observed for at least n waves
 * by pid, sort: egen waves = count(wave)
