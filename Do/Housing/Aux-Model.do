@@ -91,8 +91,12 @@ replace bought = 1 if housing ==1 & L.housing==0
 gen sold = 0
 replace sold = 1 if housing == 0 & L.housing == 1
 
-gen WHtM = HtM & housing == 1
-gen PHtM = HtM & housing == 0
+// gen WHtM = HtM & housing == 1
+// gen PHtM = HtM & housing == 0
+
+* OR
+ gen WHtM = HtM & housing_wealth > 0
+ gen PHtM = HtM & housing_wealth <= 0 
 
 gen LTV = (mortgage1 + mortgage2) / housevalue if t_homeownership == 0
 gen underwater = LTV > 1 & LTV != .
@@ -181,8 +185,9 @@ if $drop_top_x > 0{
 
 rename age_sq age2
 gen age3 = age^3
-local control_vars age age2 age3 bought L(1 2).(bought underwater)
+local control_vars age age2 age3 bought 
 
+* L(1 2).(bought underwater)
 * sold L.housing new_mort
 * underwater
 
@@ -467,7 +472,7 @@ sureg `sureg_command'
 
 if $estimate_reg_by_age == 0{
 	di "sureg (`endog_vars' =  L.(`endog_vars') `exog_vars' )"	
-    sureg (`endog_vars' =  L(1 2).(`endog_vars') `exog_vars' )
+    sureg (`endog_vars' =  L.(`endog_vars') `exog_vars' )
 
     * matrix list e(b) // coefs
     mat coefs = e(b)
@@ -611,12 +616,11 @@ else if $estimate_reg_by_age == 1{
   gen sample = sample_below + sample_above
 }
 
-sdfsdf
 
 ****************************************************************************************************
 ** Generate initial data for simulation
 ****************************************************************************************************
-
+/*
 preserve
   by pid, sort: egen min_year = min(wave)
   keep if F.sample == 1 & age <= 30 & wave == min_year // first observation for each indiv is not in the sample b/c of the lag
@@ -628,11 +632,12 @@ preserve
   gen cons = 1
   export delimited using "$folder/Results/Aux_Model_Estimates/InitData.csv", replace
 restore
-
+*/
 ****************************************************************************************************
 ** Generate initial means for simulation
 ****************************************************************************************************
 
+/*
 preserve
   by pid, sort: egen min_year = min(wave)
   keep if F.sample == 1 & age == 25 // just look at the youngest age
@@ -645,10 +650,15 @@ preserve
   gen cons = 1
   export delimited using "$folder/Results/Aux_Model_Estimates/InitDataMeans.csv", replace
 restore
+*/
 
 ****************************************************************************************************
 ** Save sample used in aux model
 ****************************************************************************************************
+
+di "`endog_vars'"
+di "`control_vars'"
+di "`level_vars'"
 
 preserve
   keep if F.sample == 1 | sample == 1
@@ -676,7 +686,33 @@ preserve
   collapse (median) `endog_vars' `level_vars' log_housing_wealth_if_owner, by(age)
   tsset age
   sort age
-  save "$folder/Results/Aux_Model_Estimates/PSID_by_age_median.csv", replace
+  export delimited using "$folder/Results/Aux_Model_Estimates/PSID_by_age_median.csv", replace
+  
+  * Export Plots
+  set scheme s2mono
+  tsline income, title("Median Household Income") graphregion(color(white))
+  graph export "$folder\Results\Aux_Model_Estimates\Medians\income.pdf", as(pdf) replace
+  
+  tsline consumption, title("Median Consumption")  graphregion(color(white))
+  graph export "$folder\Results\Aux_Model_Estimates\Medians\consumption.pdf", as(pdf) replace
+  
+  tsline liq_wealth, title("Median Liquid Wealth") graphregion(color(white))
+  graph export "$folder\Results\Aux_Model_Estimates\Medians\liq_wealth.pdf", as(pdf) replace
+  
+  tsline housing_wealth, title("Median Housing Wealth (Net)") graphregion(color(white))
+  graph export "$folder\Results\Aux_Model_Estimates\Medians\housing_wealth.pdf", as(pdf) replace
+
+  tsline mortgage, title("Median Mortgage Balance") graphregion(color(white))
+  graph export "$folder\Results\Aux_Model_Estimates\Medians\mortgage.pdf", as(pdf) replace
+
+  tsline housing, title("Fraction Homeowners") graphregion(color(white))
+  graph export "$folder\Results\Aux_Model_Estimates\Medians\housing.pdf", as(pdf) replace
+    
+  tsline WHtM, title("Fraction WHtM") graphregion(color(white))
+  graph export "$folder\Results\Aux_Model_Estimates\Medians\WHtM.pdf", as(pdf) replace
+    
+  tsline PHtM, title("Fraction PHtM") graphregion(color(white))
+  graph export "$folder\Results\Aux_Model_Estimates\Medians\PHtM.pdf", as(pdf) replace
 restore
 
 preserve
@@ -689,15 +725,44 @@ preserve
   collapse (mean) `endog_vars' `level_vars' log_housing_wealth_if_owner, by(age)
   tsset age
   sort age
-  save "$folder/Results/Aux_Model_Estimates/PSID_by_age_mean.csv", replace
+  export delimited using "$folder/Results/Aux_Model_Estimates/PSID_by_age_mean.csv", replace
+  
+  * Export Plots
+  set scheme s2mono
+  tsline income, title("Mean Household Income") graphregion(color(white))
+  graph export "$folder\Results\Aux_Model_Estimates\Means\income.pdf", as(pdf) replace
+  
+  tsline consumption, title("Mean Consumption") graphregion(color(white))
+  graph export "$folder\Results\Aux_Model_Estimates\Means\consumption.pdf", as(pdf) replace
+  
+  tsline liq_wealth, title("Mean Liquid Wealth") graphregion(color(white))
+  graph export "$folder\Results\Aux_Model_Estimates\Means\liq_wealth.pdf", as(pdf) replace
+  
+  tsline housing_wealth, title("Mean Housing Wealth (Net)") graphregion(color(white))
+  graph export "$folder\Results\Aux_Model_Estimates\Means\housing_wealth.pdf", as(pdf) replace
+
+  tsline mortgage, title("Mean Mortgage Balance") graphregion(color(white))
+  graph export "$folder\Results\Aux_Model_Estimates\Means\mortgage.pdf", as(pdf) replace
+
+  tsline housing, title("Fraction Homeowners") graphregion(color(white))
+  graph export "$folder\Results\Aux_Model_Estimates\Means\housing.pdf", as(pdf) replace
+    
+  tsline WHtM, title("Fraction WHtM") graphregion(color(white))
+  graph export "$folder\Results\Aux_Model_Estimates\Means\WHtM.pdf", as(pdf) replace
+    
+  tsline PHtM, title("Fraction PHtM") graphregion(color(white))
+  graph export "$folder\Results\Aux_Model_Estimates\Means\PHtM.pdf", as(pdf) replace
+    
 restore
 
 ****************************************************************************************************
 ** Look at wealthy hand to mouth
 ****************************************************************************************************
 
+* Note: here WHtM are defined based on housing wealth (above WHtM was defined based on housing status)
 
 preserve
+  drop *HtM*
   gen HtM = liq_wealth <= (income / 24)
   gen WHtM = HtM & housing_wealth > 0
 //   gen PHtM = HtM & housing_wealth == 0 // should this be <= 0 ?
@@ -716,6 +781,7 @@ restore
 
 
 preserve
+  drop *HtM*
   gen HtM = liq_wealth <= (income / 24)
   gen WHtM = HtM & illiq_wealth > 0
   gen PHtM = HtM & illiq_wealth == 0
