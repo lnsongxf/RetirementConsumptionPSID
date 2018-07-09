@@ -8,6 +8,7 @@ set autotabgraphs on
 
 global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 use "$folder\Data\Intermediate\Basic-Panel.dta", clear
+
 cap mkdir "$folder/Results/Aux_Model_Estimates/AuxModelLatex/"
 
 * Switches
@@ -83,18 +84,29 @@ gen income = inc_fam_real_2015 // TODO: will need to subtract out taxes using NB
 gen illiq_wealth = fam_wealth_real - fam_liq_wealth_real // NOTE: we do not use this in the regressions, just use it for our alternative measure of WHtM
 gen HtM = liq_wealth <= (income / 24)
 gen dummy_mort = mortgage>0
+
 gen bought = 0 
 replace bought = 1 if housing ==1 & L.housing==0
 
+gen sold = 0
+replace sold = 1 if housing == 0 & L.housing == 1
+
 gen WHtM = HtM & housing == 1
 gen PHtM = HtM & housing == 0
+
+gen LTV = (mortgage1 + mortgage2) / housevalue if t_homeownership == 0
+gen underwater = LTV > 1 & LTV != .
+tab underwater // just 58 observations
+
+gen new_mort = dummy_mort == 1 & L.dummy_mort == 0
+
 
 * New variables
 // housevalue_real
 // mortgage_debt_real
 * TODO: if I combine these, do I get housing_wealth?
 
-local non_log_endog_vars housing WHtM PHtM dummy_mort bought
+local non_log_endog_vars WHtM PHtM dummy_mort housing
 
 * HtM
 
@@ -169,7 +181,10 @@ if $drop_top_x > 0{
 
 rename age_sq age2
 gen age3 = age^3
-local control_vars age age2 age3
+local control_vars age age2 age3 bought L(1 2).(bought underwater)
+
+* sold L.housing new_mort
+* underwater
 
 ****************************************************************************************************
 ** Consumption before purchase
@@ -448,11 +463,11 @@ sureg `sureg_command'
 
 
 
- 
+
 
 if $estimate_reg_by_age == 0{
-	di "sureg (`endog_vars' =  L.(`endog_vars') `exog_vars' )"
-    sureg (`endog_vars' =  L.(`endog_vars') `exog_vars' )
+	di "sureg (`endog_vars' =  L.(`endog_vars') `exog_vars' )"	
+    sureg (`endog_vars' =  L(1 2).(`endog_vars') `exog_vars' )
 
     * matrix list e(b) // coefs
     mat coefs = e(b)
@@ -460,10 +475,47 @@ if $estimate_reg_by_age == 0{
 
     // e(sample)         marks estimation sample
     local filename ""
-    mat2txt, matrix(coefs) saving("$folder/Results/Aux_Model_Estimates/coefs`filename'.txt") replace
-    mat2txt, matrix(sigma) saving("$folder/Results/Aux_Model_Estimates/sigma`filename'.txt") replace
+//     mat2txt, matrix(coefs) saving("$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs`filename'.txt") replace
+    mat2txt, matrix(sigma) saving("$folder/Results/Aux_Model_Estimates/AuxModelLatex/sigma.txt") replace
 
 	// export coefs to latex
+	preserve
+		matrix c = e(b)'
+		xsvmat c, norestore roweqname(xvar)
+		split xvar, parse(":")
+		drop xvar
+		replace xvar2 = subinstr(xvar2, ".", "_", .)
+		
+		* export to csv for julia
+		export delimited using "$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs_list.csv", replace
+		
+		reshape wide c1, i(xvar1) j(xvar2) string
+// 		reshape wide c1, i(xvar2) j(xvar1) string
+
+		rename c1_cons c1constant
+		foreach var of varlist c1* {
+			local newname = substr("`var'", 3, .)
+			rename `var' `newname'
+		}
+		
+		rename xvar Y
+		rename L_log_consumption L_logC
+		rename L_log_housing_wealth L_logHW
+		rename L_log_income L_logY
+		rename L_log_liq_wealth L_logLW
+		rename L_log_mortgage L_logM
+		rename L_dummy_mort L_mort
+		cap rename L_housing L_H
+		
+
+		
+		mkmat L* cons age*, matrix(newcoefs) rownames(Y)
+// 		mkmat PHtM-logM , matrix(newcoefs) rownames(Y)
+		outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs", nobox mat(newcoefs) replace f(%9.3f)  caption("Coefficients (transposed)")
+		mat2txt, matrix(newcoefs) saving("$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs.txt") replace
+	restore
+	
+	// export coefs to latex (transposed)
 	preserve
 		matrix c = e(b)'
 		xsvmat c, norestore roweqname(xvar)
@@ -494,14 +546,15 @@ if $estimate_reg_by_age == 0{
 		rename log_liq_wealth logLW
 		rename log_mortgage logM
 		rename dummy_mort mort
-		rename housing H
+		cap rename housing H
 		
 		list
 		
 		* dataout, save("$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs") tex replace auto(3)
 // 		mkmat L* cons age*, matrix(newcoefs) rownames(Y)
 		mkmat PHtM-logM , matrix(newcoefs) rownames(Y)
-		outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs", nobox mat(newcoefs) replace f(%9.3f)  caption("Coefficients (transposed)")
+		outtable using "$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs_transposed", nobox mat(newcoefs) replace f(%9.3f)  caption("Coefficients (transposed)")
+		mat2txt, matrix(newcoefs) saving("$folder/Results/Aux_Model_Estimates/AuxModelLatex/coefs_transposed.txt") replace
 	restore
 	
 	// export var covar to latex
