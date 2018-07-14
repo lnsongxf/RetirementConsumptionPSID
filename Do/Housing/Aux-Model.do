@@ -68,6 +68,18 @@ drop if fam_wealth_real - L.fam_wealth_real > 100 * inc_fam_real & fam_wealth !=
 * Find first home purcahses (two alternative definitions)
 qui do "$folder\Do\Housing\Find-First-Home-Purchase.do"
 
+
+****************************************************************************************************
+** Aux Model Versions
+****************************************************************************************************
+
+* Version 5 (Original)
+* local non_log_endog_vars WHtM PHtM dummy_mort housing
+
+* Version 5 (New - remove dummy_mort b/c in the model dummy_mort is collinear with housing)
+local non_log_endog_vars WHtM PHtM housing
+
+
 ****************************************************************************************************
 ** Define variables
 ****************************************************************************************************
@@ -110,7 +122,6 @@ gen new_mort = dummy_mort == 1 & L.dummy_mort == 0
 // mortgage_debt_real
 * TODO: if I combine these, do I get housing_wealth?
 
-local non_log_endog_vars WHtM PHtM dummy_mort housing
 
 * HtM
 
@@ -448,6 +459,14 @@ sureg `sureg_command'
 
 
 ****************************************************************************************************
+** Income Calibration - very complicated
+****************************************************************************************************
+
+gen age2d = age2/10
+reg log_income age age2d
+
+
+****************************************************************************************************
 ** Run SU regression
 ****************************************************************************************************
 
@@ -465,7 +484,6 @@ sureg `sureg_command'
 // di e(rmse)
 // qui reg log_mortgage housing log_consumption log_liq_wealth log_housing_wealth log_income L.(`endog_vars') `exog_vars' 
 // di e(rmse)
-
 
 
 
@@ -509,7 +527,7 @@ if $estimate_reg_by_age == 0{
 		rename L_log_income L_logY
 		rename L_log_liq_wealth L_logLW
 		rename L_log_mortgage L_logM
-		rename L_dummy_mort L_mort
+		cap rename L_dummy_mort L_mort
 		cap rename L_housing L_H
 		
 
@@ -550,7 +568,7 @@ if $estimate_reg_by_age == 0{
 		rename log_income logY
 		rename log_liq_wealth logLW
 		rename log_mortgage logM
-		rename dummy_mort mort
+		cap rename dummy_mort mort
 		cap rename housing H
 		
 		list
