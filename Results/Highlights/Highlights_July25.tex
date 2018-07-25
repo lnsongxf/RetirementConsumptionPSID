@@ -1,0 +1,317 @@
+% \documentclass[10pt,onecolumn]{article}
+\documentclass[a4paper]{article}
+
+\usepackage{amsmath, amsthm, amssymb,lscape, natbib,epstopdf,
+	cases, bbm, indentfirst}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{colortbl}
+\usepackage[hang,small,bf]{caption}
+\usepackage{setspace}
+\usepackage{amsmath}
+\usepackage[nohead]{geometry}
+\usepackage[bottom]{footmisc}
+\usepackage{endnotes}
+\usepackage{rotating}
+\usepackage{xr}
+\usepackage{xr-hyper}
+\usepackage[backref = section]{hyperref}
+\usepackage[section]{placeins}
+\allowdisplaybreaks
+\usepackage{pdflscape}
+\usepackage{float}
+
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{colortbl}
+\usepackage{setspace}
+\usepackage{amsmath}
+\usepackage[nohead]{geometry}
+\usepackage[bottom]{footmisc}
+\usepackage{endnotes}
+\usepackage{rotating}
+\usepackage{xr}
+\usepackage{xr-hyper}
+\usepackage[backref = section]{hyperref}
+\usepackage[section]{placeins}
+\usepackage{amsmath}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{pstricks}
+
+\definecolor{citec}{rgb}{0,0,.5}
+\definecolor{linkc}{rgb}{0,0,.6}
+\definecolor{bcolor}{rgb}{1,1,1}
+
+\hypersetup{
+	colorlinks = true,
+	urlcolor=linkc,
+	linkcolor=linkc,
+	citecolor = citec,
+	filecolor = linkc,
+	pdfauthor={Pat Moran}}
+
+\usepackage{pstricks}
+\usepackage{pstcol}
+
+\onehalfspacing
+
+%\input{tcilatex}
+\geometry{left=1in,right=1.25in,top=1in,bottom=1in}
+\interfootnotelinepenalty=10000
+
+\begin{document}	
+	%-------------------------------------------------
+	\title{Household expenditure in retirement}
+	\date{}
+	\maketitle
+
+%-------------------------------------------------
+\section{Income by Duration of Retirement}
+
+\begin{figure}[h]
+	\caption{Income Around Retirement}
+	\centering
+	\includegraphics[width=1.0\textwidth]{../IncomeAroundRetirement/Income_with_spouse_definition_1.pdf}
+\end{figure}
+
+Here we use the full sample - we do not select HHs based on spouse behavior. Though of course the results vary greatly if we look at households where the spouse does not work, always works, etc. 
+%inc_fam - "Total Income". "Inc Head" - "Earnings of Head" inc_spouse "Earnings of Spounds" inc_transfer "No SS Transfer", inc_ss_fam "Family SS"
+
+\clearpage
+
+\section{Expenditure Breakdown by Duration of Retirement}
+
+\begin{figure}[h]
+	\caption{Expenditure Breakdown for the Bottom Tertile - for categories before 2005}
+	\centering
+	\includegraphics[width=0.9\textwidth]{../ConsumptionPostRetirement/Tertile_Bar/tertile1.pdf}
+\end{figure}
+
+%\begin{figure}[h]
+%	\caption{For categories before 2005}
+%	\centering
+%	\includegraphics[width=0.8\textwidth]{../ConsumptionPostRetirement/Tertile_Bar/tertile2.pdf}
+%\end{figure}
+
+\begin{figure}[H]
+	\caption{Expenditure Breakdown for the Top Tertile - for categories before 2005}
+	\centering
+	\includegraphics[width=0.9\textwidth]{../ConsumptionPostRetirement/Tertile_Bar/tertile3.pdf}
+\end{figure}
+
+
+\clearpage
+
+
+%-------------------------------------------------
+\section{Total Nondurable expenditure (unsmoothed)}
+
+\begin{figure}[h]
+	\caption{Full Sample - Total Nondurable expenditure}
+	\centering
+	\includegraphics[width=0.9\textwidth]{../ConsumptionPostRetirement_by_SpouseDef/UnSmoothed/spouse_def_1.pdf}
+\end{figure}
+
+
+
+\begin{figure}[H]
+	\caption{Spouse Never Works- Total Nondurable expenditure}
+	\centering
+	\includegraphics[width=0.9\textwidth]{../ConsumptionPostRetirement_by_SpouseDef/UnSmoothed/spouse_def_2.pdf}
+\end{figure}
+
+
+\begin{figure}[H]
+	\caption{Spouse Always Works- Total Nondurable expenditure}
+	\centering
+	\includegraphics[width=0.9\textwidth]{../ConsumptionPostRetirement_by_SpouseDef/UnSmoothed/spouse_def_3.pdf}
+\end{figure}
+
+Full sample: Expenditure falls slightly for all three tertiles
+
+Spouse never works: Expenditure falls slightly for all three tertiles
+
+Spouse always works: Expenditure rises slightly for the rich
+
+\clearpage
+
+
+
+
+
+%-------------------------------------------------
+\section{Expenditure based on tertiles (smoothed)} 
+\begin{figure}[h]
+	\caption{Expenditure based on tertile}
+	\begin{subfigure}{1.0\textwidth}
+		\centering
+		\includegraphics[width=0.8\linewidth]{../ConsumptionPostRetirement_by_SpouseDef/Smoothed/spouse_def_1.pdf}
+		\caption{Nondurable expenditure}
+	\end{subfigure}
+	\vspace{1cm}
+	
+	\begin{subfigure}{0.5\textwidth}
+		\centering
+		\includegraphics[width=0.9\linewidth]{../ConsumptionPostRetirement_by_SpouseDef/Smoothed_xhealth/spouse_def_1.pdf}
+		\caption{Nondurables w/o health exp}
+		\label{fig:chapter001_dist_001}
+	\end{subfigure}
+	\hspace{1cm}
+	\begin{subfigure}{0.5\textwidth}
+		\includegraphics[width=0.9\linewidth]{../ConsumptionPostRetirement_by_SpouseDef/Smoothed_xhealth_educ/spouse_def_1.pdf}
+		\caption{Nondurables w/o health and educ exp}
+		\label{fig:chapter001_reward_001}
+	\end{subfigure}
+\end{figure}
+
+Here we use the full sample - we do not select HHs based on spouse behavior.
+
+Expenditure is roughly flat for the top tertile, once you take away education expenditure.
+
+If spouse always works it's similar, if spouse different it looks similar, if spouse never works looks different
+\clearpage
+
+
+%-------------------------------------------------
+\begin{landscape}
+\section{Expenditure Regressions}
+
+Here we use the full sample - we do not select households based upon spouse behavior
+
+\subsection{Regression table with nondurables expenditure}
+\input{../Regression_Table/Def_1/test_nond_expenditure_categories_1.tex}
+\clearpage
+
+\subsection{Regression table with nondurables expenditure w/o health expenditure} 
+\input{../Regression_Table/Def_1/test_nond_expenditure_categories_2.tex}
+\clearpage
+
+\subsection{Regression table with nondurables expenditure without Health and Education Expenditure}
+\input{../Regression_Table/Def_1/test_nond_expenditure_categories_3.tex}
+\clearpage
+\end{landscape}
+	
+\section{Expenditure Breakdown Before and After Retirement}
+\subsection{Food at Home Expenditure}
+
+\begin{table}[h]
+	\centering
+	\input{../Regression_Table/Def_1/1_test_total_foodexp_home_real.tex}
+\end{table}
+
+\begin{figure}[h]
+	\caption{Food Expenditure at Home}
+	\centering
+	\includegraphics[width=1.0\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_foodexp_home_real.pdf}
+\end{figure}
+
+
+
+
+
+\clearpage
+
+\subsection{Food Away from Home Expenditure}
+
+\begin{table}[h]
+	\centering
+	\input{../Regression_Table/Def_1/1_test_total_foodexp_away_real.tex}
+\end{table}
+
+\begin{figure}[h]
+	\caption{Food Expenditure Away from Home}
+	\centering
+	\includegraphics[width=1.0\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_foodexp_away_real.pdf}
+\end{figure}
+\clearpage
+
+\subsection{Education Expenditure}
+\begin{table}[h]
+	\centering
+	\input{../Regression_Table/Def_1/1_test_total_education_real.tex}
+\end{table}
+
+\begin{figure}[h]
+	\caption{Expenditure on Education}
+	\centering
+	\includegraphics[width=1.0\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_education_real.pdf}
+\end{figure}
+\clearpage
+
+\subsection{Health Expenditure}
+(Previously labeled recreation expenditure. But the tex file says health expenditure.)
+
+\begin{table}[h]
+	\centering
+	\input{../Regression_Table/Def_1/1_test_total_healthexpense_real.tex}
+\end{table}
+
+\begin{figure}[h]
+	\caption{Expenditure on Health}
+	\centering
+	\includegraphics[width=1.0\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_healthexpense_real.pdf}
+\end{figure}
+\clearpage
+
+\subsection{Housing Expenditure}
+\begin{table}[h]
+	\centering
+	\input{../Regression_Table/Def_1/1_test_total_housing_real.tex}
+\end{table}
+
+\begin{figure}[h]
+	\caption{Expenditure on Housing}
+	\centering
+	\includegraphics[width=1.0\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_housing_real.pdf}
+\end{figure}
+\clearpage
+
+\subsection{Nondurable Transportation Expenditure}
+\begin{table}[h]
+	\centering
+	\input{../Regression_Table/Def_1/1_test_total_transport_real.tex}
+\end{table}
+
+\begin{figure}[h]
+	\caption{Expenditure on Nondurable Transport}
+	\centering
+	\includegraphics[width=1.0\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_transport_real.pdf}
+\end{figure}
+\clearpage
+
+\subsection{Recreation Expenditure}
+\begin{table}[h]
+	\centering
+	\input{../Regression_Table/Def_1/1_test_total_recreation_2005_real.tex}
+\end{table}
+
+\begin{figure}[h]
+	\caption{Expenditure on total recreation (post 2005)}
+	\centering
+	\includegraphics[width=1.0\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_recreation_2005_real.pdf}
+\end{figure}
+
+\clearpage
+
+\subsection{Clothing Expenditure}
+\begin{table}[h]
+	\centering
+	\input{../Regression_Table/Def_1/1_test_total_clothing_2005_real.tex}
+\end{table}
+
+\begin{figure}[h]
+	\caption{Expenditure on total clothing (post 2005)}
+	\centering
+	\includegraphics[width=1.0\textwidth]{../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_clothing_2005_real.pdf}
+\end{figure}
+
+\clearpage
+
+
+
+
+\end{document}
+              
