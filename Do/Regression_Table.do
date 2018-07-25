@@ -4,8 +4,8 @@
 	*set trace on
 
 	* global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"
-	* global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
-	global folder "/Users/bibekbasnet/Documents/GitHub/RetirementConsumptionPSID"
+	global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
+	* global folder "/Users/bibekbasnet/Documents/GitHub/RetirementConsumptionPSID"
 	global folder_output "$folder/Results/Regression_Table"
 
 	cap mkdir "$folder_output"
@@ -53,7 +53,6 @@
 		quietly do "$folder/Do/Scripts/Define-Quintiles.do"
 
 		quietly do "$folder/Do/Scripts/Define-Ret-Duration.do"
-
 			
 		local expenditure_cats_all total_foodexp_home_real total_foodexp_away_real total_housing_real ///
 		/*total_healthexpense_real total_education_real */ total_transport_real 
@@ -95,6 +94,18 @@
 
 		by pid, sort: egen do_they_ever_retire = max(retired)
 
+		***********************************************************************************
+		** Bibek: could you look into the existence of households that move between tertiles?
+		** We should use a time consistent definition of tertiles
+		***********************************************************************************
+	
+		sort pid wave
+		gen D_tertile = D.tertile
+		tab D_tertile
+		
+		by pid, sort: egen mode_tertile = mode(tertile)
+		drop tertile
+		rename mode_tertile tertile
 
 		***********************************************************************************
 		** APC
@@ -149,12 +160,14 @@
 
 	foreach var in `expenditure_categories_all' {
 		
+		************************************************************************
+		** ORIGINAL VERSION: REG on retirement dummy
 		qui reg `var' i.retired
 		outreg2 using "$folder_output/Def_`spouse_def'/test_`var'.tex", ctitle("OLS") tex(frag) replace addtext(HH FE, No, Age Dummies, No, Dummy Children, No, Time, No) keep(i.retired) nocons // keep() addtext() ///
 
 		qui xtreg `var' i.retired, fe
 		outreg2 using "$folder_output/Def_`spouse_def'/test_`var'.tex", ctitle("test 2") tex(frag) addtext(HH FE, Yes, Age Dummies, No, Dummy Children, No, Time, No) keep(i.retired) nocons
-
+	
 		qui xtreg `var' i.age i.retired, fe
 		outreg2 using "$folder_output/Def_`spouse_def'/test_`var'.tex", ctitle("test 3") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, No, Time, No) keep(i.retired) nocons
 
@@ -163,9 +176,7 @@
 
 		qui xtreg `var' i.age i.retired i.dummy_children d_year*, fe
 		outreg2 using "$folder_output/Def_`spouse_def'/test_`var'.tex", ctitle("test 5") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, Yes)  keep(i.retired) nocons
-
-	* edit pid wave retired do_they_ever_retire if do_they_ever_retire == 1 & pid == 11003
-
+		
 		local conditions "if do_they_ever_retire == 1"
 
 		qui reg `var' i.retired `conditions'
@@ -182,6 +193,41 @@
 
 		qui xtreg `var' i.age i.retired i.dummy_children d_year* `conditions', fe
 		outreg2 using "$folder_output/Def_`spouse_def'/test_`var'.tex", ctitle("test 10") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, Yes)  keep(i.retired) nocons
+
+		************************************************************************
+		** NEV VERWION: REG on retirement dummy interacted with tertile
+		local conditions ""
+		reg `var' i.tertile i.retired#i.tertile
+		outreg2 using "$folder_output/Def_`spouse_def'/By_tertile_test_`var'.tex", ctitle("OLS") tex(frag) replace addtext(HH FE, No, Age Dummies, No, Dummy Children, No, Time, No) keep(1.retired#i.tertile) nocons // keep() addtext() ///
+		
+		xtreg `var' i.tertile i.retired#i.tertile, fe
+		outreg2 using "$folder_output/Def_`spouse_def'/By_tertile_test_`var'.tex", ctitle("test 2") tex(frag) addtext(HH FE, Yes, Age Dummies, No, Dummy Children, No, Time, No) keep(1.retired#i.tertile) nocons
+
+		 xtreg `var' i.age i.tertile i.retired#i.tertile, fe
+		outreg2 using "$folder_output/Def_`spouse_def'/By_tertile_test_`var'.tex", ctitle("test 3") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, No, Time, No) keep(1.retired#i.tertile) nocons
+
+		 xtreg `var' i.age i.tertile i.retired#i.tertile i.dummy_children, fe
+		outreg2 using "$folder_output/Def_`spouse_def'/By_tertile_test_`var'.tex", ctitle("test 4") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, No) keep(1.retired#i.tertile) nocons
+
+		 xtreg `var' i.age i.tertile i.retired#i.tertile i.dummy_children d_year*, fe
+		outreg2 using "$folder_output/Def_`spouse_def'/By_tertile_test_`var'.tex", ctitle("test 5") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, Yes)  keep(1.retired#i.tertile) nocons
+
+		local conditions "if do_they_ever_retire == 1"
+
+		qui reg `var' i.tertile i.retired#i.tertile `conditions'
+		outreg2 using "$folder_output/Def_`spouse_def'/By_tertile_test_`var'.tex", ctitle("test 6") tex(frag) addtext(HH FE, No, Age Dummies, No, Dummy Children, No, Time, No) keep(1.retired#i.tertile) nocons // keep() addtext() ///
+
+		qui xtreg `var' i.tertile i.retired#i.tertile `conditions', fe
+		outreg2 using "$folder_output/Def_`spouse_def'/By_tertile_test_`var'.tex", ctitle("test 7") tex(frag) addtext(HH FE, Yes, Age Dummies, No, Dummy Children, No, Time, No) keep(1.retired#i.tertile) nocons
+
+		qui xtreg `var' i.age i.tertile i.retired#i.tertile `conditions', fe
+		outreg2 using "$folder_output/Def_`spouse_def'/By_tertile_test_`var'.tex", ctitle("test 8") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, No, Time, No) keep(1.retired#i.tertile) nocons
+
+		qui xtreg `var' i.age i.tertile i.retired#i.tertile i.dummy_children `conditions', fe
+		outreg2 using "$folder_output/Def_`spouse_def'/By_tertile_test_`var'.tex", ctitle("test 9") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, No) keep(1.retired#i.tertile) nocons
+
+		qui xtreg `var' i.age i.tertile i.retired#i.tertile i.dummy_children d_year* `conditions', fe
+		outreg2 using "$folder_output/Def_`spouse_def'/By_tertile_test_`var'.tex", ctitle("test 10") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, Yes)  keep(1.retired#i.tertile) nocons
 
 
 }

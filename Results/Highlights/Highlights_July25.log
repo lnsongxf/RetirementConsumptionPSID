@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/W32TeX) (preloaded format=pdflatex 2018.3.1)  25 JUL 2018 12:38
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/W32TeX) (preloaded format=pdflatex 2018.3.1)  25 JUL 2018 15:14
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -717,7 +717,7 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 
 LaTeX Warning: No \author given.
 
-<../IncomeAroundRetirement/Income_with_spouse_definition_1.pdf, id=68, 397.485p
+<../IncomeAroundRetirement/Income_with_spouse_definition_1.pdf, id=88, 397.485p
 t x 289.08pt>
 File: ../IncomeAroundRetirement/Income_with_spouse_definition_1.pdf Graphic fil
 e (type pdf)
@@ -736,16 +736,16 @@ Non-PDF special ignored!
 Non-PDF special ignored!
 Non-PDF special ignored!{c:/texlive/2017/texmf-var/fonts/map/pdftex/updmap/pdft
 ex.map} <../IncomeAroundRetirement/Income_with_spouse_definition_1.pdf>]
-<../ConsumptionPostRetirement/Tertile_Bar/tertile1.pdf, id=90, 397.485pt x 289.
-08pt>
+<../ConsumptionPostRetirement/Tertile_Bar/tertile1.pdf, id=110, 397.485pt x 289
+.08pt>
 File: ../ConsumptionPostRetirement/Tertile_Bar/tertile1.pdf Graphic file (type 
 pdf)
 <use ../ConsumptionPostRetirement/Tertile_Bar/tertile1.pdf>
 Package pdftex.def Info: ../ConsumptionPostRetirement/Tertile_Bar/tertile1.pdf 
  used on input line 90.
 (pdftex.def)             Requested size: 391.40768pt x 284.66827pt.
-<../ConsumptionPostRetirement/Tertile_Bar/tertile3.pdf, id=91, 397.485pt x 289.
-08pt>
+<../ConsumptionPostRetirement/Tertile_Bar/tertile3.pdf, id=111, 397.485pt x 289
+.08pt>
 File: ../ConsumptionPostRetirement/Tertile_Bar/tertile3.pdf Graphic file (type 
 pdf)
 <use ../ConsumptionPostRetirement/Tertile_Bar/tertile3.pdf>
@@ -757,7 +757,7 @@ Package pdftex.def Info: ../ConsumptionPostRetirement/Tertile_Bar/tertile3.pdf
 
  <../ConsumptionPostRetirement/Tertile_Bar/tertile1.pdf> <../ConsumptionPostRet
 irement/Tertile_Bar/tertile3.pdf>]
-<../ConsumptionPostRetirement_by_SpouseDef/UnSmoothed/spouse_def_1.pdf, id=118,
+<../ConsumptionPostRetirement_by_SpouseDef/UnSmoothed/spouse_def_1.pdf, id=138,
  397.485pt x 289.08pt>
 File: ../ConsumptionPostRetirement_by_SpouseDef/UnSmoothed/spouse_def_1.pdf Gra
 phic file (type pdf)
@@ -765,7 +765,7 @@ phic file (type pdf)
 Package pdftex.def Info: ../ConsumptionPostRetirement_by_SpouseDef/UnSmoothed/s
 pouse_def_1.pdf  used on input line 115.
 (pdftex.def)             Requested size: 391.40768pt x 284.66827pt.
-<../ConsumptionPostRetirement_by_SpouseDef/UnSmoothed/spouse_def_2.pdf, id=119,
+<../ConsumptionPostRetirement_by_SpouseDef/UnSmoothed/spouse_def_2.pdf, id=139,
  397.485pt x 289.08pt>
 File: ../ConsumptionPostRetirement_by_SpouseDef/UnSmoothed/spouse_def_2.pdf Gra
 phic file (type pdf)
@@ -773,7 +773,7 @@ phic file (type pdf)
 Package pdftex.def Info: ../ConsumptionPostRetirement_by_SpouseDef/UnSmoothed/s
 pouse_def_2.pdf  used on input line 123.
 (pdftex.def)             Requested size: 391.40768pt x 284.66827pt.
-<../ConsumptionPostRetirement_by_SpouseDef/UnSmoothed/spouse_def_3.pdf, id=120,
+<../ConsumptionPostRetirement_by_SpouseDef/UnSmoothed/spouse_def_3.pdf, id=140,
  397.485pt x 289.08pt>
 File: ../ConsumptionPostRetirement_by_SpouseDef/UnSmoothed/spouse_def_3.pdf Gra
 phic file (type pdf)
@@ -786,7 +786,7 @@ pouse_def_3.pdf  used on input line 130.
  <../ConsumptionPostRetirement_by_SpouseDef/UnSmoothed/spouse_def_1.pdf> <../Co
 nsumptionPostRetirement_by_SpouseDef/UnSmoothed/spouse_def_2.pdf>] [4 <../Consu
 mptionPostRetirement_by_SpouseDef/UnSmoothed/spouse_def_3.pdf>]
-<../ConsumptionPostRetirement_by_SpouseDef/Smoothed/spouse_def_1.pdf, id=169, 3
+<../ConsumptionPostRetirement_by_SpouseDef/Smoothed/spouse_def_1.pdf, id=189, 3
 97.485pt x 289.08pt>
 File: ../ConsumptionPostRetirement_by_SpouseDef/Smoothed/spouse_def_1.pdf Graph
 ic file (type pdf)
@@ -795,7 +795,7 @@ Package pdftex.def Info: ../ConsumptionPostRetirement_by_SpouseDef/Smoothed/spo
 use_def_1.pdf  used on input line 151.
 (pdftex.def)             Requested size: 347.92163pt x 253.04141pt.
 <../ConsumptionPostRetirement_by_SpouseDef/Smoothed_xhealth/spouse_def_1.pdf, i
-d=170, 397.485pt x 289.08pt>
+d=190, 397.485pt x 289.08pt>
 File: ../ConsumptionPostRetirement_by_SpouseDef/Smoothed_xhealth/spouse_def_1.p
 df Graphic file (type pdf)
 <use ../ConsumptionPostRetirement_by_SpouseDef/Smoothed_xhealth/spouse_def_1.pd
@@ -804,7 +804,7 @@ Package pdftex.def Info: ../ConsumptionPostRetirement_by_SpouseDef/Smoothed_xhe
 alth/spouse_def_1.pdf  used on input line 158.
 (pdftex.def)             Requested size: 195.70384pt x 142.33414pt.
 <../ConsumptionPostRetirement_by_SpouseDef/Smoothed_xhealth_educ/spouse_def_1.p
-df, id=171, 397.485pt x 289.08pt>
+df, id=191, 397.485pt x 289.08pt>
 File: ../ConsumptionPostRetirement_by_SpouseDef/Smoothed_xhealth_educ/spouse_de
 f_1.pdf Graphic file (type pdf)
 <use ../ConsumptionPostRetirement_by_SpouseDef/Smoothed_xhealth_educ/spouse_def
@@ -832,178 +832,159 @@ mptionPostRetirement_by_SpouseDef/Smoothed_xhealth_educ/spouse_def_1.pdf>]
 (../Regression_Table/Def_1/test_nond_expenditure_categories_3.tex) [8
 
 ]
-(../Regression_Table/Def_1/1_test_total_foodexp_home_real.tex)
+(../Regression_Table/Def_1/By_tertile_test_nond_expenditure_categories_1.tex)
+[9
+
+]
+(../Regression_Table/Def_1/By_tertile_test_nond_expenditure_categories_2.tex)
+[10
+
+]
+(../Regression_Table/Def_1/By_tertile_test_nond_expenditure_categories_3.tex)
+[11
+
+] (../Regression_Table/Def_1/1_test_total_foodexp_home_real.tex)
 <../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_foo
-dexp_home_real.pdf, id=227, 397.485pt x 289.08pt>
+dexp_home_real.pdf, id=259, 397.485pt x 289.08pt>
 File: ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_tota
 l_foodexp_home_real.pdf Graphic file (type pdf)
 <use ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total
 _foodexp_home_real.pdf>
 Package pdftex.def Info: ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothe
-d/1/spouse_def_total_foodexp_home_real.pdf  used on input line 208.
+d/1/spouse_def_total_foodexp_home_real.pdf  used on input line 229.
 (pdftex.def)             Requested size: 434.90039pt x 316.29956pt.
- [9
+ [12
 
 
  <../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_fo
 odexp_home_real.pdf>] (../Regression_Table/Def_1/1_test_total_foodexp_away_real
 .tex)
 <../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_foo
-dexp_away_real.pdf, id=248, 397.485pt x 289.08pt>
+dexp_away_real.pdf, id=278, 397.485pt x 289.08pt>
 File: ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_tota
 l_foodexp_away_real.pdf Graphic file (type pdf)
 <use ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total
 _foodexp_away_real.pdf>
 Package pdftex.def Info: ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothe
-d/1/spouse_def_total_foodexp_away_real.pdf  used on input line 227.
+d/1/spouse_def_total_foodexp_away_real.pdf  used on input line 253.
 (pdftex.def)             Requested size: 434.90039pt x 316.29956pt.
- [10
+
+[13
 
  <../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_fo
-odexp_away_real.pdf>] (../Regression_Table/Def_1/1_test_total_education_real.te
-x)
+odexp_away_real.pdf>]
+(../Regression_Table/Def_1/1_test_total_education_real.tex)
 <../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_edu
-cation_real.pdf, id=268, 397.485pt x 289.08pt>
+cation_real.pdf, id=299, 397.485pt x 289.08pt>
 File: ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_tota
 l_education_real.pdf Graphic file (type pdf)
 <use ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total
 _education_real.pdf>
 Package pdftex.def Info: ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothe
-d/1/spouse_def_total_education_real.pdf  used on input line 240.
+d/1/spouse_def_total_education_real.pdf  used on input line 266.
 (pdftex.def)             Requested size: 434.90039pt x 316.29956pt.
-
-[11
+ [14
 
  <../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_ed
-ucation_real.pdf>]
-(../Regression_Table/Def_1/1_test_total_healthexpense_real.tex)
+ucation_real.pdf>] (../Regression_Table/Def_1/1_test_total_healthexpense_real.t
+ex)
 <../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_hea
-lthexpense_real.pdf, id=289, 397.485pt x 289.08pt>
+lthexpense_real.pdf, id=318, 397.485pt x 289.08pt>
 File: ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_tota
 l_healthexpense_real.pdf Graphic file (type pdf)
 <use ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total
 _healthexpense_real.pdf>
 Package pdftex.def Info: ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothe
-d/1/spouse_def_total_healthexpense_real.pdf  used on input line 255.
+d/1/spouse_def_total_healthexpense_real.pdf  used on input line 281.
 (pdftex.def)             Requested size: 434.90039pt x 316.29956pt.
- [12
+ [15
 
  <../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_he
 althexpense_real.pdf>] (../Regression_Table/Def_1/1_test_total_housing_real.tex
 )
 <../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_hou
-sing_real.pdf, id=309, 397.485pt x 289.08pt>
+sing_real.pdf, id=337, 397.485pt x 289.08pt>
 File: ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_tota
 l_housing_real.pdf Graphic file (type pdf)
 <use ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total
 _housing_real.pdf>
 Package pdftex.def Info: ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothe
-d/1/spouse_def_total_housing_real.pdf  used on input line 268.
+d/1/spouse_def_total_housing_real.pdf  used on input line 294.
 (pdftex.def)             Requested size: 434.90039pt x 316.29956pt.
- [13
+
+[16
 
  <../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_ho
 using_real.pdf>] (../Regression_Table/Def_1/1_test_total_transport_real.tex)
 <../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_tra
-nsport_real.pdf, id=330, 397.485pt x 289.08pt>
+nsport_real.pdf, id=356, 397.485pt x 289.08pt>
 File: ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_tota
 l_transport_real.pdf Graphic file (type pdf)
 <use ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total
 _transport_real.pdf>
 Package pdftex.def Info: ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothe
-d/1/spouse_def_total_transport_real.pdf  used on input line 281.
+d/1/spouse_def_total_transport_real.pdf  used on input line 307.
 (pdftex.def)             Requested size: 434.90039pt x 316.29956pt.
- [14
+[17
 
  <../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_tr
-ansport_real.pdf>] (../Regression_Table/Def_1/1_test_total_recreation_2005_real
-.tex)
+ansport_real.pdf>]
+(../Regression_Table/Def_1/1_test_total_recreation_2005_real.tex)
 <../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_rec
-reation_2005_real.pdf, id=350, 397.485pt x 289.08pt>
+reation_2005_real.pdf, id=375, 397.485pt x 289.08pt>
 File: ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_tota
 l_recreation_2005_real.pdf Graphic file (type pdf)
 <use ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total
 _recreation_2005_real.pdf>
 Package pdftex.def Info: ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothe
-d/1/spouse_def_total_recreation_2005_real.pdf  used on input line 294.
+d/1/spouse_def_total_recreation_2005_real.pdf  used on input line 320.
 (pdftex.def)             Requested size: 434.90039pt x 316.29956pt.
-
-[15
+ [18
 
  <../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_re
-creation_2005_real.pdf>]
-(../Regression_Table/Def_1/1_test_total_clothing_2005_real.tex)
+creation_2005_real.pdf>] (../Regression_Table/Def_1/1_test_total_clothing_2005_
+real.tex)
 <../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_clo
-thing_2005_real.pdf, id=370, 397.485pt x 289.08pt>
+thing_2005_real.pdf, id=394, 397.485pt x 289.08pt>
 File: ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_tota
 l_clothing_2005_real.pdf Graphic file (type pdf)
 <use ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total
 _clothing_2005_real.pdf>
 Package pdftex.def Info: ../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothe
-d/1/spouse_def_total_clothing_2005_real.pdf  used on input line 308.
+d/1/spouse_def_total_clothing_2005_real.pdf  used on input line 334.
 (pdftex.def)             Requested size: 434.90039pt x 316.29956pt.
- [16
+
+[19
 
  <../ConsumptionPostRetirement_by_SpouseDef_Cats/Smoothed/1/spouse_def_total_cl
 othing_2005_real.pdf>]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 316.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 316.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 342.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 342.
  (./Highlights_July25.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 316.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 316.
-
-
-Package rerunfilecheck Warning: File `Highlights_July25.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `Highlights_July25.out':
-(rerunfilecheck)             Before: 91FF294F731ABF8943275A9C2D291EDD;1329
-(rerunfilecheck)             After:  CEF51B849D06F2B6CF81C3C09FE622F0;1384.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 316.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 342.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 342.
+Package rerunfilecheck Info: File `Highlights_July25.out' has not changed.
+(rerunfilecheck)             Checksum: 114051832B3CD0F90672C944294B8DF3;1827.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 342.
  ) 
 Here is how much of TeX's memory you used:
- 15719 strings out of 492982
- 266893 string characters out of 6136226
- 355969 words of memory out of 5000000
- 18900 multiletter control sequences out of 15000+600000
+ 15732 strings out of 492982
+ 267504 string characters out of 6136226
+ 358969 words of memory out of 5000000
+ 18905 multiletter control sequences out of 15000+600000
  11802 words of font info for 46 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  42i,10n,77p,399b,564s stack positions out of 5000i,500n,10000p,200000b,80000s
-pdfTeX warning (dest): name{subsection.5.11} has been referenced but does not
- exist, replaced by a fixed one
-
-pdfTeX warning (dest): name{subsection.5.10} has been referenced but does not e
-xist, replaced by a fixed one
-
-pdfTeX warning (dest): name{subsection.5.9} has been referenced but does not ex
-ist, replaced by a fixed one
-
-pdfTeX warning (dest): name{subsection.5.8} has been referenced but does not ex
-ist, replaced by a fixed one
-
-pdfTeX warning (dest): name{subsection.5.7} has been referenced but does not ex
-ist, replaced by a fixed one
-
-pdfTeX warning (dest): name{subsection.5.6} has been referenced but does not ex
-ist, replaced by a fixed one
-
-pdfTeX warning (dest): name{subsection.5.5} has been referenced but does not ex
-ist, replaced by a fixed one
-
-pdfTeX warning (dest): name{subsection.5.4} has been referenced but does not ex
-ist, replaced by a fixed one
-
-<c:/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><c:/texli
-ve/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb><c:/texlive/2017/te
-xmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><c:/texlive/2017/texmf-dist/
-fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/texlive/2017/texmf-dist/fonts/type
-1/public/amsfonts/cm/cmr17.pfb><c:/texlive/2017/texmf-dist/fonts/type1/public/a
-msfonts/cm/cmr9.pfb>
-Output written on Highlights_July25.pdf (16 pages, 400192 bytes).
+<c:/texlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><c:/tex
+live/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb><c:/texlive/2017/
+texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><c:/texlive/2017/texmf-dis
+t/fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/texlive/2017/texmf-dist/fonts/ty
+pe1/public/amsfonts/cm/cmr17.pfb><c:/texlive/2017/texmf-dist/fonts/type1/public
+/amsfonts/cm/cmr9.pfb>
+Output written on Highlights_July25.pdf (19 pages, 405449 bytes).
 PDF statistics:
- 428 PDF objects out of 1000 (max. 8388607)
- 349 compressed objects within 4 object streams
- 65 named destinations out of 1000 (max. 500000)
- 214 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 452 PDF objects out of 1000 (max. 8388607)
+ 370 compressed objects within 4 object streams
+ 64 named destinations out of 1000 (max. 500000)
+ 254 words of extra memory for PDF output out of 10000 (max. 10000000)
 

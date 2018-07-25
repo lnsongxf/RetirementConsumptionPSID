@@ -3,12 +3,12 @@
     graph close
 
     * global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"
-    * global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
-    global folder "/Users/bibekbasnet/Documents/GitHub/RetirementConsumptionPSID"
+    global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
+    * global folder "/Users/bibekbasnet/Documents/GitHub/RetirementConsumptionPSID"
     // global folder_output "$folder/Results/Regression_Table"
 
         cap mkdir "$folder_output"
-        cap ssc install outreg2
+//         cap ssc install outreg2
 
         local expenditure_cats_all total_foodexp_home_real total_foodexp_away_real total_housing_real ///
             total_education_real total_transport_real total_recreation_2005_real total_clothing_2005_real total_healthexpense_real
@@ -99,11 +99,14 @@ by pid, sort: egen year_ss_claim = min(year_ss_claims)
 
 
 * social security the wave after they claim (where possible)
+* TODO: why not use inc_ss_head_imputed in this place????
+// edit pid wave inc_ss_head inc_ss_head_imputed last_wave year_ss_claim tempSS referenceSS
 by pid, sort: egen last_wave = max(wave)
-gen tempSS = inc_ss_head * (wave == year_ss_claim + 2) if last_wave >= year_ss_claim + 2
-replace tempSS = inc_ss_head * (wave == year_ss_claim) if last_wave < year_ss_claim + 2
+gen tempSS = inc_ss_head * (wave == year_ss_claim + 2) if last_wave >= year_ss_claim + 2 & year_ss_claim != .
+replace tempSS = inc_ss_head * (wave == year_ss_claim) if last_wave < year_ss_claim + 2 & year_ss_claim != .
 by pid, sort: egen referenceSS = max(tempSS)
 
+* whats this? 
 gen tempPriceNum = CPI_all * (wave == year_ss_claim + 2)
 by pid, sort: egen priceNum = max(tempPriceNum)
 gen tempPriceDenom = CPI_all * (wave == year_ss_claim)
