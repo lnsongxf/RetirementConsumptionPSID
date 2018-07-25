@@ -21,7 +21,8 @@ global allow_kids_to_leave_hh 1 // When looking for stable households, what shou
 
 global aux_model_in_logs 1 // 1 = logs, 0 = levels
 
-global drop_top_x 0 // can be 0, 1, or 5
+global drop_top_x 5 // can be 0, 1, or 5
+global drop_by_income 1 // can be 1 to drop by income, 0 to drop by wealth
 
 global estimate_reg_by_age 0 // 0 is our baseline where we estimate SUREG with everyone pooled together. 1 is alternative where we do two buckets
 global cutoff_age 40
@@ -31,9 +32,10 @@ global residualized_vars 1 // original version was 0 (no residualization) (NOTE:
 global house_price_by_age 0 // plot distribution of house price by age?
 
 global compute_htm_persistence 0
-global makeplots 0
+global makeplots 1
 
 * TODO: add in mortgage debt vs house value
+* TODO: drop imputed values (ex tab acc_homeequity)
 
 ****************************************************************************************************
 ** Sample selection
@@ -91,10 +93,11 @@ gen liq_wealth = fam_liq_wealth_real // 2015 dollars
 * gen housing_wealth = fam_LiqAndH_wealth_real - fam_liq_wealth_real // 2015 dollars (includes other housing wealth)
 gen housing_wealth = homeequity_real
 gen mortgage       = mortgage_debt_real
+gen housing_price  = housing_wealth + mortgage
 gen housing = housingstatus == 1 // renting or living with parents are considered as the same
 gen income = inc_fam_real_2015 // TODO: will need to subtract out taxes using NBER TAXSIM
 gen illiq_wealth = fam_wealth_real - fam_liq_wealth_real // NOTE: we do not use this in the regressions, just use it for our alternative measure of WHtM
-gen HtM = liq_wealth <= (income / 24)
+gen HtM = liq_wealth <= (income / 24) // TODO: not sure it should be 24 exactly
 gen dummy_mort = mortgage>0
 
 gen bought = 0 
@@ -145,6 +148,19 @@ else if $aux_model_in_logs == 0{
 }
 
 
+preserve
+	collapse housing_wealth housing_price mortgage, by(age housing)
+	xtset housing age 
+	xtline housing_wealth housing_price mortgage, name(v1, replace)
+restore
+
+preserve
+	collapse housing_wealth housing_price mortgage, by(age)
+	tsset age 
+	tsline housing_wealth housing_price mortgage, name(v2, replace)
+restore
+
+
 ****************************************************************************************************
 ** Simple means and medians by age EXCLUDING TOP x%
 ****************************************************************************************************
@@ -154,8 +170,13 @@ if $drop_top_x > 0{
   gen NetWealth = liq_wealth + housing_wealth
 
   * local sort_var fam_wealth_real
-  local sort_var NetWealth
-
+  if $drop_by_income == 1 {
+	local sort_var income
+  }
+  else{
+	local sort_var NetWealth
+  }
+	
   * Find top x% by age
   by age, sort: egen p95 = pctile(`sort_var'), p(95)
   by age, sort: egen p99 = pctile(`sort_var'), p(99)
@@ -304,11 +325,13 @@ forvalues i = 1/8 {
 
 if $makeplots == 1{
 preserve
-	collapse log_housing_wealth log_mortgage , by(housing age)
+	collapse log_housing_wealth log_mortgage housing_wealth mortgage housing_price , by(housing age)
 	xtset housing age
 	xtline log*, title("Housing Wealth") name("HW_by_housing_status_ORIG", replace)
+	xtline housing_wealth mortgage housing_price , title("Housing Wealth") name("HW2", replace)
 restore
 }
+
 
 if $residualized_vars == 1{
 	* Generate controls
@@ -346,8 +369,9 @@ if $residualized_vars == 1{
 			collapse `var' `var'_resid, by(age)
 			tsset age
 			replace `var'_resid = `var'_resid 
-			tsline `var', name(`var', replace)
-			tsline `var'_resid, name(`var'_resid, replace)
+// 			tsline `var', name(`var', replace)
+// 			tsline `var'_resid, name(`var'_resid, replace)
+			tsline `var' `var'_resid, name(`var', replace)
 		restore
 		}
 		
@@ -464,6 +488,7 @@ sureg `sureg_command'
 
 gen age2d = age2/10
 reg log_income age age2d
+sdfdsf
 
 
 ****************************************************************************************************
