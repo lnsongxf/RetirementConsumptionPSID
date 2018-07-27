@@ -224,6 +224,18 @@ local control_vars age age2 age3 bought
 * underwater
 
 ****************************************************************************************************
+** Calibrate initial liquid assets -- used for setting some params in model
+****************************************************************************************************
+
+preserve
+	keep if age == 22
+	// hist liq_wealth
+	drop if log_liq_wealth == 0
+	sum log_liq_wealth
+restore
+
+
+****************************************************************************************************
 ** Consumption before purchase
 ****************************************************************************************************
 

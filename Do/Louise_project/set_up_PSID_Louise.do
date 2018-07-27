@@ -4,9 +4,9 @@ clear all
 // PSID Variable Search:
 // https://simba.isr.umich.edu/VS/s.aspx
 
-*global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
-global folder "/Users/bibekbasnet/Documents/GitHub/RetirementConsumptionPSID"
-  //change the folder if you want to use it from your computer
+global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
+* global folder "/Users/bibekbasnet/Documents/GitHub/RetirementConsumptionPSID"
+* change the folder if you want to use it from your computer
 
 ****************************************************************************************************
 ** Convert year level zip files to dta files
@@ -141,6 +141,12 @@ psid use
     || racehead
     [99]ER15928 [01]ER19989 [03]ER23426 [05]ER27393 [07]ER40565 [09]ER46543
     [11]ER51904 [13]ER57659 [15]ER64810
+
+    || race_spouse
+    // [85]V12293 [86]V13500 [87]V14547 [88]V16021 [89]V17418 [90]V18749 
+    // [91]V20049 [92]V21355 [93]V23212 [94]ER3883 [95]ER6753 [96]ER8999 [97]ER11760 
+    [99]ER15836 [01]ER19897 [03]ER23334 [05]ER27297 [07]ER40472 [09]ER46449 
+    [11]ER51810 [13]ER57549 [15]ER64671
 
     // Head's Completed Education Level (years of education, with 99 = NA)
     //Values in the range 1-16 represent the actual grade of school completed; e.g., 
@@ -1070,11 +1076,13 @@ label define married
 9 "NA; refused";
 
 label define race
+0 "Wild code"
 1 "White"
 2 "Black" // Black, African-American, or Negro
 3 "Native Am." // American Indian or Alaska Native
 4 "Asian"
 5 "Islander" // Native Hawaiian or Pacific Islander
+6 "Mentions color other than black or white"
 7 "Other"
 9 "NA"; // DK; NA; refused
 
@@ -1151,6 +1159,7 @@ label values sex_indiv sex
 label values splitoff_indicator splitoff_lab
 label values married married
 label values racehead race
+label values race_spouse race
 label values why_last_job_end why_last_job_end
 label values why_last_job_end_spouse why_last_job_end
 label values type_mortgage1 type_mortgage
@@ -1228,6 +1237,8 @@ replace ret_year_spouse = . if ret_year_spouse >= 9998
 replace mortgage1       = . if mortgage1 >= 9999998
 replace mortgage2       = . if mortgage2 >= 9999998
 replace year_born       = . if year_born == 9999
+replace wage_rate_head  = . if wage_rate_head >= 9998
+replace wage_rate_spouse= . if wage_rate_spouse >= 9998
 
 * Compute net business wealth for 2013 and 2015
 replace business_wealth = business_value - business_debt if wave >= 2013
@@ -1289,23 +1300,23 @@ summ *
 tempvar kid counted_children kid0_17 kid0_2 kid3_5 kid6_13 kid14_17m kid18_21m kid14_17f kid18_21f
 gen `kid' = (rel2head != 10) & (rel2head != 20) & (rel2head != 22) & sequence > 0 & sequence <= 20
 
-gen `kid0_17'  = `kid' & age <= 17 // this matches the PSID definition of children = all persons <= 17 who are not head/wife/"wife"
-gen `kid0_2'   = `kid' & age >= 0  & age <= 2
-gen `kid3_5'   = `kid' & age >= 3  & age <= 5
-gen `kid6_13'  = `kid' & age >= 6  & age <= 13
-gen `kid14_17m' = `kid' & age >= 14 & age <= 17 & sex_indiv == 1
-gen `kid14_17f' = `kid' & age >= 14 & age <= 17 & sex_indiv == 2
-gen `kid18_21m' = `kid' & age >= 18 & age <= 21 & sex_indiv == 1
-gen `kid18_21f' = `kid' & age >= 18 & age <= 21 & sex_indiv == 2
+qui gen `kid0_17'  = `kid' & age <= 17 // this matches the PSID definition of children = all persons <= 17 who are not head/wife/"wife"
+qui gen `kid0_2'   = `kid' & age >= 0  & age <= 2
+qui gen `kid3_5'   = `kid' & age >= 3  & age <= 5
+qui gen `kid6_13'  = `kid' & age >= 6  & age <= 13
+qui gen `kid14_17m' = `kid' & age >= 14 & age <= 17 & sex_indiv == 1
+qui gen `kid14_17f' = `kid' & age >= 14 & age <= 17 & sex_indiv == 2
+qui gen `kid18_21m' = `kid' & age >= 18 & age <= 21 & sex_indiv == 1
+qui gen `kid18_21f' = `kid' & age >= 18 & age <= 21 & sex_indiv == 2
 
-by family_id wave, sort: egen `counted_children' = total(`kid0_17')
-by family_id wave: egen children0_2   = total(`kid0_2')
-by family_id wave: egen children3_5   = total(`kid3_5')
-by family_id wave: egen children6_13  = total(`kid6_13')
-by family_id wave: egen children14_17m = total(`kid14_17m')
-by family_id wave: egen children14_17f = total(`kid14_17f')
-by family_id wave: egen children18_21m = total(`kid18_21m')
-by family_id wave: egen children18_21f = total(`kid18_21f')
+qui by family_id wave, sort: egen `counted_children' = total(`kid0_17')
+qui by family_id wave: egen children0_2   = total(`kid0_2')
+qui by family_id wave: egen children3_5   = total(`kid3_5')
+qui by family_id wave: egen children6_13  = total(`kid6_13')
+qui by family_id wave: egen children14_17m = total(`kid14_17m')
+qui by family_id wave: egen children14_17f = total(`kid14_17f')
+qui by family_id wave: egen children18_21m = total(`kid18_21m')
+qui by family_id wave: egen children18_21f = total(`kid18_21f')
 
 * Apparently tempvars get saved in the dta file down below... that's annoying
 drop `kid' `counted_children' `kid0_17' `kid0_2' `kid3_5' `kid6_13' `kid14_17m' `kid18_21m' `kid14_17f' `kid18_21f'
@@ -1325,30 +1336,6 @@ tab rel2head
 tab sex_indiv
 keep if ( rel2head == 10 | rel2head == 20 ) & sex_indiv == 2
 format %8.0g rel2head
-
-gen income_female = .
-replace income_female = inc_head if sex_head == 2
-replace income_female = inc_spouse if sex_indiv == 2 & income_female == .
-
-inspect income_female
-sum income_female inc_fam
-
-gen wage_rate_female = .
-replace wage_rate_female = wage_rate_head if sex_head == 2
-replace wage_rate_female = wage_rate_spouse if sex_indiv == 2 & wage_rate_female == .
-inspect wage_rate_female
-
-gen hours_annual_female = .
-replace hours_annual_female =  total_hours_head if sex_head == 2
-replace hours_annual_female =  total_hours_spouse if sex_indiv == 2 & hours_annual_female == .
-
-gen educ_female = .
-replace educ_female =  educhead if sex_head == 2
-replace educ_female =  educspouse if sex_indiv == 2 & educ_female == .
-
-gen inc_fam_nofemale = .
-replace inc_fam_nofemale = inc_fam - inc_head if sex_head == 2
-replace inc_fam_nofemale = inc_fam - inc_spouse if sex_indiv == 2 & inc_fam_nofemale == . 
 
 //egen total_working = total(emp_status_spouse == 1), by(wave)
 
