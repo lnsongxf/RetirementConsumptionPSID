@@ -130,5 +130,5 @@ label variable year_left_college "The year an individual left the highest degree
 
 xtset pid wave, delta(2)
 
-save "$folder/Data/Intermediate/Basic-Panel-Louise-Final.dta", replace
+saveold "$folder/Data/Intermediate/Basic-Panel-Louise-Final.dta", replace version(13)
 
