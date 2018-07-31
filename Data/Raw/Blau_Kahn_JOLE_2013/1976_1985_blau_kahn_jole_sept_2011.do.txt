@@ -1,0 +1,316 @@
+*log using "c:\Documents and Settings\LMK12\my documents\PDII\1976_1985_new_format_tables_mar_2011.log", replace 
+
+log using "c:\users\LMK12\documents\PDII\1976_1985_blau_kahn_jole_regressions_sept_2011.log", replace 
+
+set more off
+#delimit ;
+
+
+
+
+*use "C:\Documents and Settings\LMK12\my documents\PDII\match_experience_76_85_testunc.dta";
+use "C:\users\LMK12\documents\PDII\1976_1985_blau_kahn_jole_sept_2011.dta";
+
+generate sex=er32000;
+
+keep if sex==2;
+
+keep if er30190==1 | er30190==2; 
+keep if er30219==1 | er30219==2; 
+keep if er30248==1 | er30248==2; 
+keep if er30285==1 | er30285==2; 
+keep if er30315==1 | er30315==2; 
+keep if er30345==1 | er30345==2; 
+keep if er30375==1 | er30375==2; 
+keep if er30401==10 | er30401==20 | er30401==22; 
+keep if er30431==10 | er30431==20 | er30431==22; 
+keep if er30465==10 | er30465==20 | er30465==22; 
+
+generate age85=er30466;
+generate age76=er30191;
+
+generate expact85=v11739 if er30465==10;
+replace expact85=v11828 if er30465==10 & (v11739==0);
+replace expact85=v12102 if er30465==20 | er30465==22;
+replace expact85=v12191 if v12102==0 & (er30465==20 | er30465==22);
+
+
+generate expfact85=v11740 if er30465==10;
+replace expfact85=v11829 if er30465==10 & (v11740==0);
+replace expfact85=v12103 if er30465==20 | er30465==22;
+replace expfact85=v12192 if v12103==0 & (er30465==20 | er30465==22);
+
+
+
+
+drop if expact85==99;
+drop if expfact85==99;
+
+generate expact76=v4630 if er30190==1;
+replace expact76=v4989 if er30190==2;
+generate expfact76=v4631 if er30190==1;
+replace expfact76=v4990 if er30190==2;
+
+
+
+drop if expact76==99;
+drop if expfact76==99;
+
+replace expact76=age76-18 if expact76>age76-18;
+replace expfact76=age76-18 if expfact76>age76-18;
+
+replace expfact76=expact76 if expfact76>expact76;
+
+generate worked77=v5232>0 if er30219==1;
+replace worked77=1 if v5244>0 & er30219==2;
+replace worked77=0 if v5244==0 & er30219==2;
+
+generate worked78=v5731>0 if er30248==1;
+replace worked78=1 if v5743>0 & er30248==2;
+replace worked78=0 if v5743==0 & er30248==2;
+
+generate worked79=v6336>0 if er30285==1;
+replace worked79=1 if v6348>0 & er30285==2;
+replace worked79=0 if v6348==0 & er30285==2;
+
+generate worked80=v6934>0 if er30315==1;
+replace worked80=1 if v6946>0 & er30315==2;
+replace worked80=0 if v6946==0 & er30315==2;
+
+generate worked81=v7530>0 if er30345==1;
+replace worked81=1 if v7540>0 & er30345==2;
+replace worked81=0 if v7540==0 & er30345==2;
+
+generate worked82=v8228>0 if er30375==1;
+replace worked82=1 if v8238>0 & er30375==2;
+replace worked82=0 if v8238==0 & er30375==2;
+
+generate worked83=v8830>0 if er30401==10;
+replace worked83=1 if v8840>0 & er30401>=20;
+replace worked83=0 if v8840==0 & er30401>=20;
+
+generate worked84=v10037>0 if er30431==10;
+replace worked84=1 if v10131>0 & er30431>=20;
+replace worked84=0 if v10131==0 & er30431>=20;
+
+generate worked85=v11146>0 if er30465==10;
+replace worked85=1 if v11258>0 & er30465>=20;
+replace worked85=0 if v11258==0 & er30465>=20;
+
+generate fullyr77=v5232>=1500 if er30219==1;
+replace fullyr77=1 if v5244>=1500 & er30219==2;
+replace fullyr77=0 if v5244<1500 & er30219==2;
+
+generate fullyr78=v5731>=1500 if er30248==1;
+replace fullyr78=1 if v5743>=1500 & er30248==2;
+replace fullyr78=0 if v5743<1500 & er30248==2;
+
+generate fullyr79=v6336>=1500 if er30285==1;
+replace fullyr79=1 if v6348>=1500 & er30285==2;
+replace fullyr79=0 if v6348<1500 & er30285==2;
+
+generate fullyr80=v6934>=1500 if er30315==1;
+replace fullyr80=1 if v6946>=1500 & er30315==2;
+replace fullyr80=0 if v6946<1500 & er30315==2;
+
+generate fullyr81=v7530>=1500 if er30345==1;
+replace fullyr81=1 if v7540>=1500 & er30345==2;
+replace fullyr81=0 if v7540<1500 & er30345==2;
+
+generate fullyr82=v8228>=1500 if er30375==1;
+replace fullyr82=1 if v8238>=1500 & er30375==2;
+replace fullyr82=0 if v8238<1500 & er30375==2;
+
+generate fullyr83=v8830>=1500 if er30401==10;
+replace fullyr83=1 if v8840>=1500 & er30401>=20;
+replace fullyr83=0 if v8840<1500 & er30401>=20;
+
+generate fullyr84=v10037>=1500 if er30431==10;
+replace fullyr84=1 if v10131>=1500 & er30431>=20;
+replace fullyr84=0 if v10131<1500 & er30431>=20;
+
+generate fullyr85=v11146>=1500 if er30465==10;
+replace fullyr85=1 if v11258>=1500 & er30465>=20;
+replace fullyr85=0 if v11258<1500 & er30465>=20;
+
+
+
+
+generate addexp=worked77+worked78+worked79+worked80+worked81+worked82+worked83+worked84+worked85;
+
+generate addexpf=fullyr77+fullyr78+fullyr79+fullyr80+fullyr81+fullyr82+fullyr83+fullyr84+fullyr85;
+
+
+
+generate exp85const=expact76+addexp;
+generate expf85const=expfact76+addexpf;
+
+replace exp85const=age85-18 if exp85const>age85-18;
+replace expf85const=age85-18 if expf85const>age85-18;
+replace expf85const=exp85const if expf85const>exp85const;
+
+
+keep if age76>=18 & age85<=65;
+
+replace expact76=age76-18 if expact76>age76-18;
+
+replace expact85=age85-18 if expact85>age85-18;
+replace expfact85=age85-18 if expfact85>age85-18;
+replace expfact85=expact85 if expfact85>expact85;
+
+generate race=v11938 if er30465==10;
+replace race=v12293 if er30465>=20;
+
+drop if race==9;
+
+generate hsgrad=v11945 if er30465==10;
+replace hsgrad=v12300 if er30465>=20;
+
+generate grade=v11953 if er30465==10;
+replace grade=v12308 if er30465>=20;
+
+generate gradeged=v11948 if er30465==10;
+replace gradeged=v12303 if er30465>=20;
+
+generate attcoll=v11956 if er30465==10;
+replace attcoll=v12311 if er30465>=20;
+
+generate collyrs=v11959 if er30465==10;
+replace collyrs=v12314 if er30465>=20;
+
+generate hicolldeg=v11961 if er30465==10;
+replace hicolldeg=v12316 if er30465>=20;
+
+generate edyrs=grade if hsgrad==3;
+replace edyrs=gradeged if hsgrad==2;
+replace edyrs=12 if hsgrad==1 & attcoll~=1;
+
+replace edyrs=12+collyrs if attcoll==1 & attcoll~=9;
+replace edyrs=15 if collyrs>=3 & collyrs<=5;
+
+drop if attcoll==9 | grade==99 | gradeged==99 | hicolldeg>=97 | collyrs==9;
+
+generate colldeg=hicolldeg==2;
+generate advdeg=hicolldeg>=3 & hicolldeg<=6;
+
+replace edyrs=16 if colldeg==1;
+replace edyrs=18 if hicolldeg==3;
+replace edyrs=19 if hicolldeg==5 | hicolldeg==6;
+replace edyrs=20 if hicolldeg==4;
+
+generate laborinc=v12372 if er30465==10;
+replace laborinc=v11404 if er30465>=20;
+
+generate empstat=v11637 if er30465==10;
+replace empstat=v12000 if er30465>=20;
+
+generate selfemp=v11640 if er30465==10;
+replace selfemp=v12003 if er30465>=20;
+
+generate annhrs=v11146 if er30465==10;
+replace annhrs=v11258 if er30465>=20;
+
+
+*replace laborinc=laborinc*100/64.795;
+
+*2000 dollars;
+
+replace laborinc=laborinc*62.436/64.795;
+
+*1983 dollars;
+
+generate hrwage=laborinc/annhrs;
+
+generate employed=empstat==1 | empstat==2;
+
+generate wagesal=selfemp==1;
+
+generate lnwage=log(hrwage);
+
+*generate wagesamp=(hrwage>=2 & hrwage<=200 & hrwage~=.) & employed==1 & wagesal==1 & age85~=. & edyrs~=. & age85>=18 & age85<=65;
+
+generate wagesamp=(hrwage>=1 & hrwage<=250 & hrwage~=.) & employed==1 & wagesal==1 & age85~=. & edyrs~=. & age85>=18 & age85<=65;
+
+
+generate wagesamp2=wagesamp==1 & age76>=18;
+
+generate wagesamp3=age85>=27 & age85<=36 & wagesamp==1;
+generate wagesamp4=wagesamp==1 & age76>=18 & age76<=25;
+generate white=v11938==1 if er30465==10;
+replace white=1 if v12293==1 & er30465>=20;
+replace white=0 if v12293~=1 & er30465>=20;
+
+generate weight=v12446;
+
+
+generate agesq=age85*age85;
+replace edyrs=17 if advdeg==1;
+
+generate pexp=age85-edyrs-6;
+replace pexp=0 if pexp<0;
+
+generate pexpsq=pexp*pexp;
+
+generate expact85sq=expact85^2;
+
+generate exp85constsq=exp85const^2;
+
+
+generate exppact85=expact85-expfact85;
+generate expp85const=exp85const-expf85const;
+
+generate expfact85sq=expfact85^2;
+generate exppact85sq=exppact85^2;
+
+generate expf85constsq=expf85const^2;
+generate expp85constsq=expp85const^2;
+
+generate age85sq=age85^2;
+generate erradd=((expact85-expact76-addexp)^2)^.5;
+generate erraddf=((expfact85-expfact76-addexpf)^2)^.5;
+
+
+reg erradd white age85 edyrs  if wagesamp==1 [aw=weight];
+est store model1;
+reg erradd white age85 edyrs colldeg advdeg if wagesamp==1 [aw=weight];
+est store model2;
+reg erradd white age85 age85sq edyrs  if wagesamp==1 [aw=weight];
+est store model3;
+
+reg erradd white age85 age85sq edyrs colldeg advdeg if wagesamp==1 [aw=weight];
+est store model4;
+
+
+reg lnwage white edyrs colldeg advdeg pexp pexpsq if wagesamp==1 [aw=weight];
+est store model5;
+
+reg lnwage white edyrs colldeg advdeg expact85 expact85sq if wagesamp==1 [aw=weight];
+est store model6;
+
+reg lnwage white edyrs colldeg advdeg exp85const exp85constsq if wagesamp==1 [aw=weight];
+est store model7;
+
+ivreg lnwage white edyrs colldeg advdeg (expact85 expact85sq = exp85const exp85constsq white edyrs colldeg advdeg) if wagesamp==1 [aw=weight]; 
+est store model8;
+
+reg lnwage white edyrs colldeg advdeg expfact85 expfact85sq exppact85 exppact85sq if wagesamp==1 [aw=weight];
+est store model9;
+
+reg lnwage white edyrs colldeg advdeg expf85const expf85constsq expp85const expp85constsq if wagesamp==1 [aw=weight];
+est store model10;
+
+
+ivreg lnwage white edyrs colldeg advdeg (expfact85 expfact85sq exppact85 exppact85sq = expf85const expf85constsq expp85const expp85constsq white edyrs colldeg advdeg) if wagesamp==1 [aw=weight];
+
+est store model11;
+
+estout model1 model2 model3 model4, cells(b(star fmt(%9.4f)) se(par)) starlevels(+ 0.10 * 0.05 ** 0.01) stats(N p r2_a bic, star(p) fmt(%9.0g %9.4f)) mlabel("model1") label collabels("") varlabels(_cons Constant) varwidth(25) modelwidth(10) prefoot("") postfoot("") legend style(fixed) replace ;
+
+estout model5 model6 model7 model8, cells(b(star fmt(%9.4f)) se(par)) starlevels(+ 0.10 * 0.05 ** 0.01) stats(N p r2_a bic, star(p) fmt(%9.0g %9.4f)) mlabel("model5") label collabels("") varlabels(_cons Constant) varwidth(25) modelwidth(10) prefoot("") postfoot("") legend style(fixed) replace ;
+
+estout model9 model10 model11, cells(b(star fmt(%9.4f)) se(par)) starlevels(+ 0.10 * 0.05 ** 0.01) stats(N p r2_a bic, star(p) fmt(%9.0g %9.4f)) mlabel("model9") label collabels("") varlabels(_cons Constant) varwidth(25) modelwidth(10) prefoot("") postfoot("") legend style(fixed) replace ;
+
+log close;
+exit, clear;
+
+

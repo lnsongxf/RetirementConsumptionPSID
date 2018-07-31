@@ -41,9 +41,15 @@ label values race_indiv race
 gen wage_rate_male = .
 replace wage_rate_male = wage_rate_head if sex_head == 1 & rel2head == 20
 
-egen household_nonlabor_income = rowtotal(inc_transfer inc_ss_head inc_ss_spouse inc_ss_ofum foodstamp)
+// Old method
+// egen household_nonlabor_income = rowtotal(inc_transfer inc_ss_head inc_ss_spouse inc_ss_ofum foodstamp)
+// asset income is not currently included here 
 
-
+// New method: take family income and subtract head and spouse labor income
+egen labor_income_fam = rowtotal(inc_head inc_spouse)
+gen household_nonlabor_income = inc_fam - labor_income_fam
+// TODO: why some ppl with negative?
+count if household_nonlabor_income < 0
 
 preserve
 

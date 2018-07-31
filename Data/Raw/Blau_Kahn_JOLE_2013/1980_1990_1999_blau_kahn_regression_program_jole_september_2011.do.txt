@@ -1,0 +1,164 @@
+*log using "c:\Documents and Settings\LMK12\my documents\PDII\1980_1990_1999_blau_kahn_jole_regs_sept_2011.log", replace 
+
+log using "c:\users\LMK12\documents\PDII\1980_1990_1999_blau_kahn_jole_regs_sept_2011.log", replace 
+
+set more off
+#delimit ;
+
+
+
+
+
+*use "c:\Documents and Settings\LMK12\my documents\psid_data_programs\1980_1990_1999_all_pos_earn_apr_2003.dta";
+use "c:\users\LMK12\documents\psid_data_programs\1980_1990_1999_blau_kahn_regression_ready_jole_psid_data.dta";
+
+
+drop if year==.;
+
+keep if corewgt>0;
+
+egen avewt=mean(corewgt), by (year);
+
+count if year==1980;
+
+generate kyr=r(N) if year==1980;
+count if year==1999;
+replace kyr=r(N) if year==1999;
+count if year==1990;
+replace kyr=r(N) if year==1990;
+
+
+replace corewgt=corewgt/(kyr*avewt);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+generate wagesamp2=employed==1 & hrwk>=35 & lnwpce~=. & lnwpce>=0 & lnwpce<=log(250);
+
+generate wagesamp3=employed==1  & lnwpce~=. & lnwpce>=0 & lnwpce<=log(250);
+
+*SAMPLE INCLUDES ALL EMPLOYED WITH VALID WAGE OBSERVATIONS;
+generate femmar=female*mar;
+generate femchild=female*nchild;
+
+
+tabulate year female [aw=corewgt], summarize (lnwpce);
+
+
+replace pexp=age-edyrs-6;
+replace pexp=0 if pexp<0;
+gen pexpsq=pexp*pexp;
+
+generate expact=expf+expp;
+replace expact=0 if expact<0;
+replace expact=age-18 if expact>age-18;
+generate expactsq=expact^2;
+
+generate timeout=age-expact-18;
+
+replace timeout=0 if timeout<0;
+
+generate timeoutsq=timeout^2;
+
+
+
+
+
+
+
+gen break=pexp-expact;
+
+replace break=0 if break<0;
+gen breakge1=pexp-expact>=1;
+
+gen break12=break>=1 & break<2;
+gen break23=break>=2 & break<3;
+gen breakge3=break>=3;
+
+
+
+reg lnwpce white edyrs colldeg advdeg expact expactsq  if female==1 & year==1980 & wagesamp3==1 [aw=corewgt] ;
+est store fact80;
+reg lnwpce white edyrs colldeg advdeg expact expactsq  if female==1 & year==1990 & wagesamp3==1 [aw=corewgt] ;
+est store fact90;
+reg lnwpce white edyrs colldeg advdeg expact expactsq  if female==1 & year==1999 & wagesamp3==1 [aw=corewgt] ;
+est store fact99;
+
+reg lnwpce white edyrs colldeg advdeg expact expactsq  if female==0 & year==1980 & wagesamp3==1 [aw=corewgt] ;
+est store mact80;
+reg lnwpce white edyrs colldeg advdeg expact expactsq  if female==0 & year==1990 & wagesamp3==1 [aw=corewgt] ;
+est store mact90;
+reg lnwpce white edyrs colldeg advdeg expact expactsq  if female==0 & year==1999 & wagesamp3==1 [aw=corewgt] ;
+est store mact99;
+
+reg lnwpce white edyrs colldeg advdeg pexp pexpsq  if female==1 & year==1980 & wagesamp3==1 [aw=corewgt] ;
+est store fpexp80;
+reg lnwpce white edyrs colldeg advdeg pexp pexpsq  if female==1 & year==1990 & wagesamp3==1 [aw=corewgt] ;
+est store fpexp90;
+reg lnwpce white edyrs colldeg advdeg pexp pexpsq  if female==1 & year==1999 & wagesamp3==1 [aw=corewgt] ;
+est store fpexp99;
+
+reg lnwpce white edyrs colldeg advdeg pexp pexpsq  if female==0 & year==1980 & wagesamp3==1 [aw=corewgt] ;
+est store mpexp80;
+reg lnwpce white edyrs colldeg advdeg pexp pexpsq  if female==0 & year==1990 & wagesamp3==1 [aw=corewgt] ;
+est store mpexp90;
+reg lnwpce white edyrs colldeg advdeg pexp pexpsq  if female==0 & year==1999 & wagesamp3==1 [aw=corewgt] ;
+est store mpexp99;
+
+reg lnwpce white edyrs colldeg advdeg expf expfsq expp exppsq if female==1 & year==1980 & wagesamp3==1 [aw=corewgt];
+est store fftpt80;
+reg lnwpce white edyrs colldeg advdeg expf expfsq expp exppsq if female==1 & year==1990 & wagesamp3==1 [aw=corewgt];
+est store fftpt90;
+reg lnwpce white edyrs colldeg advdeg expf expfsq expp exppsq if female==1 & year==1999 & wagesamp3==1 [aw=corewgt];
+est store fftpt99;
+
+reg lnwpce white edyrs colldeg advdeg expf expfsq expp exppsq if female==0 & year==1980 & wagesamp3==1 [aw=corewgt];
+est store mftpt80;
+reg lnwpce white edyrs colldeg advdeg expf expfsq expp exppsq if female==0 & year==1990 & wagesamp3==1 [aw=corewgt];
+est store mftpt90;
+reg lnwpce white edyrs colldeg advdeg expf expfsq expp exppsq if female==0 & year==1999 & wagesamp3==1 [aw=corewgt];
+est store mftpt99;
+
+
+reg lnwpce white edyrs colldeg advdeg expf expfsq expp exppsq break12-breakge3 if female==1 & year==1980 & wagesamp3==1 [aw=corewgt];
+est store fb80;
+reg lnwpce white edyrs colldeg advdeg expf expfsq expp exppsq break12-breakge3 if female==1 & year==1990 & wagesamp3==1 [aw=corewgt];
+est store fb90;
+reg lnwpce white edyrs colldeg advdeg expf expfsq expp exppsq break12-breakge3 if female==1 & year==1999 & wagesamp3==1 [aw=corewgt];
+est store fb99;
+
+reg lnwpce white edyrs colldeg advdeg expf expfsq expp exppsq break12-breakge3 if female==0 & year==1980 & wagesamp3==1 [aw=corewgt];
+est store mb80;
+reg lnwpce white edyrs colldeg advdeg expf expfsq expp exppsq break12-breakge3 if female==0 & year==1990 & wagesamp3==1 [aw=corewgt];
+est store mb90;
+reg lnwpce white edyrs colldeg advdeg expf expfsq expp exppsq break12-breakge3 if female==0 & year==1999 & wagesamp3==1 [aw=corewgt];
+est store mb99;
+
+
+
+
+
+estout fact80 fact90 fact99 mact80 mact90 mact99, cells(b(star fmt(%9.4f)) se(par)) starlevels(+ 0.10 * 0.05 ** 0.01) stats(N p r2 bic, star(p) fmt(%9.0g %9.4f)) mlabel("fact80") label collabels("") varlabels(_cons Constant) varwidth(20) modelwidth(9) prefoot("") postfoot("") legend style(fixed) replace ;
+
+estout fpexp80 fpexp90 fpexp99 mpexp80 mpexp90 mpexp99, cells(b(star fmt(%9.4f)) se(par)) starlevels(+ 0.10 * 0.05 ** 0.01) stats(N p r2 bic, star(p) fmt(%9.0g %9.4f)) mlabel("fpexp80") label collabels("") varlabels(_cons Constant) varwidth(20) modelwidth(9) prefoot("") postfoot("") legend style(fixed) replace ;
+
+estout fftpt80 fftpt90 fftpt99 mftpt80 mftpt90 mftpt99, cells(b(star fmt(%9.4f)) se(par)) starlevels(+ 0.10 * 0.05 ** 0.01) stats(N p r2 bic, star(p) fmt(%9.0g %9.4f)) mlabel("fftpt80") label collabels("") varlabels(_cons Constant) varwidth(20) modelwidth(9) prefoot("") postfoot("") legend style(fixed) replace ;
+
+estout fb80 fb90 fb99 mb80 mb90 mb99, cells(b(star fmt(%9.4f)) se(par)) starlevels(+ 0.10 * 0.05 ** 0.01) stats(N p r2 bic, star(p) fmt(%9.0g %9.4f)) mlabel("fftpt80") label collabels("") varlabels(_cons Constant) varwidth(20) modelwidth(9) prefoot("") postfoot("") legend style(fixed) replace ;
+
+
+
+log close;
+exit, clear;
+
+

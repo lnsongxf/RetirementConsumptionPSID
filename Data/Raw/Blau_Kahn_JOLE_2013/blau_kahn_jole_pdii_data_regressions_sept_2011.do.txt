@@ -1,0 +1,758 @@
+*log using "C:\Documents and Settings\LMK12\My Documents\pdii\pdii_regs_new_format_tables_mar_2011.log", replace
+
+log using "C:\users\LMK12\Documents\pdii\blau_kahn_jole_pdii_regs_sept_2011.log", replace
+
+set more off
+*#delimit  
+
+*use "C:\Documents and Settings\LMK12\My Documents\pdii\pdii_rddsurvey2.dta" 
+
+use "C:\users\LMK12\Documents\pdii\pdii_rddsurvey2.dta" 
+
+
+*Note:  this is the Princeton Data Improvement Initiative Survey. Data and documentation are available at http://www.krueger.princeton.edu/PDIIMAIN2.htm 
+
+gen agege18=q1 
+gen empstat=q1a 
+gen employed=empstat==1 
+
+gen everworked=q1b 
+gen onejob=q1c==1 
+
+gen unionmember=q10a 
+gen unioncovered=q10b 
+
+gen exp=q36a 
+gen expf=q36b 
+
+gen marstat=q38 
+
+generate female=q37==2 
+
+gen age=i35 
+
+gen hispanic=i40==1 
+
+
+gen white=i41wht 
+gen black=i41blk==1 
+gen asian=i41pacif==1 | i41asian==1
+gen otherrace=i41amind==1 | i41oth==1
+
+replace black=0 if hispanic==1
+replace asian=0 if hispanic==1
+replace otherrace=0 if hispanic==1
+
+gen educ=i39 
+
+
+gen edyrs=0 if educ==1 
+
+replace edyrs=2.5 if educ==2 
+replace edyrs=5.5 if educ==3 
+replace edyrs=7.5 if educ==4 
+replace edyrs=9 if educ==5 
+replace edyrs=10 if educ==6 
+replace edyrs=11 if educ==7 
+replace edyrs=12 if educ==8 | educ==9 
+replace edyrs=13 if educ==10 
+replace edyrs=14 if educ==11 | educ==12 
+replace edyrs=16 if educ==13 
+replace edyrs=18 if educ>=14 & educ<=16 
+
+
+gen edlths=i39<=8 
+
+gen hs=i39==9 
+
+gen voctech=i39==11 
+
+gen somecoll=i39==10 
+
+gen assocdeg=i39==12 
+
+gen badeg=i39==13 
+
+gen madeg=i39==14 
+
+
+gen profdeg=i39==15 
+
+gen phd=i39==16 
+
+
+gen nchildu6=q38b 
+
+gen nchild617=q38c 
+
+gen perwt=rakwgt 
+
+gen wkswork=q42 
+
+gen earnunit=q43 
+
+gen hourly=earnunit==1 
+
+gen weekly=earnunit==2 
+
+gen monthly=earnunit==3 
+
+gen annually=earnunit==4 
+
+
+gen usualearn=q43d 
+
+gen usualhrs=q3 
+
+*gen hourwage=usualearn if earnunit==1 
+
+gen hourwage=usualearn/usualhrs if earnunit==2 
+
+replace hourwage=usualearn/(usualhrs*4.33) if earnunit==3 
+
+replace hourwage=usualearn/(usualhrs*wkswork) if earnunit==4 
+
+replace hourwage=q43b if q43b>0 & earnunit==1 
+
+gen otwage=q43c if q43c>0 
+
+gen agesq=age*age 
+
+gen expsq=exp*exp 
+
+gen expfsq=expf*expf 
+
+gen pexp=age-edyrs-6 
+replace pexp=0 if pexp<0 
+
+replace pexp=age-18 if pexp>age-18 
+gen pexpsq=pexp*pexp 
+
+gen lnwage=log(hourwage) 
+
+*drop if exp<0 | expf<0 | earnunit<0  
+
+gen blacknonhisp=black==1 & hispanic==0 
+
+gen maxexp=age-18 
+
+gen expaug=exp 
+
+replace expaug=maxexp if exp>maxexp 
+
+*replace expaug=pexp if expaug>pexp 
+
+gen expfaug=expf 
+
+replace expfaug=expaug if expfaug>expaug 
+
+gen expaugsq=expaug^2 
+gen expfaugsq=expfaug^2 
+
+
+gen marsp=marst==1 
+
+gen exppaug=expaug-expfaug 
+
+replace exppaug=0 if exppaug<0 
+
+gen exppaugsq=exppaug^2 
+
+
+gen timeout=pexp-expaug 
+
+
+gen othexp=q48a 
+gen othexpf=q48b 
+
+*gen marstat=q38 
+gen othspouse=q44==1 
+
+
+generate othfemale=q45==2 
+
+gen othage=q47 
+
+gen othhispanic=q50==1 
+gen othwhite=q51wht==1 
+gen othblack=q51blk==1 
+gen othasian=q51pacif==1 | q51asian==1
+gen othotherrace=q51ind==1 | q51oth==1
+replace othblack=0 if othhispanic==1
+replace othasian=0 if othhispanic==1
+replace othotherrace=0 if othhispanic==1
+
+gen otheduc=q49 
+
+
+gen othedyrs=0 if otheduc==1 
+
+replace othedyrs=2.5 if otheduc==2 
+replace othedyrs=5.5 if otheduc==3 
+replace othedyrs=7.5 if otheduc==4 
+replace othedyrs=9 if otheduc==5 
+replace othedyrs=10 if otheduc==6 
+replace othedyrs=11 if otheduc==7 
+replace othedyrs=12 if otheduc==8 | otheduc==9 
+replace othedyrs=13 if otheduc==10 
+replace othedyrs=14 if otheduc==11 | otheduc==12 
+replace othedyrs=16 if otheduc==13 
+replace othedyrs=18 if otheduc>=14 & otheduc<=16 
+
+
+gen othedlths=otheduc<=8 
+
+gen othhs=otheduc==9 
+
+gen othvoctech=otheduc==11 
+
+gen othsomecoll=otheduc==10 
+
+gen othassocdeg=otheduc==12 
+
+gen othbadeg=otheduc==13 
+
+gen othmadeg=otheduc==14 
+
+
+gen othprofdeg=otheduc==15 
+
+gen othphd=otheduc==16 
+
+
+gen othnchildu6=q44xc 
+
+gen othnchild617=q44xd 
+
+*gen perwt=rakwgt 
+
+gen othwkswork=q44c 
+
+gen othearnunit=q52 
+
+gen othhourly=othearnunit==1 
+
+gen othweekly=othearnunit==2 
+
+gen othmonthly=othearnunit==3 
+
+gen othannually=othearnunit==4 
+
+
+gen othusualearn=q52d 
+
+gen othusualhrs=q46 
+
+*gen hourwage=usualearn if earnunit==1 
+
+gen othhourwage=othusualearn/othusualhrs if othearnunit==2 
+
+replace othhourwage=othusualearn/(othusualhrs*4.33) if othearnunit==3 
+
+replace othhourwage=othusualearn/(othusualhrs*othwkswork) if othearnunit==4 
+
+replace othhourwage=q52b if q52b>0 & othearnunit==1 
+
+gen othotwage=q52c if q52c>0 
+
+gen othagesq=othage*othage 
+
+gen othexpsq=othexp*othexp 
+
+gen othexpfsq=othexpf*othexpf 
+
+gen othpexp=othage-othedyrs-6 
+replace othpexp=0 if othpexp<0 
+
+replace othpexp=othage-18 if othpexp>othage-18 
+gen othpexpsq=othpexp*othpexp 
+
+gen othlnwage=log(othhourwage) 
+
+*drop if exp<0 | expf<0 | earnunit<0  
+
+gen othblacknonhisp=othblack==1 & othhispanic==0 
+
+gen othmaxexp=othage-18 
+
+gen othexpaug=othexp 
+
+replace othexpaug=othmaxexp if othexp>othmaxexp 
+
+*replace othexpaug=othpexp if othexpaug>othpexp 
+
+gen othexpfaug=othexpf 
+
+replace othexpfaug=othexpaug if othexpfaug>othexpaug 
+
+gen othexpaugsq=othexpaug^2 
+gen othexpfaugsq=othexpfaug^2 
+
+
+*gen marsp=marst==1 
+
+gen othexppaug=othexpaug-othexpfaug 
+
+replace othexppaug=0 if othexppaug<0 
+
+gen othexppaugsq=othexppaug^2 
+
+
+gen othtimeout=othpexp-othexpaug 
+
+
+
+
+
+*THis is THe beGiNNiNG oF THe NeW code
+
+* code to fix up problems with hourly wage
+
+*FIXING HOURLY WAGES FOR OTHER RANDOMLY SELECTED ADULT IN THE HOUSEHOLD
+gen othhrwage=.
+
+
+replace othhrwage=q52b if q52==1 & q52a==2 & q52b>0
+*drop a person with two jobs and two wage rates
+replace othhrwage=. if baseid=="2080143"
+* Paid hourly and receives plausible tips, commisions & oT PeR HoUR
+replace othhrwage= q52b + q52c if q52==1 & q52a==1 & q52b>0 & q52c>0 & (q52b > q52c) 
+* calculate share of Hours worked over Time or Regular Time
+
+gene othreghrs = q47 if (q47-40)<=0 & q47>0 
+replace othreghrs = 40 if (q47-40)>0 & q47>0
+
+gene othothrs = 0 if q47>0
+replace othothrs = (q47-40) if (q47-40)>0 & q47>0 
+
+gene othhrs = q47 if q47>0
+
+* adjust cases where it seems that q43c was time and a half, not weighted by hours 
+replace othhrwage = q52b * (othreghrs/othhrs) + q52c * (othothrs/othhrs) if q52==1 & q52a==1 & q52b>0 & q52c>0 & q52c <= 1.5*q52b+.01 & q52c >1.5*q52b-.01
+
+* assume that q52c is correct ToTaL hourly comp for those who reported an amount other than 1.5xbase wage and more than base wage
+* Justification for this decision is that people were much more likely to report time and half than 50% of base salary
+replace othhrwage = q52c if q52c>=q52b & othhrwage==. & q52b>0 & q52c>0 & q52==1 & q52a==1
+
+* Weekly pay schedules
+
+gene othsalary = q52d if q52d>0 
+
+replace othhrwage = othsalary / othhrs if othhrwage==. & q52==2
+
+
+
+* Monthly pay schedules
+
+replace othhrwage = othsalary /(4.3*othhrs)  if othhrwage==. & q52==3
+
+
+* annual salaries
+* Note: it looks like salary should have been reported for annual period, even if they worked less than 52 weeks last year
+* assume 50 weeks of work, 2 weeks of vacation
+
+replace othhrwage = othsalary /(50*othhrs)  if othhrwage==. & q52==4  
+
+gene hrwage=.
+
+* Paid hourly and does not receive tips, commissions, & oT  
+replace hrwage=q43b if q43==1 & q43a==2 & q43b>0
+
+*drop an implausible hourly wage: child forensic interviewer can't earn $360 an hour
+replace hrwage=. if baseid=="20697480"
+
+* Paid hourly and receives plausible tips, commisions & oT PeR HoUR
+replace hrwage= q43b + q43c if q43==1 & q43a==1 & q43b>0 & q43c>0 & (q43b > q43c) 
+
+
+* calculate share of Hours worked over Time or Regular Time
+
+gene reghrs = q3 if (q3-40)<=0 & q3>0 
+replace reghrs = 40 if (q3-40)>0 & q3>0
+
+gene othrs = 0 if q3>0
+replace othrs = (q3-40) if (q3-40)>0 & q3>0 
+
+gene hrs = q3 if q3>0
+
+
+
+
+* adjust 4 cases where it seems that q43c was exactly the over time permium (0.5xbase), not weighted by hours 
+
+replace hrwage = q43b * (reghrs/hrs) + 3*q43c * (othrs/hrs) if baseid=="20522658"
+replace hrwage = q43b * (reghrs/hrs) + 3*q43c * (othrs/hrs) if baseid=="20542638"
+replace hrwage = q43b * (reghrs/hrs) + 3*q43c * (othrs/hrs) if baseid=="20907844"
+replace hrwage = q43b * (reghrs/hrs) + 3*q43c * (othrs/hrs) if baseid=="20218782"
+
+
+* adjust cases where it seems that q43c was time and a half, not weighted by hours 
+replace hrwage = q43b * (reghrs/hrs) + q43c * (othrs/hrs) if q43==1 & q43a==1 & q43b>0 & q43c>0 & q43c <= 1.5*q43b+.01 & q43c >1.5*q43b-.01
+
+
+* assume that q43c is correct ToTaL hourly comp for those who reported an amount other than 1.5xbase wage and more than base wage
+* Justification for this decision is that people were much more likely to report time and half than 50% of base salary
+replace hrwage = q43c if q43c>=q43b & hrwage==. & q43b>0 & q43c>0 & q43==1 & q43a==1
+
+* For waitresses and waiters, assume base and tips should be combined
+replace hrwage=q43b + q43c if q43c>=q43b & soccode=="35-3031" & q43b>0 & q43c>0 & q43==1 & q43a==1
+
+* assume $200 was a weekly tip amount for cage cashier at casino and add to base hourly salary
+replace hrwage = 16.35 if baseid=="20616511"
+
+
+* Fix miss reporting -- must be annual salary
+replace q43=4 if baseid=="20909875"
+
+
+* Weekly pay schedules
+
+gene salary = q43d if q43d>0 
+
+replace hrwage = salary / hrs if hrwage==. & q43==2
+
+* drop implausible cases
+replace hrwage=. if baseid=="20171887"    
+replace hrwage=. if baseid=="20378716"   
+replace hrwage=. if baseid=="20771568"
+
+
+* Monthly pay schedules
+
+replace hrwage = salary /(4.3*hrs)  if hrwage==. & q43==3
+
+*drop implausible values
+replace hrwage=. if baseid=="20059378" 
+replace hrwage=. if baseid=="20739951"
+replace hrwage=. if baseid=="20116244"
+replace hrwage=. if baseid=="20447715"
+replace hrwage=. if baseid=="20170509"
+
+
+* annual salaries
+* Note: it looks like salary should have been reported for annual period, even if they worked less than 52 weeks last year
+* assume 50 weeks of work, 2 weeks of vacation
+
+replace hrwage = salary /(50*hrs)  if hrwage==. & q43==4  
+
+
+* adjustments based on analysis of outliers
+replace hrwage = q43b * (reghrs/hrs) + q43c * (othrs/hrs) if baseid=="20048073"
+replace hrwage = q43b * (reghrs/hrs) + q43c * (othrs/hrs) if baseid=="20514952"
+replace hrwage = q43b if baseid=="20563914"
+
+
+*drop implausible values
+
+replace hrwage=. if baseid=="20737733"
+replace hrwage=. if baseid=="20015561"
+replace hrwage=. if baseid=="20813703"
+replace hrwage=. if baseid=="20224747"
+replace hrwage=. if baseid=="20527653"
+
+*Note: some of the following are implausibly low and some are probably truly low but not this low
+replace hrwage=. if baseid=="20058175" 
+replace hrwage=. if baseid=="20128939" 
+replace hrwage=. if baseid=="20494698" 
+replace hrwage=. if baseid=="20065490" 
+replace hrwage=. if baseid=="20213189" 
+replace hrwage=. if baseid=="20220543" 
+replace hrwage=. if baseid=="20033930" 
+replace hrwage=. if baseid=="20238696"
+replace hrwage=. if baseid=="20475914"
+replace hrwage=. if baseid=="20309868"
+
+
+
+
+
+*gene educ=.
+replace educ=.
+replace educ=0 if q39==1
+replace educ=3 if q39==2
+replace educ=6 if q39==3
+replace educ=8 if q39==4
+replace educ=9 if q39==5
+replace educ=10 if q39==6
+replace educ=11 if q39==7
+replace educ=11 if q39==8
+replace educ=12 if q39==9
+replace educ=13 if q39==10
+replace educ=14 if q39==11
+replace educ=14 if q39==12
+replace educ=16 if q39==13
+replace educ=18 if q39==14
+replace educ=19 if q39==15
+replace educ=20 if q39==16
+
+
+gene othereduc=.
+replace othereduc=0 if q49==1
+replace othereduc=3 if q49==2
+replace othereduc=6 if q49==3
+replace othereduc=8 if q49==4
+replace othereduc=9 if q49==5
+replace othereduc=10 if q49==6
+replace othereduc=11 if q49==7
+replace othereduc=11 if q49==8
+replace othereduc=12 if q49==9
+replace othereduc=13 if q49==10
+replace othereduc=14 if q49==11
+replace othereduc=14 if q49==12
+replace othereduc=16 if q49==13
+replace othereduc=18 if q49==14
+replace othereduc=19 if q49==15
+replace othereduc=20 if q49==16
+
+
+
+* Note: i did not adjust for inflation in determining outlying wages for those who do not currently work.
+
+
+
+* Keep only current workers
+
+*keep if q1a==1
+
+
+
+
+
+replace age=i35
+replace pexp = age - educ - 6
+replace pexp=0 if pexp<0 & pexp~=.
+gen pexpsp=pexp*pexp
+*gen asian=q41asian==1
+gen AK=state=="AK"
+gen AL=state=="AL"
+gen AR=state=="AR"
+gen AZ=state=="AZ"
+gen CA=state=="CA"
+gen CO=state=="CO"
+gen CT=state=="CT"
+gen DC=state=="DC"
+gen DE=state=="DE"
+gen FL=state=="FL"
+gen GA=state=="GA"
+gen HI=state=="HI"
+gen IA=state=="IA"
+gen ID=state=="ID"
+gen IL=state=="IL"
+gen IN=state=="IN"
+gen KS=state=="KS"
+gen KY=state=="KY"
+gen LA=state=="LA"
+gen MA=state=="MA"
+gen MD=state=="MD"
+gen ME=state=="ME"
+gen MI=state=="MI"
+gen MN=state=="MN"
+gen MO=state=="MO"
+gen MS=state=="MS"
+gen MT=state=="MT"
+gen NC=state=="NC"
+gen ND=state=="ND"
+gen NE=state=="NE"
+gen NH=state=="NH"
+gen NJ=state=="NJ"
+gen NM=state=="NM"
+gen NV=state=="NV"
+gen NY=state=="NY"
+gen OH=state=="OH"
+gen OK=state=="OK"
+gen OR=state=="OR"
+gen PA=state=="PA"
+gen RI=state=="RI"
+gen SC=state=="SC"
+gen SD=state=="SD"
+gen TN=state=="TN"
+gen TX=state=="TX"
+gen UT=state=="UT"
+gen VA=state=="VA"
+gen VT=state=="VT"
+gen WA=state=="WA"
+gen WI=state=="WI"
+gen WV=state=="WV"
+gen WY=state=="WY"
+
+
+
+gen althrwage=hrwage
+replace althrwage=salary/(wkswork*hrs) if hrwage>0 & q43==4 & hrwage~=.
+
+gene lwage = log(hrwage)
+
+gen altlwage=log(althrwage) if lwage~=.
+
+
+
+gen expp=exp-expf
+replace expp=0 if expp<0
+gen exppsq=expp^2
+
+gen exppuncorr=expuncorr-expfuncorr
+gen expuncorrsq=expuncorr^2
+
+gen exppuncorrsq=exppuncorr^2
+gen expfuncorrsq=expfuncorr^2
+
+
+gen break=pexp-expaug
+replace break=0 if break<0
+gen breakgt0=break>0
+gen break01=break>0 & break<1
+gen break12=break>=1 & break<2
+gen break23=break>=2 & break<3
+gen breakge3=break>=3
+
+
+
+
+
+keep if q1a==1 & lwage~=. & educ~=. & educ>=0 & pexp~=. & pexp>=0
+
+keep if exp>=0 & expf>=0
+
+*POTENTIAL EXPERIENCE SPECIFICATION
+reg lwage educ pexp pexpsq black hispanic asian otherrace  if female==0 & age>=18 & age<=65 [aw=rak]
+predict wpexp
+est store ma
+
+*ACTUAL PART AND FULL TIME EXPERIENCE, ORIGINAL WESTAT ANSWERS BEFORE THE 38 RESPONDENTS WITH VERY INCONSISTENT ANSWERS WERE CONTACTED
+reg lwage educ exppuncorr exppuncorrsq expfuncorr expfuncorrsq black hispanic asian otherrace  if female==0 & age>=18 & age<=65 & expfuncorr>=0 & exppuncorr>=0 [aw=rak]
+predict wraw
+est store me
+
+*ACTUAL TOTAL EXPERIENCE, ORIGINAL WESTAT ANSWERS BEFORE THE 38 RESPONDENTS WITH VERY INCONSISTENT ANSWERS WERE CONTACTED
+reg lwage educ expuncorr expuncorrsq  black hispanic asian otherrace  if female==0 & age>=18 & age<=65 & expfuncorr>=0 & exppuncorr>=0 [aw=rak]
+predict wtotexpraw
+est store mb
+
+
+*ACTUAL PART AND FULL TIME EXPERIENCE, AFTER RESPONDENTS WERE RECONTACTED, AND THEIR ANSWERS ARE UNEDITED
+reg lwage educ expp exppsq expf expfsq black hispanic asian otherrace  if female==0 & age>=18 & age<=65 [aw=rak]
+predict wwestat
+est store mf
+*ACTUAL TOTAL EXPERIENCE, AFTER RESPONDENTS WERE RECONTACTED, AND THEIR ANSWERS ARE UNEDITED
+reg lwage educ exp expsq  black hispanic asian otherrace  if female==0 & age>=18 & age<=65 [aw=rak]
+predict wtotexpwestat
+est store mc
+
+*ACTUAL PART AND FULL TIME EXPERIENCE, SECOND WESTAT SURVEY ANSWERS, EXPERIENCE CONSTRAINED TO BE <=AGE-18
+reg lwage educ exppaug exppaugsq expfaug expfaugsq black hispanic asian otherrace  if female==0 & age>=18 & age<=65 [aw=rak]
+predict waug
+est store mg
+*ACTUAL TOTAL EXPERIENCE, SECOND WESTAT SURVEY ANSWERS, EXPERIENCE CONSTRAINED TO BE <=AGE-18
+reg lwage educ expaug expaugsq  black hispanic asian otherrace  if female==0 & age>=18 & age<=65 [aw=rak]
+predict wtotexpaug
+est store md
+
+
+*POTENTIAL EXPERIENCE SPECIFICATION
+reg lwage educ pexp pexpsq black hispanic asian otherrace  if female==1 & age>=18 & age<=65 [aw=rak]
+*predict wpexp
+est store fa
+*ACTUAL PART AND FULL TIME EXPERIENCE, ORIGINAL WESTAT ANSWERS BEFORE THE 38 RESPONDENTS WITH VERY INCONSISTENT ANSWERS WERE CONTACTED
+reg lwage educ exppuncorr exppuncorrsq expfuncorr expfuncorrsq black hispanic asian otherrace  if female==1 & age>=18 & age<=65 [aw=rak]
+*predict wraw
+est store fe
+*ACTUAL TOTAL EXPERIENCE, ORIGINAL WESTAT ANSWERS BEFORE THE 38 RESPONDENTS WITH VERY INCONSISTENT ANSWERS WERE CONTACTED
+reg lwage educ expuncorr expuncorrsq  black hispanic asian otherrace  if female==1 & age>=18 & age<=65 & expfuncorr>=0 & exppuncorr>=0 [aw=rak]
+*predict wtotexpraw
+est store fb
+
+
+*ACTUAL PART AND FULL TIME EXPERIENCE, AFTER RESPONDENTS WERE RECONTACTED, AND THEIR ANSWERS ARE UNEDITED
+reg lwage educ expp exppsq expf expfsq black hispanic asian otherrace  if female==1 & age>=18 & age<=65 [aw=rak]
+*predict wwestat
+est store ff
+*ACTUAL TOTAL EXPERIENCE, AFTER RESPONDENTS WERE RECONTACTED, AND THEIR ANSWERS ARE UNEDITED
+reg lwage educ exp expsq  black hispanic asian otherrace  if female==1 & age>=18 & age<=65 [aw=rak]
+*predict wtotexpwestat
+est store fc
+
+
+*ACTUAL PART AND FULL TIME EXPERIENCE, SECOND WESTAT SURVEY ANSWERS, EXPERIENCE CONSTRAINED TO BE <=AGE=18
+reg lwage educ exppaug exppaugsq expfaug expfaugsq black hispanic asian otherrace  if female==1 & age>=18 & age<=65 [aw=rak]
+*predict waug
+est store fg
+
+*ACTUAL TOTAL EXPERIENCE, SECOND WESTAT SURVEY ANSWERS, EXPERIENCE CONSTRAINED TO BE <=AGE=18
+reg lwage educ expaug expaugsq  black hispanic asian otherrace  if female==1 & age>=18 & age<=65 [aw=rak]
+*predict wtotexpaug
+est store fd
+
+
+
+
+gen tenure=-9999
+replace tenure=q5bmos if q5b==1
+replace tenure=q5byrs*12  if q5b==2
+replace tenure=q5byrs*12  + q5bmos if q5b==3 & q5byrs>=0 & q5bmos>=0
+gen tenyrs=tenure/12
+replace tenyrs=expaug if tenyrs>expaug & tenyrs~=.
+gen tensq =tenyrs^2
+replace timeout=age-expaug-18
+
+replace timeout=0 if timeout<0
+
+generate timeoutsq=timeout^2
+
+
+reg lwage educ  pexp pexpsq  exppaug exppaugsq expfaug expfaugsq black hispanic asian otherrace  if female==1 & age>=18 & age<=65 [aw=rak]
+
+reg lwage educ  pexp pexpsq  exppaug exppaugsq expfaug expfaugsq black hispanic asian otherrace  if female==0 & age>=18 & age<=65 [aw=rak]
+predict respact, residuals
+
+su lwage respact educ  pexp pexpsq  exppaug exppaugsq expfaug expfaugsq black hispanic asian otherrace  if female==1 & age>=18 & age<=65 [aw=rak], sep(0)
+su lwage respact educ  pexp pexpsq  exppaug exppaugsq expfaug expfaugsq black hispanic asian otherrace  if female==0 & age>=18 & age<=65 [aw=rak], sep(0)
+
+
+reg lwage educ  pexp pexpsq  /* exppaug exppaugsq expfaug expfaugsq */ black hispanic asian otherrace  if female==1 & age>=18 & age<=65 & tenure>=0 [aw=rak]
+
+reg lwage educ  pexp pexpsq tenyrs tensq /* exppaug exppaugsq expfaug expfaugsq */ black hispanic asian otherrace  if female==1 & age>=18 & age<=65 & tenure>=0 [aw=rak]
+
+reg lwage educ  pexp pexpsq tenyrs tensq  exppaug exppaugsq expfaug expfaugsq  black hispanic asian otherrace  if female==1 & age>=18 & age<=65 & tenure>=0 [aw=rak]
+test expfaug expfaugsq
+test expfaug expfaugsq exppaug exppaugsq
+est store a23
+
+reg lwage educ  pexp pexpsq  /* exppaug exppaugsq expfaug expfaugsq */ black hispanic asian otherrace  if female==0 & age>=18 & age<=65 & tenure>=0 [aw=rak]
+
+reg lwage educ  pexp pexpsq tenyrs tensq /* exppaug exppaugsq expfaug expfaugsq */ black hispanic asian otherrace  if female==0 & age>=18 & age<=65 & tenure>=0 [aw=rak]
+
+
+reg lwage educ  pexp pexpsq tenyrs tensq  exppaug exppaugsq expfaug expfaugsq  black hispanic asian otherrace  if female==1 & age>=18 & age<=65 & tenure>=0 [aw=rak]
+test expfaug expfaugsq
+test expfaug expfaugsq exppaug exppaugsq
+
+
+reg lwage educ  pexp pexpsq  exppaug exppaugsq expfaug expfaugsq  black hispanic asian otherrace  if female==1 & age>=18 & age<=65 [aw=rak]
+test expfaug expfaugsq
+test expfaug expfaugsq exppaug exppaugsq
+est store a21
+reg lwage educ  pexp pexpsq  exppaug exppaugsq expfaug expfaugsq  black hispanic asian otherrace  if female==1 & age>=18 & age<=65 & tenure>=0 [aw=rak]
+test expfaug expfaugsq
+test expfaug expfaugsq exppaug exppaugsq
+est store a22
+
+reg lwage educ breakge3   exppaug exppaugsq expfaug expfaugsq  black hispanic asian otherrace break12 break23 if female==0 & age>=18 & age<=65  [aw=rak]
+test expfaug expfaugsq
+test expfaug expfaugsq exppaug exppaugsq
+est store mbreak
+reg lwage educ     exppaug exppaugsq expfaug expfaugsq  black hispanic asian otherrace break12 break23 breakge3 if female==1 & age>=18 & age<=65   [aw=rak]
+test expfaug expfaugsq
+test expfaug expfaugsq exppaug exppaugsq
+est store fbreak
+
+
+
+ estout ma fa mb fb mc fc md fd, cells(b(star fmt(%9.4f)) se(par)) starlevels(+ 0.10 * 0.05 ** 0.01) stats(N p r2 bic, star(p) fmt(%9.0g %9.4f)) mlabel("ma") label collabels("") varlabels(_cons Constant) varwidth(20) modelwidth(9) prefoot("") postfoot("") legend style(fixed) replace 
+
+estout me fe mf ff mg fg mbreak fbreak, cells(b(star fmt(%9.4f)) se(par)) starlevels(+ 0.10 * 0.05 ** 0.01) stats(N p r2 bic, star(p) fmt(%9.0g %9.4f)) mlabel("me") label collabels("") varlabels(_cons Constant) varwidth(20) modelwidth(9) prefoot("") postfoot("") legend style(fixed) replace 
+
+estout a21 a22 a23, cells(b(star fmt(%9.4f)) se(par)) starlevels(+ 0.10 * 0.05 ** 0.01) stats(N p r2 bic, star(p) fmt(%9.0g %9.4f)) mlabel("a21") label collabels("") varlabels(_cons Constant) varwidth(20) modelwidth(9) prefoot("") postfoot("") legend style(fixed) replace  
+
+
+log close 
+exit, clear 
