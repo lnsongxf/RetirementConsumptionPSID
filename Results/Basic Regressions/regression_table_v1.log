@@ -1,10 +1,10 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  18 JUN 2018 14:02
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  30 JUL 2018 00:03
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
-**temporary_test.tex
-(./temporary_test.tex
+**regression_table_v1.tex
+(./regression_table_v1.tex
 LaTeX2e <2018-04-01> patch level 2
 Babel <3.18> and hyphenation patterns for 84 language(s) loaded.
 (/usr/local/texlive/2018/texmf-dist/tex/latex/base/article.cls
@@ -606,8 +606,9 @@ Package pstcol Warning: ************************************
 (pstcol)                    \usepackage{pstricks}
 (pstcol)                ************************************.
 
-) (./temporary_test.aux)
-\openout1 = `temporary_test.aux'.
+)
+No file regression_table_v1.aux.
+\openout1 = `regression_table_v1.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 46.
 LaTeX Font Info:    ... okay on input line 46.
@@ -623,7 +624,6 @@ LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 46.
 LaTeX Font Info:    ... okay on input line 46.
 LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 46.
 LaTeX Font Info:    ... okay on input line 46.
-
 (/usr/local/texlive/2018/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count149
@@ -691,10 +691,8 @@ Package: gettitlestring 2016/05/16 v1.5 Cleanup title references (HO)
 LaTeX Info: Redefining \ref on input line 46.
 LaTeX Info: Redefining \pageref on input line 46.
 LaTeX Info: Redefining \nameref on input line 46.
-
-(./temporary_test.out) (./temporary_test.out)
 \@outlinefile=\write4
-\openout4 = `temporary_test.out'.
+\openout4 = `regression_table_v1.out'.
 
 LaTeX Font Info:    Try loading font information for U+msa on input line 51.
 
@@ -726,204 +724,168 @@ Non-PDF special ignored!
 Non-PDF special ignored!
 <special> ps:tx@Dict begin  gsave STV CP T /ps@refangle 0.  def grestore  e...
 {/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-(../Regression_Table/NO_FE/Defff_1/test_nond_expenditure_categories_1.tex)
-[2
-
-] (../Regression_Table/NO_FE/Defff_1/test_nond_expenditure_categories_2.tex)
-[3
-
-] (../Regression_Table/NO_FE/Defff_1/test_nond_expenditure_categories_3.tex)
-[4
-
-] (../Regression_Table/NO_FE/Deff_1/test_nond_expenditure_categories_1.tex)
-[5
-
-] (../Regression_Table/NO_FE/Deff_1/test_nond_expenditure_categories_2.tex)
-[6
-
-] (../Regression_Table/NO_FE/Deff_1/test_nond_expenditure_categories_3.tex)
-[7
-
-] (../Regression_Table/NO_FE/Deff_1/1_test_total_foodexp_home_real.tex)
-[8
-
-] (../Regression_Table/NO_FE/Deff_1/1_test_total_foodexp_away_real.tex)
-[9
-
-] (../Regression_Table/NO_FE/Deff_1/1_test_total_education_real.tex) [10
+(../Regression_Table/Def_1/test_nond_expenditure_categories_2.tex) [2
 
 ]
-(../Regression_Table/NO_FE/Deff_1/1_test_total_healthexpense_real.tex) [11
+(../Regression_Table/Def_1/test_nond_expenditure_categories_3.tex) [3
 
 ]
-(../Regression_Table/NO_FE/Deff_1/1_test_total_housing_real.tex) [12
+(../Regression_Table/Def_1/1_test_total_foodexp_home_real.tex) [4
 
 ]
-(../Regression_Table/NO_FE/Deff_1/1_test_total_transport_real.tex) [13
+(../Regression_Table/Def_1/1_test_total_foodexp_away_real.tex) [5
 
 ]
-(../Regression_Table/NO_FE/Deff_1/1_test_total_recreation_2005_real.tex)
-[14
-
-] (../Regression_Table/NO_FE/Deff_1/1_test_total_clothing_2005_real.tex)
-[15
-
-] (../Regression_Table/NO_FE/Deff_2/test_nond_expenditure_categories_1.tex)
-[16
-
-] (../Regression_Table/NO_FE/Deff_2/test_nond_expenditure_categories_2.tex)
-[17
-
-] (../Regression_Table/NO_FE/Deff_2/test_nond_expenditure_categories_3.tex)
-[18
-
-] (../Regression_Table/NO_FE/Deff_2/2_test_total_foodexp_home_real.tex)
-[19
-
-] (../Regression_Table/NO_FE/Deff_2/2_test_total_foodexp_away_real.tex)
-[20
-
-] (../Regression_Table/NO_FE/Deff_2/2_test_total_education_real.tex)
-[21
-
-] (../Regression_Table/NO_FE/Deff_2/2_test_total_healthexpense_real.tex)
-[22
-
-] (../Regression_Table/NO_FE/Deff_2/2_test_total_housing_real.tex) [23
+(../Regression_Table/Def_1/1_test_total_education_real.tex) [6
 
 ]
-(../Regression_Table/NO_FE/Deff_2/2_test_total_transport_real.tex) [24
+(../Regression_Table/Def_1/1_test_total_healthexpense_real.tex) [7
 
 ]
-(../Regression_Table/NO_FE/Deff_2/2_test_total_recreation_2005_real.tex)
-[25
-
-] (../Regression_Table/NO_FE/Deff_2/2_test_total_clothing_2005_real.tex)
-[26
-
-] (../Regression_Table/NO_FE/Deff_3/test_nond_expenditure_categories_1.tex)
-[27
-
-] (../Regression_Table/NO_FE/Deff_3/test_nond_expenditure_categories_2.tex)
-[28
-
-] (../Regression_Table/NO_FE/Deff_3/test_nond_expenditure_categories_3.tex)
-[29
-
-] (../Regression_Table/NO_FE/Deff_3/3_test_total_foodexp_home_real.tex)
-[30
-
-] (../Regression_Table/NO_FE/Deff_3/3_test_total_foodexp_away_real.tex)
-[31
-
-] (../Regression_Table/NO_FE/Deff_3/3_test_total_education_real.tex)
-[32
-
-] (../Regression_Table/NO_FE/Deff_3/3_test_total_healthexpense_real.tex)
-[33
-
-] (../Regression_Table/NO_FE/Deff_3/3_test_total_housing_real.tex) [34
+(../Regression_Table/Def_1/1_test_total_housing_real.tex) [8
 
 ]
-(../Regression_Table/NO_FE/Deff_3/3_test_total_transport_real.tex) [35
+(../Regression_Table/Def_1/1_test_total_transport_real.tex) [9
 
 ]
-(../Regression_Table/NO_FE/Deff_3/3_test_total_recreation_2005_real.tex)
-[36
-
-] (../Regression_Table/NO_FE/Deff_3/3_test_total_clothing_2005_real.tex)
-[37
-
-] (../Regression_Table/NO_FE/Deff_8/test_nond_expenditure_categories_1.tex)
-[38
-
-] (../Regression_Table/NO_FE/Deff_8/test_nond_expenditure_categories_2.tex)
-[39
-
-] (../Regression_Table/NO_FE/Deff_8/test_nond_expenditure_categories_3.tex)
-[40
-
-] (../Regression_Table/NO_FE/Deff_8/8_test_total_foodexp_home_real.tex)
-[41
-
-] (../Regression_Table/NO_FE/Deff_8/8_test_total_foodexp_away_real.tex)
-[42
-
-] (../Regression_Table/NO_FE/Deff_8/8_test_total_education_real.tex)
-[43
-
-] (../Regression_Table/NO_FE/Deff_8/8_test_total_healthexpense_real.tex)
-[44
-
-] (../Regression_Table/NO_FE/Deff_8/8_test_total_housing_real.tex) [45
+(../Regression_Table/Def_1/1_test_total_recreation_2005_real.tex) [10
 
 ]
-(../Regression_Table/NO_FE/Deff_8/8_test_total_transport_real.tex) [46
+(../Regression_Table/Def_1/1_test_total_clothing_2005_real.tex) [11
 
 ]
-(../Regression_Table/NO_FE/Deff_8/8_test_total_recreation_2005_real.tex)
-[47
-
-] (../Regression_Table/NO_FE/Deff_8/8_test_total_clothing_2005_real.tex)
-[48
+(../Regression_Table/Def_2/test_nond_expenditure_categories_1.tex) [12
 
 ]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 272.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 272.
- (./temporary_test.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 272.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 272.
+(../Regression_Table/Def_2/test_nond_expenditure_categories_2.tex) [13
+
+]
+(../Regression_Table/Def_2/test_nond_expenditure_categories_3.tex) [14
+
+]
+(../Regression_Table/Def_2/2_test_total_foodexp_home_real.tex) [15
+
+]
+(../Regression_Table/Def_2/2_test_total_foodexp_away_real.tex) [16
+
+]
+(../Regression_Table/Def_2/2_test_total_education_real.tex) [17
+
+]
+(../Regression_Table/Def_2/2_test_total_healthexpense_real.tex) [18
+
+]
+(../Regression_Table/Def_2/2_test_total_housing_real.tex) [19
+
+]
+(../Regression_Table/Def_2/2_test_total_transport_real.tex) [20
+
+]
+(../Regression_Table/Def_2/2_test_total_recreation_2005_real.tex) [21
+
+]
+(../Regression_Table/Def_2/2_test_total_clothing_2005_real.tex) [22
+
+]
+(../Regression_Table/Def_3/test_nond_expenditure_categories_1.tex) [23
+
+]
+(../Regression_Table/Def_3/test_nond_expenditure_categories_2.tex) [24
+
+]
+(../Regression_Table/Def_3/test_nond_expenditure_categories_3.tex) [25
+
+]
+(../Regression_Table/Def_3/3_test_total_foodexp_home_real.tex) [26
+
+]
+(../Regression_Table/Def_3/3_test_total_foodexp_away_real.tex) [27
+
+]
+(../Regression_Table/Def_3/3_test_total_education_real.tex) [28
+
+]
+(../Regression_Table/Def_3/3_test_total_healthexpense_real.tex) [29
+
+]
+(../Regression_Table/Def_3/3_test_total_housing_real.tex) [30
+
+]
+(../Regression_Table/Def_3/3_test_total_transport_real.tex) [31
+
+]
+(../Regression_Table/Def_3/3_test_total_recreation_2005_real.tex) [32
+
+]
+(../Regression_Table/Def_3/3_test_total_clothing_2005_real.tex) [33
+
+]
+(../Regression_Table/Def_8/test_nond_expenditure_categories_1.tex) [34
+
+]
+(../Regression_Table/Def_8/test_nond_expenditure_categories_2.tex) [35
+
+]
+(../Regression_Table/Def_8/test_nond_expenditure_categories_3.tex) [36
+
+]
+(../Regression_Table/Def_8/8_test_total_foodexp_home_real.tex) [37
+
+]
+(../Regression_Table/Def_8/8_test_total_foodexp_away_real.tex) [38
+
+]
+(../Regression_Table/Def_8/8_test_total_education_real.tex) [39
+
+]
+(../Regression_Table/Def_8/8_test_total_healthexpense_real.tex) [40
+
+]
+(../Regression_Table/Def_8/8_test_total_housing_real.tex) [41
+
+]
+(../Regression_Table/Def_8/8_test_total_transport_real.tex) [42
+
+]
+(../Regression_Table/Def_8/8_test_total_recreation_2005_real.tex) [43
+
+]
+(../Regression_Table/Def_8/8_test_total_clothing_2005_real.tex) [44
+
+]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 245.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 245.
+
+(./regression_table_v1.aux)
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 245.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 245.
 
 
-Package rerunfilecheck Warning: File `temporary_test.out' has changed.
+Package rerunfilecheck Warning: File `regression_table_v1.out' has changed.
 (rerunfilecheck)                Rerun to get outlines right
 (rerunfilecheck)                or use package `bookmark'.
 
-Package rerunfilecheck Info: Checksums for `temporary_test.out':
-(rerunfilecheck)             Before: 2661535B687797E77E52D1E59A607191;4359
-(rerunfilecheck)             After:  006E77EFC5AE87CEE31C4F84AAA1ED49;4853.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 272.
+Package rerunfilecheck Info: Checksums for `regression_table_v1.out':
+(rerunfilecheck)             Before: <no file>
+(rerunfilecheck)             After:  D9DE5F055ED2E10A991D78AE62C04159;4185.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 245.
  ) 
 Here is how much of TeX's memory you used:
- 15661 strings out of 492649
- 266237 string characters out of 6129622
- 358983 words of memory out of 5000000
- 19042 multiletter control sequences out of 15000+600000
+ 15576 strings out of 492649
+ 263893 string characters out of 6129622
+ 358980 words of memory out of 5000000
+ 18991 multiletter control sequences out of 15000+600000
  11195 words of font info for 44 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 42i,8n,41p,413b,325s stack positions out of 5000i,500n,10000p,200000b,80000s
-pdfTeX warning (dest): name{subsection.2.11} has been referenced but does not
- exist, replaced by a fixed one
-
-pdfTeX warning (dest): name{subsection.2.10} has been referenced but does not e
-xist, replaced by a fixed one
-
-pdfTeX warning (dest): name{subsection.2.9} has been referenced but does not ex
-ist, replaced by a fixed one
-
-pdfTeX warning (dest): name{subsection.2.8} has been referenced but does not ex
-ist, replaced by a fixed one
-
-pdfTeX warning (dest): name{subsection.2.7} has been referenced but does not ex
-ist, replaced by a fixed one
-
-pdfTeX warning (dest): name{subsection.2.6} has been referenced but does not ex
-ist, replaced by a fixed one
-
-pdfTeX warning (dest): name{subsection.2.5} has been referenced but does not ex
-ist, replaced by a fixed one
-
-pdfTeX warning (dest): name{subsection.2.4} has been referenced but does not ex
-ist, replaced by a fixed one
-
-</usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><
-/usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></
-usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></us
-r/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb>
-Output written on temporary_test.pdf (48 pages, 111931 bytes).
+ 42i,8n,41p,418b,325s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb
+></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb>
+</usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></
+usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb>
+Output written on regression_table_v1.pdf (44 pages, 100269 bytes).
 PDF statistics:
- 467 PDF objects out of 1000 (max. 8388607)
- 408 compressed objects within 5 object streams
- 111 named destinations out of 1000 (max. 500000)
- 401 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 280 PDF objects out of 1000 (max. 8388607)
+ 227 compressed objects within 3 object streams
+ 93 named destinations out of 1000 (max. 500000)
+ 1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

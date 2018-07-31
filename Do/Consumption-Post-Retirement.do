@@ -1,6 +1,9 @@
 set more off
 graph close
 *set autotabgraphs on
+ssc install winsor2
+ssc install winsor
+
 
 *global folder "/Users/agneskaa/Documents/RetirementConsumptionPSID"
 * global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
@@ -16,7 +19,7 @@ global retirement_definition 0   // 0 is default (last job ended due to "Quit, R
 global ret_duration_definition 2 // Defines retirement year. Can be 1, 2, or 3. My preference is 3 (for the sharp income drop) although 2 is perhaps better when looking at consumption data (for smoothness)
 global graphs_by_mean 0          // Graph by quintile. Can be 0 or 1
 global graphs_by_quintile 0      // Graph by quintile. Can be 0 or 1
-global graphs_by_tertile 1       // Tertiles
+global graphs_by_tertile 0       // Tertiles
 global make_barplots 1
 global allow_kids_to_leave_hh 1  // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH 
                                  // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
@@ -267,7 +270,6 @@ preserve
 	legend(label(1 "Imputed Expenditure")) legend(label(2 "Sum of Categories Pre-2005"))
 	graph export "$folder/Results/ConsumptionPostRetirement/Comparision_of_imputed_and_categorical_age.pdf", as(pdf) replace
 
-
 restore
 
 
@@ -275,7 +277,7 @@ preserve
 	collapse `expenditure_cats' expenditure_total_pre2005_real, by(ret_duration)
 	egen expenditure_total_imputed = rowtotal(`expenditure_cats')
 	tsset ret_duration
-	tsline expenditure_total_imputed expenditure_total_pre2005_real, ///
+	tsline expenditure_total_imputed expenditure_total_pre2005_real, name(expenditure_pre2005, replace) ///
 	legend(label(1 "Imputed Expenditure")) legend(label(2 "Sum of Categories Pre-2005"))
 	graph export "$folder/Results/ConsumptionPostRetirement/Comparision_of_imputed_and_categorical_ret.pdf", as(pdf) replace
 
@@ -293,22 +295,20 @@ graph bar expenditure_total_pre2005_real, over(ret_duration) stack name("fig2", 
 
 preserve
 	keep if ret_duration >= -8 & ret_duration <= 8
-	graph bar `expenditure_cats' if tertile == 1, over(ret_duration) stack name("tertile1", replace) percent title("Expenditure for Bottom Tertile") ///
+	graph bar `expenditure_cats' if tertile == 1, over(ret_duration) stack name("tertile1", replace) percent title("Expenditure for Bottom Tertile") note("Values on the x-axis: Time since Retirement") ///
 	legend(label(1 "Food Home")) legend(label(2 "Food Away")) legend(label(3 "Housing")) legend(label(4 "Education")) legend(label(5 "Health")) ///
 	legend(label(6 "Non Durable Transport")) legend(label(7 "Durable Transport"))
 	graph export "$folder/Results/ConsumptionPostRetirement/Tertile_Bar/tertile1.pdf", as(pdf) replace
 
-	graph bar `expenditure_cats' if tertile == 2, over(ret_duration) stack name("tertile2", replace) percent title("Expenditure for Middle Tertile") ///
+	graph bar `expenditure_cats' if tertile == 2, over(ret_duration) stack name("tertile2", replace) percent title("Expenditure for Middle Tertile") note("Values on the x-axis: Time since Retirement") ///
 	legend(label(1 "Food Home")) legend(label(2 "Food Away")) legend(label(3 "Housing")) legend(label(4 "Education")) legend(label(5 "Health")) ///
 	legend(label(6 "Non Durable Transport")) legend(label(7 "Durable Transport"))
 	graph export "$folder/Results/ConsumptionPostRetirement/Tertile_Bar/tertile2.pdf", as(pdf) replace
 
-	graph bar `expenditure_cats' if tertile == 3, over(ret_duration) stack name("tertile3", replace) percent title("Expenditure for Top Tertile") ///
+	graph bar `expenditure_cats' if tertile == 3, over(ret_duration) stack name("tertile3", replace) percent title("Expenditure for Top Tertile") note("Values on the x-axis: Time since Retirement") ///
 	legend(label(1 "Food Home")) legend(label(2 "Food Away")) legend(label(3 "Housing")) legend(label(4 "Education")) legend(label(5 "Health")) ///
 	legend(label(6 "Non Durable Transport")) legend(label(7 "Durable Transport"))
 	graph export "$folder/Results/ConsumptionPostRetirement/Tertile_Bar/tertile3.pdf", as(pdf) replace
-
-	graph export "$folder/Results/ConsumptionPostRetirement/.pdf", as(pdf) replace
 
 restore
 
@@ -407,6 +407,8 @@ restore
 * expenditure_category_x_spouse_definition_y.pdf
 * 6) tertile figures - we'll make it be 3 columns
 	
+/*
+winsor `expenditure_cats_2005', gen(`expenditure_cats_2005') h(10) highonly
 
 
 

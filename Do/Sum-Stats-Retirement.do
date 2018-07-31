@@ -11,7 +11,7 @@ global retirement_definition 0   // 0 is default (last job ended due to "Quit, R
 global allow_kids_to_leave_hh 1  // When looking for stable households, what should we do when a kid enters/leaves? 0 = break the HH, 1 = keep the HH 
                                  // (Note: this applies to any household member other than the head and spouse. We always break the HH when there's a change in head or spouse)
 
-global how_to_deal_with_spouse 1 // 1 Ignore the spouse () 2 Spouse never works  3.(spouse always works) 4 (spouse has same ret transition +/- 1 wave) 4. Spouse has a different transition
+global how_to_deal_with_spouse 8 // 1 Ignore the spouse () 2 Spouse never works  3.(spouse always works) 4 (spouse has same ret transition +/- 1 wave) 4. Spouse has a different transition
 						
 global retirement_definition_spouse 1 //// 0 is default (last job ended due to "Quit, Resigned, Retire" or "NA")
                                        // 1 is loose (does not ask why last job ended) and 2 is strict (last job ended due to "Quit, Resigned, Retire" only)			 
@@ -67,7 +67,8 @@ preserve
 	
 	tsset ret_
 	label var ret_duration "Duration of Head's Retirement (ret year = first retired wave)"
-	tsline `inc_measures', title("Income based on time since head's retirement") name("income_by_ret_duration_2_SP$how_to_deal_with_spouse", replace) ylabel(#3)
+	tsline `inc_measures', title("Income based on time since head's retirement") name("income_by_ret_duration_2_SP$how_to_deal_with_spouse", replace) ylabel(#3) ///
+	legend(label(1 "Total Income")) legend(label(2 "Earnings of Head")) legend(label(3 "Earnings of Spouse")) legend(label(4 "No SS Transfer")) legend(label(5 "Family SS")) 
 	graph export "$folder/Results/IncomeAroundRetirement/Income_with_spouse_definition_$how_to_deal_with_spouse.pdf", as(pdf) replace
 
 restore
