@@ -3,16 +3,16 @@
 ** (1) Quintiles based on FAMILY social security income in retirement
 **     (using the LAST observed social security income)
 ****************************************************************************************************
-by pid, sort: egen max_year = max(wave)
+by pid, sort: egen last_year_observed = max(wave)
 
 if $quintiles_definition == 1{
-	gen inc_ss_fam_last         = inc_ss_fam if wave == max_year
-	xtile quintile_last         = inc_ss_fam_last if wave == max_year & retired == 1, n(5)
+	gen inc_ss_fam_last         = inc_ss_fam if wave == last_year_observed
+	xtile quintile_last         = inc_ss_fam_last if wave == last_year_observed & retired == 1, n(5)
 	by pid, sort: egen quintile = max(quintile_last)
 
 	** Problem with this measure is that there are lots of cases where inc_ss_fam_last == 0
 	** So the lowest quintile isn't made of households with the lowest permanent income
-	hist inc_ss_fam_last if wave == max_year & retired == 1, name("hist", replace)
+	hist inc_ss_fam_last if wave == last_year_observed & retired == 1, name("hist", replace)
 }
 
 
@@ -26,8 +26,8 @@ if $quintiles_definition == 2{
 	* Done: rather than using inc_ss_fam_real use something similar with inc_ss_head_real
 	
 	by pid, sort: egen max_inc_ss_head = max(inc_ss_head_real)
-	xtile quintile_last               = max_inc_ss_head if wave == max_year & retired == 1 & max_inc_ss_head != 0, n(5)
-	xtile tertile_last                = max_inc_ss_head if wave == max_year & retired == 1 & max_inc_ss_head != 0, n(3)
+	xtile quintile_last               = max_inc_ss_head if wave == last_year_observed & max_inc_ss_head != 0, n(5)
+	xtile tertile_last                = max_inc_ss_head if wave == last_year_observed & max_inc_ss_head != 0, n(3)
 	by pid, sort: egen quintile       = max(quintile_last)
 	by pid, sort: egen tertile        = max(tertile_last)
 
@@ -36,13 +36,22 @@ if $quintiles_definition == 2{
 	
 	** Problem with this measure is that there are lots of cases where max_inc_ss_fam == 0
 	** So the lowest quintile isn't made of households with the lowest permanent income
-	* hist max_inc_ss_fam if wave == max_year & retired == 1, name("hist_max", replace)
+	* hist max_inc_ss_fam if wave == last_year_observed & retired == 1, name("hist_max", replace)
+
+	* Looks good!
+	* tab d_tertile
+	* by tertile, sort: sum max_inc_ss_head
 	
 	* Deal with people with no ss income
-	replace tertile = 1 if max_inc_ss_head == 0 & educhead < 12
-	replace tertile = 2 if max_inc_ss_head == 0 & educhead >= 12 & educhead < 16
-	replace tertile = 3 if max_inc_ss_head == 0 & educhead >= 16
+	* by pid, sort: egen mode_educhead = mode(educhead)
+	gen mode_educhead = educhead
+	replace tertile = 1 if max_inc_ss_head == 0 & mode_educhead <= 12
+	replace tertile = 2 if max_inc_ss_head == 0 & mode_educhead > 12 & educhead <= 16
+	replace tertile = 3 if max_inc_ss_head == 0 & mode_educhead > 16
 
+	sort pid wave
+	gen d_tertile = D.tertile
+	dsfdsf
 }
 
 * Going forward, if we want to divide by max_inc_ss_fam quintiles, perhaps we drop households that retired young
@@ -59,12 +68,12 @@ if $quintiles_definition == 2{
 ****************************************************************************************************
 
 if $quintiles_definition == 3{
-	xtile quintile_last         = inc_ss_head if wave == max_year & retired == 1 & inc_ss_head > 0, n(5)
+	xtile quintile_last         = inc_ss_head if wave == last_year_observed & retired == 1 & inc_ss_head > 0, n(5)
 	by pid, sort: egen quintile = max(quintile_last)
 
 	** Problem with this measure is that there are lots of cases where inc_ss_head_last == 0
 	** So the lowest quintile isn't made of households with the lowest permanent income
-	* hist inc_ss_head if wave == max_year & retired == 1, name("hist_head", replace)
+	* hist inc_ss_head if wave == last_year_observed & retired == 1, name("hist_head", replace)
 }
 
 ****************************************************************************************************
