@@ -314,6 +314,8 @@ psid use
 
     || emp_status_indiv
     //employment status of an individual
+    // TODO: i wonder if it's possible to go back further in history here since it's in the individual file ?
+    // [79]ER30293 [80]ER30323 [81]ER30353 [82]ER30382 [83]ER30411 [84]ER30441 [85]ER30474 [86]ER30509 [87]ER30545 [88]ER30580 [89]ER30616 [90]ER30653 [91]ER30699 [92]ER30744 [93]ER30816 [94]ER33111 [95]ER33211 [96]ER33311 [97]ER33411 [99]ER33512 [01]ER33612 [03]ER33712 [05]ER33813 [07]ER33913 [09]ER34016 [11]ER34116 [13]ER34216 [15]ER34317
     [99]ER33512 [01]ER33612 [03]ER33712 [05]ER33813 [07]ER33913 //
     [09]ER34016 [11]ER34116 [13]ER34216 [15]ER34317
 
@@ -1239,6 +1241,7 @@ replace mortgage2       = . if mortgage2 >= 9999998
 replace year_born       = . if year_born == 9999
 replace wage_rate_head  = . if wage_rate_head >= 9998
 replace wage_rate_spouse= . if wage_rate_spouse >= 9998
+replace age             = . if age == 999
 
 * Compute net business wealth for 2013 and 2015
 replace business_wealth = business_value - business_debt if wave >= 2013
