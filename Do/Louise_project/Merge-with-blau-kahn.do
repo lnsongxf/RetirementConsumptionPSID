@@ -118,8 +118,10 @@ restore
 * cumulative sum of both of these measures
 by pid: gen cum_working_odd_years = sum( working_odd_years )
 
-replace working_even_years = 0 if wave == 1999 // i suppose we should ignore work status in 1998
-by pid: gen cum_working_even_years = sum( working_even_years )
+gen working_even_years_censored = working_even_years
+replace working_even_years_censored = 0 if wave == 1999 // i suppose we should ignore work status in 1998
+by pid: gen cum_working_even_years = sum( working_even_years_censored )
+drop working_even_years_censored
 
 gen cum_experience_since_1999 = cum_working_even_years + cum_working_odd_years
 
@@ -128,7 +130,7 @@ gen cum_experience = expp_1999 + cum_experience_since_1999
 * question: is exp 1999 inclusive or exclusive of 1999?
 
 *******************************************************************************************************
-* TODO: convert variables to real
+* Convert variables to real
 *******************************************************************************************************
 
 * Merge in CPI
@@ -145,13 +147,13 @@ foreach var of varlist `nominal_vars' {
 	replace `var'    = 100 * `var' / CPI_all_base_2015
 }
 
-* NOTE: what adds up to inc_fam ?
+* NOTE: inc_fam = inc_female + inc_male + inc_fam_nonlabor
 preserve
 	collapse inc_fam inc_male inc_female inc_fam_nonlabor *wage*, by(wave)
 	tsset wave
 	tsline inc*
+	sum inc*
 restore
-
 
 *******************************************************************************************************
 ** Sample selection
@@ -187,3 +189,32 @@ saveold "$folder/Data/Intermediate/Basic-Panel-Louise-Final.dta", replace versio
 * why some negative obs for inc_fam ?
 * top coding on wage_rate_head etc?
 * drop those with very high or low wages?
+
+*******************************************************************************************************
+** How many women work the whole four years?
+*******************************************************************************************************
+
+* Select women observed 1999 to 2005
+by pid, sort: egen last_year = max(wave)
+by pid, sort: egen first_year = min(wave)
+keep if first_year == 1999
+keep if last_year >= 2005
+
+* Select women with no gaps between 1999 to 2005
+keep if wave <= 2005
+by pid, sort: egen c = count(wave)
+tab c
+keep if c == 4
+xtdescribe
+
+by pid, sort: egen years_working_even = total(working_even_years )
+by pid, sort: egen years_working_odd = total(working_odd_years )
+gen working_combined = working_even_years + working_odd_years
+by pid, sort: egen years_working_combined = total( working_combined )
+
+preserve
+	keep if wave == 1999
+	tab years_working_even
+	tab years_working_odd
+	tab years_working_combined
+restore

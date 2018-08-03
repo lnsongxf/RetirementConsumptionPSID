@@ -989,7 +989,7 @@ psid use
 
     // Pat Note: Alt Q to wrap text
     using "$folder/Data/Raw/PSID_Install", clear design(1)
-    dofile("$folder/Do/Louise_project/psid-rep-louise", replace);
+    dofile("$folder/Do/Louise_project/PSID-Setup-Louise-Replication", replace);
 
     // Pat Note: Alt Q to wrap text
    // using "$folder/Data/Raw/PSID_Install", clear design(1)
@@ -1342,7 +1342,7 @@ format %8.0g rel2head
 
 //egen total_working = total(emp_status_spouse == 1), by(wave)
 
-save "$folder/Data/Intermediate/Basic-Panel_Louise.dta", replace
+saveold "$folder/Data/Intermediate/Basic-Panel_Louise.dta", replace version(13)
 
 // if we need larger sample size, we can look at female who are no legal spouse but cohabitants
 // must needed variables
