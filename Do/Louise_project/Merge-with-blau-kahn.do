@@ -76,27 +76,81 @@ xtdescribe
 * edit pid wave sex_indiv age age_1999_BK age_spouse rel2head sex_head if age != age_1999_BK
 
 *******************************************************************************************************
-** Count experience since 1999
+** Clean up data
 *******************************************************************************************************
 
 do "$folder/Do/Louise_project/clean_variables.do"
+sort pid wave
 
-inspect hours_annual_female
-inspect emp_status_1
-sdfsdf
+* Only keep households observed starting in 1999
+by pid, sort: egen first_wave = min(wave)
+keep if first_wave == 1999
+* NOTE: if BK measure is inclusive of 1999, then we could keep HHs starting in 2001
 
-* TODO: count experience here
+*******************************************************************************************************
+** Count cumulative experience since 1999
+*******************************************************************************************************
 
-* method 1: cum sum of emp_status_1 2 or 3 == working
-* method 2: cum sum of years working above 1500 hours
-* method 3: add both of those together
+* method 1: whether you are working in year of survey
+gen working_odd_years = emp_status_1 == 1 | emp_status_2 == 1 | emp_status_3 == 1
 
+* method 2: whether you had positive hours the year before the survey
+gen working_even_years = hours_annual_female > 0
+gen working_even_years_500 = hours_annual_female >= 500
+gen working_even_years_FT = hours_annual_female >= 1500
+
+* compare method 1 vs method 2
+corr working_even_years working_odd_years
+corr working_even_years_500 working_odd_years
+corr working_even_years_FT working_odd_years
+
+corr working_even_years L.working_even_years
+corr working_odd_years L.working_odd_years
+
+/*
+preserve
+	collapse working_*, by(wave)
+	tsset wave
+	tsline work*
+restore
+*/
+
+* cumulative sum of both of these measures
+by pid: gen cum_working_odd_years = sum( working_odd_years )
+
+replace working_even_years = 0 if wave == 1999 // i suppose we should ignore work status in 1998
+by pid: gen cum_working_even_years = sum( working_even_years )
+
+gen cum_experience_since_1999 = cum_working_even_years + cum_working_odd_years
+
+gen cum_experience = expp_1999 + cum_experience_since_1999
+
+* question: is exp 1999 inclusive or exclusive of 1999?
 
 *******************************************************************************************************
 * TODO: convert variables to real
 *******************************************************************************************************
 
+* Merge in CPI
+gen year = wave - 1 // note that expenditure data is for year prior to interview
+merge m:1 year using "$folder/Data/Intermediate/CPI.dta"
+drop if _m == 2
+drop year _m
 
+local nominal_vars inc_fam inc_female inc_male inc_fam_nonlabor wage_rate_female wage_rate_male
+
+foreach var of varlist `nominal_vars' {
+	di "`var'"
+	gen `var'_nominal = `var'
+	replace `var'    = 100 * `var' / CPI_all_base_2015
+}
+
+* NOTE: what adds up to inc_fam ?
+preserve
+	collapse inc_fam inc_male inc_female inc_fam_nonlabor *wage*, by(wave)
+	tsset wave
+	tsline inc*
+restore
 
 
 *******************************************************************************************************
@@ -124,4 +178,12 @@ by pid, sort: egen count_pid = count(pid)
 drop if count_pid < 4
 xtdescribe
 
-* saveold "$folder/Data/Intermediate/Basic-Panel-Louise-Final.dta", replace version(13)
+saveold "$folder/Data/Intermediate/Basic-Panel-Louise-Final.dta", replace version(13)
+
+* NOTE: should i drop cases where theres one year of missing data in the middle of four good obs?
+
+
+* Questions:
+* why some negative obs for inc_fam ?
+* top coding on wage_rate_head etc?
+* drop those with very high or low wages?
