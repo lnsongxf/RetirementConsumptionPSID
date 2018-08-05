@@ -254,7 +254,6 @@ preserve
 restore
 }
 
-
 ****************************************************************************************************
 ** Stacked bar plots - how do the categories add up
 ****************************************************************************************************
@@ -280,19 +279,32 @@ preserve
 	tsline expenditure_total_imputed expenditure_total_pre2005_real, name(expenditure_pre2005, replace) ///
 	legend(label(1 "Imputed Expenditure")) legend(label(2 "Sum of Categories Pre-2005"))
 	graph export "$folder/Results/ConsumptionPostRetirement/Comparision_of_imputed_and_categorical_ret.pdf", as(pdf) replace
-
 restore
 
-** Doing this by tertile
-graph bar `expenditure_cats', over(ret_duration) stack name("fig1", replace) ///
+//This is bar graph by tertile but the x-asis has retirement duration. This output is not saved in the Latex document. 
+graph bar `expenditure_cats', over(ret_duration) stack name("fig1", replace) percent title("Expenditure based on retirement duration") note("Values on the x-axis: Time since Retirement") ///
 	legend(label(1 "Food Home")) legend(label(2 "Food Away")) legend(label(3 "Housing")) legend(label(4 "Education")) legend(label(5 "Health")) ///
 	legend(label(6 "Non Durable Transport")) legend(label(7 "Durable Transport"))
+	graph export "$folder/Results/ConsumptionPostRetirement/Tertile_Bar/across_ret_duration.pdf", as(pdf) replace
 
-graph bar expenditure_total_pre2005_real, over(ret_duration) stack name("fig2", replace)
+
+graph bar expenditure_total_pre2005_real, over(ret_duration) stack name("fig2", replace) title("Cummulative Expenditure") note("Values on the x-axis: Time since Retirement") ///
+	legend(label(1 "Food Home")) legend(label(2 "Food Away")) legend(label(3 "Housing")) legend(label(4 "Education")) legend(label(5 "Health")) ///
+	legend(label(6 "Non Durable Transport")) legend(label(7 "Durable Transport"))
+	graph export "$folder/Results/ConsumptionPostRetirement/Tertile_Bar/cummulative_exp.pdf", as(pdf) replace
+
+
+** Doing this by tertile
+graph bar `expenditure_cats', over(tertile) stack name("fig3", replace) title("Expenditure based on Tertile") note("Values on the x-axis: tertiles") ///
+	legend(label(1 "Food Home")) legend(label(2 "Food Away")) legend(label(3 "Housing")) legend(label(4 "Education")) legend(label(5 "Health")) ///
+	legend(label(6 "Non Durable Transport")) legend(label(7 "Durable Transport"))
+	graph export "$folder/Results/ConsumptionPostRetirement/Tertile_Bar/cummulative_tertile.pdf", as(pdf) replace
+
 
 //label variable total_foodexp_home_real "Food at Home"
 //graph bar total_foodexp_home_real , over(ret_duration ) 
 
+* This is the output in section six of our Latex document. 
 preserve
 	keep if ret_duration >= -8 & ret_duration <= 8
 	graph bar `expenditure_cats' if tertile == 1, over(ret_duration) stack name("tertile1", replace) percent title("Expenditure for Bottom Tertile") note("Values on the x-axis: Time since Retirement") ///
@@ -311,7 +323,21 @@ preserve
 	graph export "$folder/Results/ConsumptionPostRetirement/Tertile_Bar/tertile3.pdf", as(pdf) replace
 
 restore
+/*
+preserve
+	collapse `expenditure_cats' food_t, by(tertile)
+	egen expenditure_total_imputed = rowtotal(`expenditure_cats')
 
+	collapse (mean) `expenditure_cats' (count) n = total_foodexp_home_real, by(tertile)
+
+
+	graph bar `expenditure_cats_2005', if ret_duration <=15, over(tertile) stack name("1", replace) percent title("Across Tertile") ///
+	legend(label(1 "Food Home")) legend(label(2 "Food Away")) legend(label(3 "Housing")) legend(label(4 "Education")) legend(label(5 "Health")) ///
+	legend(label(6 "Non Durable Transport")) legend(label(7 "Durable Transport"))
+	graph export "$folder/Results/ConsumptionPostRetirement/Tertile_Bar/total1.pdf", as(pdf)
+
+restore
+*/
 ***
 ** For the post 2005 consumption expenditure
 /*
@@ -319,7 +345,7 @@ restore
  graph bar `expenditure_total_post2005_real', over(ret_duration) stack name("fig4", replace)
 
 */
- 
+
  ****************************************************************************************************
 ** Post 2005: Stacked bar plots - how do the categories add up
 ****************************************************************************************************
@@ -377,6 +403,7 @@ preserve
 	lab var total_clothing_2005_real  "Clothing Expenditure"
 
 	keep if ret_duration >= -15 & ret_duration <= 15
+*This section shows the graph in note_lat Latex document in section six. Budget share for different categories for 3 different tertiles. 
 
 	graph bar `expenditure_cats_2005' if tertile == 1, over(ret_duration) stack name("tertile1_post2005", replace) percent title("Bottom Tertile") ///
 	legend(label(1 "Food Home")) legend(label(2 "Food Away")) legend(label(3 "Housing")) legend(label(4 "Education")) legend(label(5 "Health")) ///

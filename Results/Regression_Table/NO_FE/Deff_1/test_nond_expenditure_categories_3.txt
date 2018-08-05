@@ -1,22 +1,23 @@
-	(1)
-VARIABLES	OLS
-	
-2.tertile	-0.105
-	(0.752)
-3.tertile	-0.406
-	(0.718)
-1.retired#1b.tertile	0.298
-	(0.541)
-1.retired#2.tertile	-0.702
-	(0.595)
-1.retired#3.tertile	-0.208
-	(0.550)
-	
-Observations	1,455
-R-squared	0.012
-HH FE	No
-Age Dummies	No
-Dummy Children	No
-Time	No
-Standard errors in parentheses	
-*** p<0.01, ** p<0.05, * p<0.1	
+	(1)	(2)	(3)	(4)	(5)
+VARIABLES	OLS	test 7	test 8	test 9	test 10
+					
+2.tertile	-2.156***		-3.300***	-3.268***	-3.254***
+	(0.432)		(0.884)	(0.888)	(0.877)
+3.tertile	-2.893***		-3.956***	-3.946***	-3.927***
+	(0.370)		(0.759)	(0.763)	(0.753)
+1.retired#1b.tertile	3.120***	0.342**	0.369*	0.360*	0.449**
+	(0.517)	(0.170)	(0.189)	(0.189)	(0.190)
+1.retired#2.tertile	0.0677	-0.170	-0.128	-0.138	-0.0696
+	(0.410)	(0.136)	(0.161)	(0.161)	(0.162)
+1.retired#3.tertile	0.523**	-0.0243	-0.00896	-0.0139	0.0488
+	(0.232)	(0.0772)	(0.112)	(0.112)	(0.113)
+					
+Observations	2,271	2,271	2,271	2,271	2,271
+R-squared	0.096	0.003			
+HH FE	No	Yes	No	No	No
+Age Dummies	No	No	Yes	Yes	Yes
+Dummy Children	No	No	No	Yes	Yes
+Time	No	No	No	No	Yes
+Number of pid		271	271	271	271
+Standard errors in parentheses					
+*** p<0.01, ** p<0.05, * p<0.1					

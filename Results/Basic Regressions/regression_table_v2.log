@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  30 JUL 2018 00:03
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  5 AUG 2018 01:04
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -606,8 +606,7 @@ Package pstcol Warning: ************************************
 (pstcol)                    \usepackage{pstricks}
 (pstcol)                ************************************.
 
-)
-No file regression_table_v2.aux.
+) (./regression_table_v2.aux)
 \openout1 = `regression_table_v2.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 46.
@@ -624,6 +623,7 @@ LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 46.
 LaTeX Font Info:    ... okay on input line 46.
 LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 46.
 LaTeX Font Info:    ... okay on input line 46.
+
 (/usr/local/texlive/2018/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count149
@@ -691,6 +691,8 @@ Package: gettitlestring 2016/05/16 v1.5 Cleanup title references (HO)
 LaTeX Info: Redefining \ref on input line 46.
 LaTeX Info: Redefining \pageref on input line 46.
 LaTeX Info: Redefining \nameref on input line 46.
+
+(./regression_table_v2.out) (./regression_table_v2.out)
 \@outlinefile=\write4
 \openout4 = `regression_table_v2.out'.
 
@@ -878,14 +880,14 @@ Package rerunfilecheck Warning: File `regression_table_v2.out' has changed.
 (rerunfilecheck)                or use package `bookmark'.
 
 Package rerunfilecheck Info: Checksums for `regression_table_v2.out':
-(rerunfilecheck)             Before: <no file>
-(rerunfilecheck)             After:  006E77EFC5AE87CEE31C4F84AAA1ED49;4853.
+(rerunfilecheck)             Before: D41D8CD98F00B204E9800998ECF8427E;0
+(rerunfilecheck)             After:  D8F7ED1BFF4B065F7CD6045902362890;4915.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 272.
  ) 
 Here is how much of TeX's memory you used:
- 15596 strings out of 492649
- 265259 string characters out of 6129622
- 358980 words of memory out of 5000000
+ 15603 strings out of 492649
+ 265410 string characters out of 6129622
+ 358982 words of memory out of 5000000
  18991 multiletter control sequences out of 15000+600000
  11195 words of font info for 44 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -894,10 +896,10 @@ Here is how much of TeX's memory you used:
 ></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb>
 </usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></
 usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb>
-Output written on regression_table_v2.pdf (48 pages, 109301 bytes).
+Output written on regression_table_v2.pdf (48 pages, 110549 bytes).
 PDF statistics:
- 304 PDF objects out of 1000 (max. 8388607)
- 247 compressed objects within 3 object streams
- 103 named destinations out of 1000 (max. 500000)
+ 305 PDF objects out of 1000 (max. 8388607)
+ 248 compressed objects within 3 object streams
+ 104 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

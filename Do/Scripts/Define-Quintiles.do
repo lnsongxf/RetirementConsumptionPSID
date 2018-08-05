@@ -51,7 +51,6 @@ if $quintiles_definition == 2{
 
 	sort pid wave
 	gen d_tertile = D.tertile
-	dsfdsf
 }
 
 * Going forward, if we want to divide by max_inc_ss_fam quintiles, perhaps we drop households that retired young

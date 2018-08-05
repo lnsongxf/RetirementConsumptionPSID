@@ -9,7 +9,7 @@
 	global folder_output "$folder/Results/Regression_Table"
 
 	cap mkdir "$folder_output"
-	cap ssc install outreg2
+	*cap ssc install outreg2
 
 	local expenditure_cats_all total_foodexp_home_real total_foodexp_away_real total_housing_real ///
 		total_education_real total_transport_real total_recreation_2005_real total_clothing_2005_real total_healthexpense_real
@@ -216,7 +216,6 @@
 		qui xtreg `var' i.age i.tertile i.retired#i.tertile i.dummy_children d_year* `conditions'
 		outreg2 using "$folder_output/NO_FE/Deff_`spouse_def'/test_`var'.tex", ctitle("test 10") tex(frag) addtext(HH FE, No, Age Dummies, Yes, Dummy Children, Yes, Time, Yes)  nocons  keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile)
 
-
 	
 		qui reg `var' i.tertile i.retired#i.tertile
 		outreg2 using "$folder_output/NO_FE/Deff_`spouse_def'/test_`var'.tex", ctitle("OLS") tex(frag) replace addtext(HH FE, No, Age Dummies, No, Dummy Children, No, Time, No) nocons keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile) // keep() addtext() ///
@@ -234,7 +233,7 @@
 
 		qui xtreg `var' i.age i.tertile i.retired#i.tertile i.dummy_children d_year*
 		outreg2 using "$folder_output/NO_FE/Deff_`spouse_def'/test_`var'.tex", ctitle("test 5") tex(frag) addtext(HH FE, No, Age Dummies, Yes, Dummy Children, Yes, Time, Yes) nocons keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile)
-*/
+
 	* edit pid wave retired do_they_ever_retire if do_they_ever_retire == 1 & pid == 11003
 		local conditions "if do_they_ever_retire == 1"
 
@@ -253,6 +252,25 @@
 		qui xtreg `var' i.age i.tertile i.retired#i.tertile i.dummy_children d_year* `conditions'
 		outreg2 using "$folder_output/NO_FE/Deff_`spouse_def'/test_`var'.tex", ctitle("test 10") tex(frag) addtext(HH FE, No, Age Dummies, Yes, Dummy Children, Yes, Time, Yes)  nocons  keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile)
 */
+
+     * edit pid wave retired do_they_ever_retire if do_they_ever_retire == 1 & pid == 11003
+            local conditions "if do_they_ever_retire == 1"
+
+            qui reg `var' i.tertile i.retired#i.tertile `conditions'
+            outreg2 using "$folder_output/NO_FE/Defff_`spouse_def'/test_`var'.tex", ctitle("OLS") tex(frag) replace addtext(HH FE, No, Age Dummies, No, Dummy Children, No, Time, No) nocons keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile) // keep() addtext() ///
+
+            qui xtreg `var' i.tertile i.retired#i.tertile `conditions', fe
+            outreg2 using "$folder_output/NO_FE/Defff_`spouse_def'/test_`var'.tex", ctitle("test 7") tex(frag) addtext(HH FE, Yes, Age Dummies, No, Dummy Children, No, Time, No) nocons keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile)
+
+            qui xtreg `var' i.age i.tertile i.retired#i.tertile `conditions', fe
+            outreg2 using "$folder_output/NO_FE/Defff_`spouse_def'/test_`var'.tex", ctitle("test 8") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, No, Time, No) nocons keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile)
+
+            qui xtreg `var' i.age i.tertile i.retired#i.tertile i.dummy_children `conditions', fe
+            outreg2 using "$folder_output/NO_FE/Defff_`spouse_def'/test_`var'.tex", ctitle("test 9") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, No) nocons keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile)
+
+            qui xtreg `var' i.age i.tertile i.retired#i.tertile i.dummy_children d_year* `conditions', fe
+            outreg2 using "$folder_output/NO_FE/Defff_`spouse_def'/test_`var'.tex", ctitle("test 10") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, Yes)  nocons  keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile)
+    */
 }
 	
 }

@@ -8,12 +8,12 @@
     // global folder_output "$folder/Results/Regression_Table"
 
         cap mkdir "$folder_output"
-        cap ssc install outreg2
+      *  cap ssc install outreg2
 
         local expenditure_cats_all total_foodexp_home_real total_foodexp_away_real total_housing_real ///
             total_education_real total_transport_real total_recreation_2005_real total_clothing_2005_real total_healthexpense_real
 
-     // forvalues spouse_def = 1/1 {   
+    * forvalues spouse_def = 1/1 {   
 
     use "$folder/Data/Intermediate/Basic-Panel.dta", clear
 
@@ -171,7 +171,8 @@ gen ss_at_bend_1 = bend_1*0.9
     line referenceSS_InClaimYear ea_head if year_ss_claim == 2005
     graph export "$folder/Results/ImputedEarnings/year_ss_claim_2005.pdf", as(pdf) replace
 
-
+  
+  forvalues spouse_def = 1/1 {   
 
 
 // social security income should be monthly
@@ -275,27 +276,27 @@ gen ss_at_bend_1 = bend_1*0.9
 
             local expenditure_categories_3 total_foodexp_home_real total_foodexp_away_real total_housing_real ///
             total_transport_real 
-    /*
+    
                 egen nond_expenditure_categories_1 = rowtotal( `expenditure_categories_1' )
                 label variable nond_expenditure_categories_1 "Real Nondurable Expenditure"
-                replace nond_expenditure_categories_1 = nond_expenditure_categories_1/average_earning_head
+                replace nond_expenditure_categories_1 = nond_expenditure_categories_1/ea_head
 
                 egen nond_expenditure_categories_2 = rowtotal( `expenditure_categories_2' )
                 label variable nond_expenditure_categories_2 "Real Nondurable Expenditure less Health"
-                replace nond_expenditure_categories_2 = nond_expenditure_categories_2/average_earning_head
+                replace nond_expenditure_categories_2 = nond_expenditure_categories_2/ea_head
 
 
                 egen nond_expenditure_categories_3 = rowtotal( `expenditure_categories_3' )
                 label variable nond_expenditure_categories_3 "Real Nondurable Expenditure less Health & Education"
-                replace nond_expenditure_categories_3 = nond_expenditure_categories_3/average_earning_head
-    */
+                replace nond_expenditure_categories_3 = nond_expenditure_categories_3/ea_head
+    
         local expenditure_categories_all nond_expenditure_categories_1 nond_expenditure_categories_2 nond_expenditure_categories_3
 
         * by pid, sort: egen do_they_ever_retire = max(retired)
         * edit pid wave retired do_they_ever_retire if do_they_ever_retire == 1 & pid == 11003
-    /*
+    
         foreach var in `expenditure_categories_all' {
-        
+        /*
             qui reg `var' i.tertile i.retired#i.tertile
             outreg2 using "$folder_output/NO_FE/Defff_`spouse_def'/test_`var'.tex", ctitle("OLS") tex(frag) replace addtext(HH FE, No, Age Dummies, No, Dummy Children, No, Time, No) nocons keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile) // keep() addtext() ///
             * esttab / estout / eststo
@@ -312,25 +313,44 @@ gen ss_at_bend_1 = bend_1*0.9
 
             qui xtreg `var' i.age i.tertile i.retired#i.tertile i.dummy_children d_year*
             outreg2 using "$folder_output/NO_FE/Defff_`spouse_def'/test_`var'.tex", ctitle("test 5") tex(frag) addtext(HH FE, No, Age Dummies, Yes, Dummy Children, Yes, Time, Yes) nocons keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile)
-
+*/
         * edit pid wave retired do_they_ever_retire if do_they_ever_retire == 1 & pid == 11003
             local conditions "if do_they_ever_retire == 1"
-
+*This section is in part 2a in Regression table v2. 
             qui reg `var' i.tertile i.retired#i.tertile `conditions'
             outreg2 using "$folder_output/NO_FE/Defff_`spouse_def'/test_`var'.tex", ctitle("OLS") tex(frag) replace addtext(HH FE, No, Age Dummies, No, Dummy Children, No, Time, No) nocons keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile)
 
             qui xtreg `var' i.tertile i.retired#i.tertile `conditions', fe
             outreg2 using "$folder_output/NO_FE/Defff_`spouse_def'/test_`var'.tex", ctitle("test 7") tex(frag) addtext(HH FE, Yes, Age Dummies, No, Dummy Children, No, Time, No) nocons keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile)
 
+            qui xtreg `var' i.age i.tertile i.retired#i.tertile `conditions', fe
+            outreg2 using "$folder_output/NO_FE/Defff_`spouse_def'/test_`var'.tex", ctitle("test 8") tex(frag)  addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, No, Time, No) nocons keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile)
+
+            qui xtreg `var' i.age i.tertile i.retired#i.tertile i.dummy_children `conditions', fe
+            outreg2 using "$folder_output/NO_FE/Defff_`spouse_def'/test_`var'.tex", ctitle("test 9") tex(frag)  addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, No) nocons keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile)
+
+            qui xtreg `var' i.age i.tertile i.retired#i.tertile i.dummy_children d_year* `conditions', fe
+            outreg2 using "$folder_output/NO_FE/Defff_`spouse_def'/test_`var'.tex", ctitle("test 10") tex(frag) addtext(HH FE, Yes, Age Dummies, Yes, Dummy Children, Yes, Time, Yes)  nocons  keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile)
+    
+
+*This section is almost the exact copy of the section before but no fixed effect is used in the second part. You can find the output fo this part in Regression Table V2. 
+            local conditions "if do_they_ever_retire == 1"
+
+            qui reg `var' i.tertile i.retired#i.tertile `conditions'
+            outreg2 using "$folder_output/NO_FE/Deff_`spouse_def'/test_`var'.tex", ctitle("OLS") tex(frag) replace addtext(HH FE, No, Age Dummies, No, Dummy Children, No, Time, No) nocons keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile) // keep() addtext() ///
+
+            qui xtreg `var' i.tertile i.retired#i.tertile `conditions', fe
+            outreg2 using "$folder_output/NO_FE/Deff_`spouse_def'/test_`var'.tex", ctitle("test 7") tex(frag) addtext(HH FE, Yes, Age Dummies, No, Dummy Children, No, Time, No) nocons keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile)
+
             qui xtreg `var' i.age i.tertile i.retired#i.tertile `conditions'
-            outreg2 using "$folder_output/NO_FE/Defff_`spouse_def'/test_`var'.tex", ctitle("test 8") tex(frag) addtext(HH FE, No, Age Dummies, Yes, Dummy Children, No, Time, No) nocons keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile)
+            outreg2 using "$folder_output/NO_FE/Deff_`spouse_def'/test_`var'.tex", ctitle("test 8") tex(frag) addtext(HH FE, No, Age Dummies, Yes, Dummy Children, No, Time, No) nocons keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile)
 
             qui xtreg `var' i.age i.tertile i.retired#i.tertile i.dummy_children `conditions'
-            outreg2 using "$folder_output/NO_FE/Defff_`spouse_def'/test_`var'.tex", ctitle("test 9") tex(frag) addtext(HH FE, No, Age Dummies, Yes, Dummy Children, Yes, Time, No) nocons keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile)
+            outreg2 using "$folder_output/NO_FE/Deff_`spouse_def'/test_`var'.tex", ctitle("test 9") tex(frag) addtext(HH FE, No, Age Dummies, Yes, Dummy Children, Yes, Time, No) nocons keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile)
 
             qui xtreg `var' i.age i.tertile i.retired#i.tertile i.dummy_children d_year* `conditions'
-            outreg2 using "$folder_output/NO_FE/Defff_`spouse_def'/test_`var'.tex", ctitle("test 10") tex(frag) addtext(HH FE, No, Age Dummies, Yes, Dummy Children, Yes, Time, Yes)  nocons  keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile)
+            outreg2 using "$folder_output/NO_FE/Deff_`spouse_def'/test_`var'.tex", ctitle("test 10") tex(frag) addtext(HH FE, No, Age Dummies, Yes, Dummy Children, Yes, Time, Yes)  nocons  keep(1.retired#1b.tertile 1.retired#2.tertile 1.retired#3.tertile 2.tertile 3.tertile)
     */
-    // }
-
+    }
+}
         

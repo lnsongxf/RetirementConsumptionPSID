@@ -1,24 +1,25 @@
-\begin{tabular}{lc} \hline
- & (1) \\
-VARIABLES & OLS \\ \hline
- &  \\
-2.tertile & -0.176 \\
- & (0.832) \\
-3.tertile & -0.290 \\
- & (0.794) \\
-1.retired\#1b.tertile & 0.337 \\
- & (0.599) \\
-1.retired\#2.tertile & -0.717 \\
- & (0.658) \\
-1.retired\#3.tertile & -0.426 \\
- & (0.609) \\
- &  \\
-Observations & 1,455 \\
-R-squared & 0.012 \\
-HH FE & No \\
-Age Dummies & No \\
-Dummy Children & No \\
- Time & No \\ \hline
-\multicolumn{2}{c}{ Standard errors in parentheses} \\
-\multicolumn{2}{c}{ *** p$<$0.01, ** p$<$0.05, * p$<$0.1} \\
+\begin{tabular}{lccccc} \hline
+ & (1) & (2) & (3) & (4) & (5) \\
+VARIABLES & OLS & test 7 & test 8 & test 9 & test 10 \\ \hline
+ &  &  &  &  &  \\
+2.tertile & -2.420*** &  & -3.620*** & -3.586*** & -3.570*** \\
+ & (0.501) &  & (1.013) & (1.018) & (1.007) \\
+3.tertile & -3.280*** &  & -4.397*** & -4.387*** & -4.367*** \\
+ & (0.429) &  & (0.870) & (0.874) & (0.865) \\
+1.retired\#1b.tertile & 3.362*** & 0.357* & 0.332 & 0.318 & 0.408* \\
+ & (0.600) & (0.194) & (0.216) & (0.216) & (0.218) \\
+1.retired\#2.tertile & 0.207 & -0.116 & -0.135 & -0.145 & -0.0780 \\
+ & (0.476) & (0.156) & (0.184) & (0.184) & (0.185) \\
+1.retired\#3.tertile & 0.592** & -0.0329 & -0.0603 & -0.0670 & -0.00242 \\
+ & (0.270) & (0.0880) & (0.128) & (0.128) & (0.129) \\
+ &  &  &  &  &  \\
+Observations & 2,271 & 2,271 & 2,271 & 2,271 & 2,271 \\
+R-squared & 0.089 & 0.002 &  &  &  \\
+HH FE & No & Yes & No & No & No \\
+Age Dummies & No & No & Yes & Yes & Yes \\
+Dummy Children & No & No & No & Yes & Yes \\
+Time & No & No & No & No & Yes \\
+ Number of pid &  & 271 & 271 & 271 & 271 \\ \hline
+\multicolumn{6}{c}{ Standard errors in parentheses} \\
+\multicolumn{6}{c}{ *** p$<$0.01, ** p$<$0.05, * p$<$0.1} \\
 \end{tabular}
