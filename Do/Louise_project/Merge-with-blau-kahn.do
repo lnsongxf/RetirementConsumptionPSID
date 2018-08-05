@@ -35,11 +35,11 @@ rename female female_BK
 rename empstat empstat_1999
 rename employed employed_1999
 
-rename expf expf_1999
-rename expp expp_1999
+rename expf expf_1999 // full time exp
+rename expp expp_1999 // part time exp
 rename expfsq expfsq_1999
 rename exppsq exppsq_1999
-rename pexp pexp_1999
+rename pexp pexp_1999 // potential experience
 
 tempvar BK_data 
 save `BK_data', replace
@@ -124,8 +124,10 @@ by pid: gen cum_working_even_years = sum( working_even_years_censored )
 drop working_even_years_censored
 
 gen cum_experience_since_1999 = cum_working_even_years + cum_working_odd_years
+label var cum_experience_since_1999 "Cumulative Experience since 1999 (includes both odd and even years)"
 
 gen cum_experience = expp_1999 + cum_experience_since_1999
+label var cum_experience "Cumulative Experience (expp_1999 + cum_experience_since_1999)"
 
 * question: is exp 1999 inclusive or exclusive of 1999?
 
@@ -147,11 +149,12 @@ foreach var of varlist `nominal_vars' {
 	replace `var'    = 100 * `var' / CPI_all_base_2015
 }
 
+* Confirm that the 3 components of family income add up to inc_fam
 * NOTE: inc_fam = inc_female + inc_male + inc_fam_nonlabor
 preserve
 	collapse inc_fam inc_male inc_female inc_fam_nonlabor *wage*, by(wave)
 	tsset wave
-	tsline inc*
+	* tsline inc*
 	sum inc*
 restore
 
@@ -199,19 +202,20 @@ by pid, sort: egen last_year = max(wave)
 by pid, sort: egen first_year = min(wave)
 keep if first_year == 1999
 keep if last_year >= 2005
+keep if wave <= 2005
 
 * Select women with no gaps between 1999 to 2005
-keep if wave <= 2005
 by pid, sort: egen c = count(wave)
-tab c
 keep if c == 4
-xtdescribe
+drop c
 
+* Count number of years working during 1999-2005
 by pid, sort: egen years_working_even = total(working_even_years )
 by pid, sort: egen years_working_odd = total(working_odd_years )
 gen working_combined = working_even_years + working_odd_years
 by pid, sort: egen years_working_combined = total( working_combined )
 
+* Display number of years working during 1999-2005
 preserve
 	keep if wave == 1999
 	tab years_working_even
@@ -219,4 +223,5 @@ preserve
 	tab years_working_combined
 restore
 
+sort pid wave
 saveold "$folder/Data/Intermediate/Basic-Panel-Louise-1999-to-2005.dta", replace version(13)
