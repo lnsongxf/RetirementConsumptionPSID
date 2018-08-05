@@ -218,3 +218,5 @@ preserve
 	tab years_working_odd
 	tab years_working_combined
 restore
+
+saveold "$folder/Data/Intermediate/Basic-Panel-Louise-1999-to-2005.dta", replace version(13)
