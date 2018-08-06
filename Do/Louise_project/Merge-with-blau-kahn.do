@@ -41,14 +41,29 @@ rename expfsq expfsq_1999
 rename exppsq exppsq_1999
 rename pexp pexp_1999 // potential experience
 
-tempvar BK_data 
+tempfile BK_data 
 save `BK_data', replace
 
-** ALTERNATVE
-* use "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID/Data/Raw/PSID_Install/ind2015er", clear
-* gen long x11101ll = ER30001*1000 + ER30002
-* lab var x11101ll "Person identification number"
-* rename x11101ll pid
+
+*******************************************************************************************************
+** Plot the experience data in B - K
+*******************************************************************************************************
+
+gen exp = expp_ + expf_
+collapse expp_* expf_* exp, by(age)
+lab var expp_ "Part time experience"
+lab var expf_ "Full time experience"
+lab var age "Age"
+lab var exp "Part + full time experience"
+gen pexp = age - 18
+lab var pexp "Potential exp = age - 18"
+
+tsset age
+tsline *exp*, name("BlauKahnExperience") title("Blau Kahn Experience")
+
+rename age age
+tempfile BK_means
+save `BK_means', replace
 
 *******************************************************************************************************
 ** Merge in experience data
@@ -130,8 +145,8 @@ drop working_even_years_censored
 gen cum_experience_since_1999 = cum_working_even_years + cum_working_odd_years
 label var cum_experience_since_1999 "Cumulative Experience since 1999 (includes both odd and even years)"
 
-gen cum_experience = expp_1999 + cum_experience_since_1999
-label var cum_experience "Cumulative Experience (expp_1999 + cum_experience_since_1999)"
+gen cum_experience = expf_1999 + expp_1999 + cum_experience_since_1999
+label var cum_experience "Cumulative Experience (expf_1999 + expp_1999 + cum_experience_since_1999)"
 
 * question: is exp 1999 inclusive or exclusive of 1999?
 
@@ -229,3 +244,21 @@ restore
 
 sort pid wave
 saveold "$folder/Data/Intermediate/Basic-Panel-Louise-1999-to-2005.dta", replace version(13)
+
+*******************************************************************************************************
+** Plot the experience data in our dataset
+*******************************************************************************************************
+
+collapse cum_experience, by(age)
+lab var cum_experience "Cumulative experience"
+
+gen pexp = age - 18
+lab var pexp "Potential exp = age - 18"
+
+tsset age
+tsline *exp*, name("OurExperience") title("Our Measure of Experience using 1999 to 2005 data + Blau Kahn")
+
+merge 1:1 age using `BK_means'
+lab var cum_experience "Experience (our measure)"
+lab var exp "Experience (Blau Kahn)"
+tsline cum_experience exp pexp, name("Both") title("Comparison")
