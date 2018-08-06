@@ -95,9 +95,13 @@ keep if first_wave == 1999
 gen working_odd_years = emp_status_1 == 1 | emp_status_2 == 1 | emp_status_3 == 1
 
 * method 2: whether you had positive hours the year before the survey
-gen working_even_years = hours_annual_female > 0
+gen working_even_years_0 = hours_annual_female > 0
+gen working_even_years_100 = hours_annual_female >= 100
 gen working_even_years_500 = hours_annual_female >= 500
 gen working_even_years_FT = hours_annual_female >= 1500
+
+* choose which definition we want to use
+gen working_even_years = working_even_years_500
 
 * compare method 1 vs method 2
 corr working_even_years working_odd_years
