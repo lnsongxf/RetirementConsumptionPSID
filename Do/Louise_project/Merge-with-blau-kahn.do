@@ -135,7 +135,11 @@ restore
 */
 
 * cumulative sum of both of these measures
-by pid: gen cum_working_odd_years = sum( working_odd_years )
+* in both cases, ignore the first entry (aka either 1998 or 1999)
+gen working_odd_years_censored = working_odd_years
+replace working_odd_years_censored = 0 if wave == 1999
+by pid: gen cum_working_odd_years = sum( working_odd_years_censored )
+drop working_odd_years_censored 
 
 gen working_even_years_censored = working_even_years
 replace working_even_years_censored = 0 if wave == 1999 // i suppose we should ignore work status in 1998
@@ -249,6 +253,10 @@ saveold "$folder/Data/Intermediate/Basic-Panel-Louise-1999-to-2005.dta", replace
 ** Plot the experience data in our dataset
 *******************************************************************************************************
 
+* edit if pid == 1269175
+
+keep if wave == 2005
+
 collapse cum_experience, by(age)
 lab var cum_experience "Cumulative experience"
 
@@ -261,4 +269,4 @@ tsline *exp*, name("OurExperience") title("Our Measure of Experience using 1999 
 merge 1:1 age using `BK_means'
 lab var cum_experience "Experience (our measure)"
 lab var exp "Experience (Blau Kahn)"
-tsline cum_experience exp pexp, name("Both") title("Comparison")
+tsline cum_experience exp pexp, name("Both") title("Comparison (2005 wave only)")
