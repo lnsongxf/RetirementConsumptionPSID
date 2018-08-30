@@ -217,37 +217,58 @@ saveold "$folder/Data/Intermediate/Basic-Panel-Louise-Final.dta", replace versio
 * drop those with very high or low wages?
 
 *******************************************************************************************************
+** Look into the power of the first stage regression
+*******************************************************************************************************
+
+* NOTE: seems results look pretty different when we restrict sample
+* I'm guessing that gas prices are correlated with the recession in some way
+* keep if wave <= 2005
+gen workstatus = hours_annual_female > 0 & hours_annual_female != .
+
+logit workstatus i.urbanicity CPI_gasoline age children*
+logit workstatus i.urbanicity##c.CPI_gasoline age children*
+
+sum CPI_gasoline, detail
+margins urbanicity, at(CPI_gas = 311 )
+margins urbanicity, at(CPI_gas = 91.6 )
+
+*******************************************************************************************************
+** Sample Selection
+*******************************************************************************************************
+
+* Try different options for sample selection
+* keep if wave == 1999 | wave == 2005 | wave == 2013 // gives 1253 households
+* keep if wave == 1999 | wave == 2001 | wave == 2003 // gives 1820 households
+keep if wave == 2001 | wave == 2003 | wave == 2005 // gives 1858 households
+* keep if wave == 2003 | wave == 2005 | wave == 2007 // gives 1740
+* keep if wave == 1999 | wave == 2005 | wave == 2007 // gives 1679 
+
+* Select women who are observed for all 3 waves
+by pid, sort: egen c = count(wave)
+keep if c == 3
+drop c
+
+*******************************************************************************************************
 ** How many women work the whole four years?
 *******************************************************************************************************
 
-* Select women observed 1999 to 2005
-by pid, sort: egen last_year = max(wave)
-by pid, sort: egen first_year = min(wave)
-keep if first_year == 1999
-keep if last_year >= 2005
-keep if wave <= 2005
-
-* Select women with no gaps between 1999 to 2005
-by pid, sort: egen c = count(wave)
-keep if c == 4
-drop c
-
-* Count number of years working during 1999-2005
+* Count number of years working during this subsample
 by pid, sort: egen years_working_even = total(working_even_years )
 by pid, sort: egen years_working_odd = total(working_odd_years )
 gen working_combined = working_even_years + working_odd_years
 by pid, sort: egen years_working_combined = total( working_combined )
 
-* Display number of years working during 1999-2005
+* Display number of years working during 2001-2005
 preserve
-	keep if wave == 1999
+	keep if wave == 2001
 	tab years_working_even
 	tab years_working_odd
 	tab years_working_combined
 restore
 
 sort pid wave
-saveold "$folder/Data/Intermediate/Basic-Panel-Louise-1999-to-2005.dta", replace version(13)
+xtdescribe
+saveold "$folder/Data/Intermediate/Basic-Panel-Louise-2001-to-2005.dta", replace version(13)
 
 *******************************************************************************************************
 ** Plot the experience data in our dataset

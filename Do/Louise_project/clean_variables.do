@@ -118,12 +118,16 @@ label var race_indiv race
 label var emp_status_indiv emp_status_lab
 
 keep pid wave family_id rel2head age sex_indiv children fsize ///
- hours_annual_female inc_fam inc_female inc_male inc_fam_nonlabor  ///
+hours_annual_female inc_fam inc_female inc_male inc_fam_nonlabor  ///
 wage_rate_female total_hours_head emp_status_indiv ///
 educ_female spouse_father_educlevel spouse_mother_educlevel year_left_college ret_year ret_year_spouse ///
 children0_2 children3_5 children6_13 children14_17m children14_17f children18_21m children18_21f married ///
 race_indiv wage_rate_male emp_status_1 emp_status_2 emp_status_3 ///
-expf_1999 expp_1999 pexp_1999
+expf_1999 expp_1999 pexp_1999 metro_pre2015
+
+rename metro_pre2015 urbanicity
+replace urbanicity = . if urbanicity == 0
+replace urbanicity = . if urbanicity == 99
 
 * Exclude inc_fam_nofemale
 * inc_head inc_spouse
