@@ -216,6 +216,14 @@ saveold "$folder/Data/Intermediate/Basic-Panel-Louise-Final.dta", replace versio
 * top coding on wage_rate_head etc?
 * drop those with very high or low wages?
 
+preserve
+	keep CPI_gasoline wave 
+	duplicates drop
+	sort wave 
+	tsset wave
+	tsline CPI, name(gas, replace)
+restore
+
 *******************************************************************************************************
 ** Look into the power of the first stage regression
 *******************************************************************************************************
