@@ -16,6 +16,7 @@ global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 * exclude individuals earning less than $1 or more than $250 per hour in 1983
 * dollars
 
+log using "$folder\Results\Louise\Logit.smcl", replace
 use "$folder\Data\Raw\Blau_Kahn_JOLE_2013\1980_1990_1999_blau_kahn_regression_ready_jole_psid_data.dta" 
 
 * gen long x11101ll = ER30001*1000 + ER30002
@@ -232,9 +233,22 @@ restore
 * I'm guessing that gas prices are correlated with the recession in some way
 * keep if wave <= 2005
 gen workstatus = hours_annual_female > 0 & hours_annual_female != .
+gen inc_nonfemale = inc_fam - inc_female
+gen age2 = age^2
+gen educ_preHS = educ_female < 12
+gen educ_HS = educ_female == 12
+gen educ_some_college = educ_female > 12 & educ_female < 16
+gen educ_college = educ_female == 16
+gen educ_beyond = educ_female > 16
 
+
+* Initial logit with very few controls
 logit workstatus i.urbanicity CPI_gasoline age children*
 logit workstatus i.urbanicity##c.CPI_gasoline age children*
+
+* Logit with more controls
+logit workstatus i.urbanicity CPI_gasoline age age2 children* inc_nonfemale i.race educ_*
+logit workstatus i.urbanicity##c.CPI_gasoline age age2 children* inc_nonfemale i.race educ_*
 
 sum CPI_gasoline, detail
 margins urbanicity, at(CPI_gas = 311 )
@@ -279,9 +293,23 @@ xtdescribe
 saveold "$folder/Data/Intermediate/Basic-Panel-Louise-2001-to-2005.dta", replace version(13)
 
 *******************************************************************************************************
+** Logit on the 2001 to 2005 sample
+*******************************************************************************************************
+
+logit workstatus i.urbanicity#c.CPI_gasoline age age2 children* inc_nonfemale i.race educ_*
+logit workstatus i.urbanicity##c.CPI_gasoline age age2 children* inc_nonfemale i.race educ_*
+
+sum CPI_gasoline, detail
+margins urbanicity, at(CPI_gas = 159.7 )
+margins urbanicity, at(CPI_gas = 116 )
+
+log close
+
+*******************************************************************************************************
 ** Plot the experience data in our dataset
 *******************************************************************************************************
 
+/*
 * edit if pid == 1269175
 
 keep if wave == 2005
@@ -299,3 +327,5 @@ merge 1:1 age using `BK_means'
 lab var cum_experience "Experience (our measure)"
 lab var exp "Experience (Blau Kahn)"
 tsline cum_experience exp pexp, name("Both") title("Comparison (2005 wave only)")
+
+*/
