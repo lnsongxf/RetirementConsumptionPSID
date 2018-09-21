@@ -32,7 +32,10 @@ global residualized_vars 1 // original version was 0 (no residualization) (NOTE:
 global house_price_by_age 0 // plot distribution of house price by age?
 
 global compute_htm_persistence 0
-global makeplots 1
+global makeplots 0
+
+
+cap net install xtserial.pkg
 
 * TODO: add in mortgage debt vs house value
 * TODO: drop imputed values (ex tab acc_homeequity)
@@ -80,6 +83,29 @@ qui do "$folder\Do\Housing\Find-First-Home-Purchase.do"
 
 * Version 5 (New - remove dummy_mort b/c in the model dummy_mort is collinear with housing)
 local non_log_endog_vars WHtM PHtM housing
+
+****************************************************************************************************
+** Find housing upgrades/downgrades (owner to owner transitions)
+****************************************************************************************************
+* note: can see if they take out a second mortgage... interesting!
+tab type_mortgage1
+tab type_mortgage2
+tab year_moved
+
+* it seems they only ask year_moved if you've moved
+gen dif = year_moved - wave
+tab year_moved
+
+gen owner_transition1 = (year_moved == wave | year_moved == wave-1) & homeowner == 1 & homeowner == 1  & L.homeowner == 1
+gen owner_transition2 = (year_moved == wave | year_moved == wave-1 | year_moved == wave-2) & L.homeowner == 1
+gen owner_transition3 = (year_moved == wave | year_moved == wave-1 | year_moved == wave-2) & year_moved != L.year_moved & L.homeowner == 1
+edit pid wave housevalue year_moved current_state owner_transition* room_count mortgage1 mortgage2 if homeowner == 1
+tab owner_transition2 homeowner, missing
+tab owner_transition2 owner_transition3
+
+gen owner_transition = owner_transition3 // best definition
+gen owner_upgrade = owner_transition & (housevalue_real > L.housevalue_real)
+gen owner_downgrade = owner_transition & (housevalue_real <= L.housevalue_real)
 
 
 ****************************************************************************************************
@@ -444,6 +470,58 @@ restore
 */
 
 ****************************************************************************************************
+** Look at residual income variance
+****************************************************************************************************
+* * from median 
+* local inc_reg_age2 = -0.05277766141931223
+* local Y0_std_scale = 0.9525554036827213
+* local inc_reg_constant = 5.9946025528994085
+* local inc_reg_age3 = 0.0031580528858719016
+* local inc_reg_age = 0.28652374573188877
+
+* *from mean
+* local inc_reg_constant = 7.353390893779766
+* local inc_reg_age      = 0.16497734614396434
+* local inc_reg_age2     = -0.023644664413939136
+* local inc_reg_age3     = 0.001
+* local Y0_std_scale     = 0.8394452421339706
+
+* * Note: already in logs
+* gen G = `inc_reg_constant' + age * `inc_reg_age' + ((age^2) * `inc_reg_age2' / 10) + ((age^3) * `inc_reg_age3' / 100)
+
+* preserve
+* 	keep age G
+* 	duplicates drop
+* 	tsset age
+* 	tsline G, name(G1, replace)
+* restore
+
+* preserve
+* 	collapse G log_income, by(age)
+* 	tsset age
+* 	tsline G log_income, name(G2, replace)
+* restore
+
+* gen y_resid = log_income - G
+
+* preserve
+* 	collapse (mean) y_resid (sd) sd = y_resid, by(age)
+* 	gen var = sd ^ 2
+* 	tsset age 
+* 	tsline y_resid, name(y, replace)
+* 	tsline var, name(var, replace)
+* restore
+
+* preserve
+* 	gen Z = log_income - G
+* 	collapse Z (sd) sd = Z, by(age)
+* 	gen var = sd^2
+* 	tsset age
+* 	tsline var, name(varZ, replace)
+* restore
+
+
+****************************************************************************************************
 ** Test our version of SU regression
 ****************************************************************************************************
 /*
@@ -500,7 +578,6 @@ sureg `sureg_command'
 
 gen age2d = age2/10
 reg log_income age age2d
-sdfdsf
 
 
 ****************************************************************************************************
@@ -527,8 +604,48 @@ sdfdsf
 
 if $estimate_reg_by_age == 0{
 	di "sureg (`endog_vars' =  L.(`endog_vars') `exog_vars' )"	
-    sureg (`endog_vars' =  L.(`endog_vars') `exog_vars' )
+    sureg (`endog_vars' =  L.(`endog_vars') `exog_vars' ), corr
+	
+	* TODO: check whether thie regression is well specified from an econometric sense
+	* test serially uncorrelated errors with durbin watson, test homoskedasticity with breusch-pagan, test normal residuals with  Jarque-Bera-test of normality perhaps, test for nonlinearities in the data
+	* https://stats.idre.ucla.edu/stata/webbooks/reg/chapter2/stata-webbooksregressionwith-statachapter-2-regression-diagnostics/
+	* to test nonlinearity: plot y predicted on y. should make a linear line. if not linear, you might be missing some linearity
+	
+* 	reg log_consumption L.(log_consumption log_liq_wealth log_housing_wealth log_income log_mortgage WHtM PHtM housing) age age2 age3 bought
+* 	reg log_housing_wealth L.(log_consumption log_liq_wealth log_housing_wealth log_income log_mortgage WHtM PHtM housing) age age2 age3 bought
+* 	reg log_housing_wealth L(1).(log_consumption log_liq_wealth log_housing_wealth log_income log_mortgage WHtM PHtM housing) age age2 age3 bought sold owner_upgrade owner_downgrade
+	
+* 	reg log_mortgage L(1).(log_consumption log_liq_wealth log_housing_wealth log_income log_mortgage WHtM PHtM housing) age age2 age3 bought sold owner_upgrade owner_downgrade
 
+* 	* look at residuals
+* 	* http://campusguides.lib.utah.edu/c.php?g=160853&p=1054157
+* 	cap drop r
+* 	predict r, resid
+* 	sum r, detail
+* // 	replace r = . if housing == 0	
+* pnorm r, name(pnorm, replace)
+* 	qnorm r, name(qnorm, replace)
+* 	swilk r // P value is based on the assumption that the distribution is normal. Very large p value -> cannot reject that r is normally distributed
+* 			// Small p value, <= 0.05: evidence against the null hypothesis, thus reject the null. Large p value -> cannot reject the null
+* 	kdensity r, normal  name(kdens, replace)
+	
+	
+	
+// 	gen lag_log_consumption = L.log_consumption
+// 	xtset, clear
+// 	reg log_consumption lag_log_consumption age age2 age3 bought
+//	
+// 	estat bgodfrey
+// 	estat dwatson
+	
+	* doesnt work b/c takes the first difference
+	* xtserial log_consumption lag_log_consumption age age2 age3 bought, output
+	
+	* estat hettest
+	* estat imtest // is this needed?
+	* estat ovtest
+	
+	
     * matrix list e(b) // coefs
     mat coefs = e(b)
     mat sigma = e(Sigma)
@@ -731,6 +848,7 @@ restore
 ** Save age patterns
 ****************************************************************************************************
 
+* MEDIANS
 preserve
   keep if F.sample == 1 | sample == 1
   keep pid `endog_vars' `level_vars' `control_vars'
@@ -770,6 +888,9 @@ preserve
   graph export "$folder\Results\Aux_Model_Estimates\Medians\PHtM.pdf", as(pdf) replace
 restore
 
+
+
+* MEANS
 preserve
   keep if F.sample == 1 | sample == 1
   keep pid `endog_vars' `level_vars' `control_vars'
@@ -777,9 +898,22 @@ preserve
   gen cons = 1
   gen log_housing_wealth_if_owner = log_housing_wealth if housing == 1
 
-  collapse (mean) `endog_vars' `level_vars' log_housing_wealth_if_owner, by(age)
+  * Compute means and sd's
+	local collapse_cmd ""
+	foreach var of varlist `endog_vars' `level_vars' log_housing_wealth_if_owner {
+		local collapse_cmd " `collapse_cmd' (mean) `var' (sd) sd_`var' = `var' "
+	}
+	di "`collapse_cmd'"
+
+
+  collapse `collapse_cmd', by(age)
   tsset age
   sort age
+
+  foreach var of varlist `endog_vars' `level_vars' log_housing_wealth_if_owner {
+  	gen var_`var' = sd_`var' ^ 2
+  }
+
   export delimited using "$folder/Results/Aux_Model_Estimates/PSID_by_age_mean.csv", replace
   
   * Export Plots
@@ -809,6 +943,39 @@ preserve
   graph export "$folder\Results\Aux_Model_Estimates\Means\PHtM.pdf", as(pdf) replace
     
 restore
+
+
+** Compute by 5 year age buckets
+preserve
+  keep if F.sample == 1 | sample == 1
+  keep pid `endog_vars' `level_vars' `control_vars'
+  order pid `endog_vars' `level_vars' `control_vars'
+  gen cons = 1
+  gen log_housing_wealth_if_owner = log_housing_wealth if housing == 1
+
+  * Compute means and sd's
+  local collapse_cmd ""
+  foreach var of varlist `endog_vars' `level_vars' log_housing_wealth_if_owner {
+  	local collapse_cmd " `collapse_cmd' (mean) `var' (sd) sd_`var' = `var' "
+  }
+  di "`collapse_cmd'"
+
+  * age buckets
+  * defined based on the right hand
+  egen age_bucket = cut(age), at(21(5)66)
+  replace age_b = age_b + 4
+
+  collapse `collapse_cmd', by(age_bucket)
+  tsset age
+  sort age
+
+  foreach var of varlist `endog_vars' `level_vars' log_housing_wealth_if_owner {
+  	gen var_`var' = sd_`var' ^ 2
+  }
+
+  export delimited using "$folder/Results/Aux_Model_Estimates/PSID_by_age_buckets_mean.csv", replace
+restore
+
 
 ****************************************************************************************************
 ** Look at wealthy hand to mouth
