@@ -243,7 +243,7 @@ gen educ_beyond = educ_female > 16
 
 
 * Initial logit with very few controls
-logit workstatus i.urbanicity CPI_gasoline age children*
+logit workstatus i.urbanicity CPI_gasoline age children* 
 logit workstatus i.urbanicity##c.CPI_gasoline age children*
 
 * Logit with more controls
@@ -261,9 +261,11 @@ margins urbanicity, at(CPI_gas = 91.6 )
 * Try different options for sample selection
 * keep if wave == 1999 | wave == 2005 | wave == 2013 // gives 1253 households
 * keep if wave == 1999 | wave == 2001 | wave == 2003 // gives 1820 households
-keep if wave == 2001 | wave == 2003 | wave == 2005 // gives 1858 households
+* keep if wave == 2001 | wave == 2003 | wave == 2005 // gives 1858 households. min gas price = 116, max = 159
 * keep if wave == 2003 | wave == 2005 | wave == 2007 // gives 1740
 * keep if wave == 1999 | wave == 2005 | wave == 2007 // gives 1679 
+keep if wave == 1999 | wave == 2003 | wave == 2005 // gives 1822 households. min gas price = 91, max = 159 
+* keep if wave == 1999 | wave == 2003 | wave == 2007 // gives 1659 households. min gas price = 91, max = 219
 
 * Select women who are observed for all 3 waves
 by pid, sort: egen c = count(wave)
@@ -290,18 +292,26 @@ restore
 
 sort pid wave
 xtdescribe
-saveold "$folder/Data/Intermediate/Basic-Panel-Louise-2001-to-2005.dta", replace version(13)
+* saveold "$folder/Data/Intermediate/Basic-Panel-Louise-2001-to-2005.dta", replace version(13)
 
 *******************************************************************************************************
 ** Logit on the 2001 to 2005 sample
 *******************************************************************************************************
 
+sum CPI_gasoline, detail
+local p1 `r(p1)'
+local p99 `r(p99)'
+di `p1'
+di `p99'
+
+replace urbanicity = 4 if urbanicity >= 4 // Population less than 250k 
+
 logit workstatus i.urbanicity#c.CPI_gasoline age age2 children* inc_nonfemale i.race educ_*
 logit workstatus i.urbanicity##c.CPI_gasoline age age2 children* inc_nonfemale i.race educ_*
 
-sum CPI_gasoline, detail
-margins urbanicity, at(CPI_gas = 159.7 )
-margins urbanicity, at(CPI_gas = 116 )
+
+margins urbanicity, at(CPI_gas = `p1'  )
+margins urbanicity, at(CPI_gas = `p99' )
 
 log close
 
