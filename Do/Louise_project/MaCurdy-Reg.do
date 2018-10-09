@@ -79,4 +79,11 @@ foreach var of varlist hours log_wage_rate inc_nonwife {
 sum d_*_conditioned, detail
 sum *_robinson, detail
 
-reg hours_robinson log_wage_rate_robinson inc_nonwife_robinson, nocons
+reg hours log_wage_rate inc_nonwife if counter == 4, nocons
+
+* MaCurdy Regression (not controlling for selection)
+reg d_hours d_log_wage_rate d_inc_nonwife if counter == 4, nocons
+
+* Robinson Regression
+reg hours_robinson log_wage_rate_robinson inc_nonwife_robinson if counter == 4, nocons
+
