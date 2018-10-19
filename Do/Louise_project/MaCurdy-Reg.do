@@ -87,3 +87,22 @@ reg d_hours d_log_wage_rate d_inc_nonwife if counter == 4, nocons
 * Robinson Regression
 reg hours_robinson log_wage_rate_robinson inc_nonwife_robinson if counter == 4, nocons
 
+
+* Heckman
+heckman hours log_wage_rate inc_nonwife, select(working_even_years_100 = inc_nonwife age children0_2 children3_5 children6_13 cum_experience mobility cum_experience2 inc_nonwife2) mills(mills_ratio)
+
+* Question: why doesnt this command recover the previous coefs?
+reg hours log_wage_rate inc_nonwife mills_ratio
+
+
+heckman hours log_wage_rate inc_nonwife if wave == 2001, select(working_even_years_100 = inc_nonwife age children0_2 children3_5 children6_13 cum_experience mobility cum_experience2 inc_nonwife2) mills(mills_ratio1)
+heckman hours log_wage_rate inc_nonwife if wave == 2003, select(working_even_years_100 = inc_nonwife age children0_2 children3_5 children6_13 cum_experience mobility cum_experience2 inc_nonwife2) mills(mills_ratio2)
+heckman hours log_wage_rate inc_nonwife if wave == 2005, select(working_even_years_100 = inc_nonwife age children0_2 children3_5 children6_13 cum_experience mobility cum_experience2 inc_nonwife2) mills(mills_ratio3)
+
+gen mills = .
+replace mills = mills_ratio1 if wave == 2001
+replace mills = mills_ratio2 if wave == 2003
+replace mills = mills_ratio3 if wave == 2005
+
+* gen d_mills_ratio = D.mills_ratio
+* reg d_hours d_log_wage_rate d_inc_nonwife d_mills_ratio
