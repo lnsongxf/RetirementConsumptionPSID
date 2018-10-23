@@ -259,17 +259,20 @@ margins urbanicity, at(CPI_gas = 91.6 )
 *******************************************************************************************************
 
 * Try different options for sample selection
+keep if wave == 1999 | wave == 2001 | wave == 2003 | wave == 2005
+* keep if wave == 2009 | wave == 2011 | wave == 2013 | wave == 2015
+
 * keep if wave == 1999 | wave == 2005 | wave == 2013 // gives 1253 households
 * keep if wave == 1999 | wave == 2001 | wave == 2003 // gives 1820 households
 * keep if wave == 2001 | wave == 2003 | wave == 2005 // gives 1858 households. min gas price = 116, max = 159
 * keep if wave == 2003 | wave == 2005 | wave == 2007 // gives 1740
 * keep if wave == 1999 | wave == 2005 | wave == 2007 // gives 1679 
-keep if wave == 1999 | wave == 2003 | wave == 2005 // gives 1822 households. min gas price = 91, max = 159 
+* keep if wave == 1999 | wave == 2003 | wave == 2005 // gives 1822 households. min gas price = 91, max = 159 
 * keep if wave == 1999 | wave == 2003 | wave == 2007 // gives 1659 households. min gas price = 91, max = 219
 
 * Select women who are observed for all 3 waves
 by pid, sort: egen c = count(wave)
-keep if c == 3
+keep if c == 4
 drop c
 
 *******************************************************************************************************
@@ -293,6 +296,9 @@ restore
 sort pid wave
 xtdescribe
 * saveold "$folder/Data/Intermediate/Basic-Panel-Louise-2001-to-2005.dta", replace version(13)
+
+saveold "$folder/Data/Intermediate/Basic-Panel-Louise-1999-to-2005.dta", replace version(13)
+* saveold "$folder/Data/Intermediate/Basic-Panel-Louise-2009-to-2015.dta", replace version(13)
 
 *******************************************************************************************************
 ** Logit on the 2001 to 2005 sample

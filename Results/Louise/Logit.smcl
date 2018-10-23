@@ -3,7 +3,7 @@
       name:  {res}<unnamed>
        {txt}log:  {res}C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID\Results\Louise\Logit.smcl
   {txt}log type:  {res}smcl
- {txt}opened on:  {res}10 Sep 2018, 23:23:24
+ {txt}opened on:  {res}24 Oct 2018, 00:07:16
 {txt}
 {com}. use "$folder\Data\Raw\Blau_Kahn_JOLE_2013\1980_1990_1999_blau_kahn_regression_ready_jole_psid_data.dta" 
 {txt}
@@ -51,8 +51,8 @@
 . tempfile BK_data 
 {txt}
 {com}. save `BK_data', replace
-{txt}(note: file C:\Users\pedm\AppData\Local\Temp\ST_69dc_000001.tmp not found)
-file C:\Users\pedm\AppData\Local\Temp\ST_69dc_000001.tmp saved
+{txt}(note: file C:\Users\pedm\AppData\Local\Temp\ST_3ae8_000001.tmp not found)
+file C:\Users\pedm\AppData\Local\Temp\ST_3ae8_000001.tmp saved
 
 {com}. 
 . 
@@ -89,8 +89,8 @@ file C:\Users\pedm\AppData\Local\Temp\ST_69dc_000001.tmp saved
 {com}. tempfile BK_means
 {txt}
 {com}. save `BK_means', replace
-{txt}(note: file C:\Users\pedm\AppData\Local\Temp\ST_69dc_000002.tmp not found)
-file C:\Users\pedm\AppData\Local\Temp\ST_69dc_000002.tmp saved
+{txt}(note: file C:\Users\pedm\AppData\Local\Temp\ST_3ae8_000002.tmp not found)
+file C:\Users\pedm\AppData\Local\Temp\ST_3ae8_000002.tmp saved
 
 {com}. 
 . *******************************************************************************************************
@@ -439,7 +439,7 @@ Distribution of T_i:   min      5%     25%       50%       75%     95%     max
 > educ_female spouse_father_educlevel spouse_mother_educlevel year_left_college ret_year ret_year_spouse ///
 > children0_2 children3_5 children6_13 children14_17m children14_17f children18_21m children18_21f married ///
 > race_indiv wage_rate_male emp_status_1 emp_status_2 emp_status_3 ///
-> expf_1999 expp_1999 pexp_1999 metro_pre2015
+> expf_1999 expp_1999 pexp_1999 metro_pre2015 why_last_job_end*
 {txt}
 {com}. 
 . rename metro_pre2015 urbanicity
@@ -877,7 +877,7 @@ file C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID/Data/Intermediate/
 {com}. 
 . 
 . * Initial logit with very few controls
-. logit workstatus i.urbanicity CPI_gasoline age children*
+. logit workstatus i.urbanicity CPI_gasoline age children* 
 
 {res}{txt}Iteration 0:{space 3}log likelihood = {res:-7416.1482}  
 Iteration 1:{space 3}log likelihood = {res:-7068.2582}  
@@ -1165,19 +1165,24 @@ urbanicity#c.CPI_gasoline {c |}
 . *******************************************************************************************************
 . 
 . * Try different options for sample selection
+. keep if wave == 1999 | wave == 2001 | wave == 2003 | wave == 2005
+{txt}(7,928 observations deleted)
+
+{com}. * keep if wave == 2009 | wave == 2011 | wave == 2013 | wave == 2015
+. 
 . * keep if wave == 1999 | wave == 2005 | wave == 2013 // gives 1253 households
 . * keep if wave == 1999 | wave == 2001 | wave == 2003 // gives 1820 households
-. keep if wave == 2001 | wave == 2003 | wave == 2005 // gives 1858 households
-{txt}(9,853 observations deleted)
-
-{com}. * keep if wave == 2003 | wave == 2005 | wave == 2007 // gives 1740
+. * keep if wave == 2001 | wave == 2003 | wave == 2005 // gives 1858 households. min gas price = 116, max = 159
+. * keep if wave == 2003 | wave == 2005 | wave == 2007 // gives 1740
 . * keep if wave == 1999 | wave == 2005 | wave == 2007 // gives 1679 
+. * keep if wave == 1999 | wave == 2003 | wave == 2005 // gives 1822 households. min gas price = 91, max = 159 
+. * keep if wave == 1999 | wave == 2003 | wave == 2007 // gives 1659 households. min gas price = 91, max = 219
 . 
 . * Select women who are observed for all 3 waves
 . by pid, sort: egen c = count(wave)
 {txt}
-{com}. keep if c == 3
-{txt}(364 observations deleted)
+{com}. keep if c == 4
+{txt}(695 observations deleted)
 
 {com}. drop c
 {txt}
@@ -1200,46 +1205,50 @@ urbanicity#c.CPI_gasoline {c |}
 . preserve
 {txt}
 {com}.         keep if wave == 2001
-{txt}(3,716 observations deleted)
+{txt}(5,376 observations deleted)
 
 {com}.         tab years_working_even
 
 {txt}years_worki {c |}
     ng_even {c |}      Freq.     Percent        Cum.
 {hline 12}{c +}{hline 35}
-          0 {c |}{res}        282       15.18       15.18
-{txt}          1 {c |}{res}        160        8.61       23.79
-{txt}          2 {c |}{res}        250       13.46       37.24
-{txt}          3 {c |}{res}      1,166       62.76      100.00
+          0 {c |}{res}        230       12.83       12.83
+{txt}          1 {c |}{res}        104        5.80       18.64
+{txt}          2 {c |}{res}        160        8.93       27.57
+{txt}          3 {c |}{res}        234       13.06       40.63
+{txt}          4 {c |}{res}      1,064       59.38      100.00
 {txt}{hline 12}{c +}{hline 35}
-      Total {c |}{res}      1,858      100.00
+      Total {c |}{res}      1,792      100.00
 {txt}
 {com}.         tab years_working_odd
 
 {txt}years_worki {c |}
      ng_odd {c |}      Freq.     Percent        Cum.
 {hline 12}{c +}{hline 35}
-          0 {c |}{res}        298       16.04       16.04
-{txt}          1 {c |}{res}        153        8.23       24.27
-{txt}          2 {c |}{res}        275       14.80       39.07
-{txt}          3 {c |}{res}      1,132       60.93      100.00
+          0 {c |}{res}        230       12.83       12.83
+{txt}          1 {c |}{res}        129        7.20       20.03
+{txt}          2 {c |}{res}        155        8.65       28.68
+{txt}          3 {c |}{res}        289       16.13       44.81
+{txt}          4 {c |}{res}        989       55.19      100.00
 {txt}{hline 12}{c +}{hline 35}
-      Total {c |}{res}      1,858      100.00
+      Total {c |}{res}      1,792      100.00
 {txt}
 {com}.         tab years_working_combined
 
 {txt}years_worki {c |}
 ng_combined {c |}      Freq.     Percent        Cum.
 {hline 12}{c +}{hline 35}
-          0 {c |}{res}        239       12.86       12.86
-{txt}          1 {c |}{res}         80        4.31       17.17
-{txt}          2 {c |}{res}         81        4.36       21.53
-{txt}          3 {c |}{res}         87        4.68       26.21
-{txt}          4 {c |}{res}        131        7.05       33.26
-{txt}          5 {c |}{res}        210       11.30       44.56
-{txt}          6 {c |}{res}      1,030       55.44      100.00
+          0 {c |}{res}        192       10.71       10.71
+{txt}          1 {c |}{res}         52        2.90       13.62
+{txt}          2 {c |}{res}         63        3.52       17.13
+{txt}          3 {c |}{res}         67        3.74       20.87
+{txt}          4 {c |}{res}         83        4.63       25.50
+{txt}          5 {c |}{res}         90        5.02       30.52
+{txt}          6 {c |}{res}        139        7.76       38.28
+{txt}          7 {c |}{res}        199       11.10       49.39
+{txt}          8 {c |}{res}        907       50.61      100.00
 {txt}{hline 12}{c +}{hline 35}
-      Total {c |}{res}      1,858      100.00
+      Total {c |}{res}      1,792      100.00
 {txt}
 {com}. restore
 {txt}
@@ -1248,168 +1257,195 @@ ng_combined {c |}      Freq.     Percent        Cum.
 {txt}
 {com}. xtdescribe
 
-     {txt}pid:  {res}4031{txt}, {res}4173{txt}, ..., {res}6872171                          {txt}n ={res}       1858
-    {txt}wave:  {res}2001, 2003, ..., 2005                             {txt}T ={res}          3
+     {txt}pid:  {res}4173{txt}, {res}4179{txt}, ..., {res}6872171                          {txt}n ={res}       1792
+    {txt}wave:  {res}1999, 2001, ..., 2005                             {txt}T ={res}          4
            {txt}Delta(wave) = {res}2 units
-           {txt}Span(wave)  = {res}3 periods
+           {txt}Span(wave)  = {res}4 periods
            {txt}(pid*wave uniquely identifies each observation)
 
 Distribution of T_i:   min      5%     25%       50%       75%     95%     max
-                    {res}     3       3       3         3         3       3       3
+                    {res}     4       4       4         4         4       4       4
 
 {txt}{col 6}Freq.  Percent    Cum. {c |}  Pattern
  {hline 27}{c +}{c -}{c -}{hline 7}
-{res}     1858    100.00  100.00{txt} {c |}  {res}111
+{res}     1792    100.00  100.00{txt} {c |}  {res}1111
 {txt} {hline 27}{c +}{c -}{c -}{hline 7}
-{res}     1858    100.00        {txt} {c |}  {res}XXX
+{res}     1792    100.00        {txt} {c |}  {res}XXXX
 {txt}
-{com}. saveold "$folder/Data/Intermediate/Basic-Panel-Louise-2001-to-2005.dta", replace version(13)
+{com}. * saveold "$folder/Data/Intermediate/Basic-Panel-Louise-2001-to-2005.dta", replace version(13)
+. 
+. saveold "$folder/Data/Intermediate/Basic-Panel-Louise-1999-to-2005.dta", replace version(13)
 {txt}(saving in Stata 13 format)
-file C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID/Data/Intermediate/Basic-Panel-Louise-2001-to-2005.dta saved
+file C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID/Data/Intermediate/Basic-Panel-Louise-1999-to-2005.dta saved
 
-{com}. 
+{com}. * saveold "$folder/Data/Intermediate/Basic-Panel-Louise-2009-to-2015.dta", replace version(13)
+. 
 . *******************************************************************************************************
 . ** Logit on the 2001 to 2005 sample
 . *******************************************************************************************************
 . 
-. logit workstatus i.urbanicity#c.CPI_gasoline age age2 children* inc_nonfemale i.race educ_*
-
-{txt}note: educ_beyond omitted because of collinearity
-{res}{txt}Iteration 0:{space 3}log likelihood = {res:-2751.7471}  
-Iteration 1:{space 3}log likelihood = {res:-2501.8231}  
-Iteration 2:{space 3}log likelihood = {res:-2487.4549}  
-Iteration 3:{space 3}log likelihood = {res: -2487.407}  
-Iteration 4:{space 3}log likelihood = {res: -2487.407}  
-{res}
-{txt}Logistic regression{col 49}Number of obs{col 67}= {res}     5,542
-{txt}{col 49}LR chi2({res}27{txt}){col 67}= {res}    528.68
-{txt}{col 49}Prob > chi2{col 67}= {res}    0.0000
-{txt}Log likelihood = {res} -2487.407{txt}{col 49}Pseudo R2{col 67}= {res}    0.0961
-
-{txt}{hline 26}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
-{col 1}               workstatus{col 27}{c |}      Coef.{col 39}   Std. Err.{col 51}      z{col 59}   P>|z|{col 67}     [95% Con{col 80}f. Interval]
-{hline 26}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
-urbanicity#c.CPI_gasoline {c |}
-{space 23}1  {c |}{col 27}{res}{space 2}  .000911{col 39}{space 2} .0020283{col 50}{space 1}    0.45{col 59}{space 3}0.653{col 67}{space 4}-.0030644{col 80}{space 3} .0048864
-{txt}{space 23}2  {c |}{col 27}{res}{space 2} .0005195{col 39}{space 2} .0020278{col 50}{space 1}    0.26{col 59}{space 3}0.798{col 67}{space 4}-.0034549{col 80}{space 3} .0044939
-{txt}{space 23}3  {c |}{col 27}{res}{space 2}-.0005205{col 39}{space 2} .0019871{col 50}{space 1}   -0.26{col 59}{space 3}0.793{col 67}{space 4}-.0044151{col 80}{space 3} .0033742
-{txt}{space 23}4  {c |}{col 27}{res}{space 2}-.0012806{col 39}{space 2} .0021039{col 50}{space 1}   -0.61{col 59}{space 3}0.543{col 67}{space 4}-.0054042{col 80}{space 3} .0028431
-{txt}{space 23}5  {c |}{col 27}{res}{space 2} .0001526{col 39}{space 2} .0022834{col 50}{space 1}    0.07{col 59}{space 3}0.947{col 67}{space 4}-.0043229{col 80}{space 3}  .004628
-{txt}{space 23}6  {c |}{col 27}{res}{space 2}-.0030975{col 39}{space 2} .0023191{col 50}{space 1}   -1.34{col 59}{space 3}0.182{col 67}{space 4}-.0076429{col 80}{space 3} .0014479
-{txt}{space 23}7  {c |}{col 27}{res}{space 2}-.0003567{col 39}{space 2} .0021109{col 50}{space 1}   -0.17{col 59}{space 3}0.866{col 67}{space 4} -.004494{col 80}{space 3} .0037807
-{txt}{space 23}8  {c |}{col 27}{res}{space 2} .0014116{col 39}{space 2} .0021063{col 50}{space 1}    0.67{col 59}{space 3}0.503{col 67}{space 4}-.0027167{col 80}{space 3} .0055398
-{txt}{space 23}9  {c |}{col 27}{res}{space 2} -.000076{col 39}{space 2} .0023035{col 50}{space 1}   -0.03{col 59}{space 3}0.974{col 67}{space 4}-.0045909{col 80}{space 3} .0044389
-{txt}{space 25} {c |}
-{space 22}age {c |}{col 27}{res}{space 2} .0814494{col 39}{space 2} .0341434{col 50}{space 1}    2.39{col 59}{space 3}0.017{col 67}{space 4} .0145296{col 80}{space 3} .1483691
-{txt}{space 21}age2 {c |}{col 27}{res}{space 2}-.0016784{col 39}{space 2} .0003765{col 50}{space 1}   -4.46{col 59}{space 3}0.000{col 67}{space 4}-.0024164{col 80}{space 3}-.0009405
-{txt}{space 17}children {c |}{col 27}{res}{space 2}-1.773574{col 39}{space 2} 1.017321{col 50}{space 1}   -1.74{col 59}{space 3}0.081{col 67}{space 4}-3.767487{col 80}{space 3} .2203395
-{txt}{space 14}children0_2 {c |}{col 27}{res}{space 2} .9459035{col 39}{space 2} 1.023179{col 50}{space 1}    0.92{col 59}{space 3}0.355{col 67}{space 4} -1.05949{col 80}{space 3} 2.951297
-{txt}{space 14}children3_5 {c |}{col 27}{res}{space 2} 1.028302{col 39}{space 2} 1.021147{col 50}{space 1}    1.01{col 59}{space 3}0.314{col 67}{space 4}-.9731092{col 80}{space 3} 3.029714
-{txt}{space 13}children6_13 {c |}{col 27}{res}{space 2} 1.337016{col 39}{space 2} 1.017842{col 50}{space 1}    1.31{col 59}{space 3}0.189{col 67}{space 4} -.657919{col 80}{space 3}  3.33195
-{txt}{space 11}children14_17m {c |}{col 27}{res}{space 2} 1.640676{col 39}{space 2} 1.024244{col 50}{space 1}    1.60{col 59}{space 3}0.109{col 67}{space 4}-.3668048{col 80}{space 3} 3.648158
-{txt}{space 11}children14_17f {c |}{col 27}{res}{space 2} 1.690234{col 39}{space 2} 1.024532{col 50}{space 1}    1.65{col 59}{space 3}0.099{col 67}{space 4}-.3178129{col 80}{space 3}  3.69828
-{txt}{space 11}children18_21m {c |}{col 27}{res}{space 2}  .180083{col 39}{space 2} .1215764{col 50}{space 1}    1.48{col 59}{space 3}0.139{col 67}{space 4}-.0582024{col 80}{space 3} .4183685
-{txt}{space 11}children18_21f {c |}{col 27}{res}{space 2} .3166459{col 39}{space 2} .1332009{col 50}{space 1}    2.38{col 59}{space 3}0.017{col 67}{space 4} .0555768{col 80}{space 3} .5777149
-{txt}{space 12}inc_nonfemale {c |}{col 27}{res}{space 2}-2.19e-06{col 39}{space 2} 3.43e-07{col 50}{space 1}   -6.37{col 59}{space 3}0.000{col 67}{space 4}-2.86e-06{col 80}{space 3}-1.51e-06
-{txt}{space 25} {c |}
-{space 15}race_indiv {c |}
-{space 23}2  {c |}{col 27}{res}{space 2} .3212615{col 39}{space 2} .1022666{col 50}{space 1}    3.14{col 59}{space 3}0.002{col 67}{space 4} .1208227{col 80}{space 3} .5217003
-{txt}{space 23}7  {c |}{col 27}{res}{space 2}-.3579443{col 39}{space 2} .2198441{col 50}{space 1}   -1.63{col 59}{space 3}0.103{col 67}{space 4}-.7888309{col 80}{space 3} .0729422
-{txt}{space 25} {c |}
-{space 14}educ_female {c |}{col 27}{res}{space 2} -.003258{col 39}{space 2} .0035775{col 50}{space 1}   -0.91{col 59}{space 3}0.362{col 67}{space 4}-.0102698{col 80}{space 3} .0037538
-{txt}{space 15}educ_preHS {c |}{col 27}{res}{space 2}-1.727592{col 39}{space 2} .1799487{col 50}{space 1}   -9.60{col 59}{space 3}0.000{col 67}{space 4}-2.080285{col 80}{space 3}  -1.3749
-{txt}{space 18}educ_HS {c |}{col 27}{res}{space 2}-.6345903{col 39}{space 2} .1505423{col 50}{space 1}   -4.22{col 59}{space 3}0.000{col 67}{space 4}-.9296477{col 80}{space 3}-.3395329
-{txt}{space 8}educ_some_college {c |}{col 27}{res}{space 2}-.3598546{col 39}{space 2} .1506086{col 50}{space 1}   -2.39{col 59}{space 3}0.017{col 67}{space 4} -.655042{col 80}{space 3}-.0646673
-{txt}{space 13}educ_college {c |}{col 27}{res}{space 2}-.0907634{col 39}{space 2} .1569082{col 50}{space 1}   -0.58{col 59}{space 3}0.563{col 67}{space 4}-.3982978{col 80}{space 3}  .216771
-{txt}{space 14}educ_beyond {c |}{col 27}{res}{space 2}        0{col 39}{txt}  (omitted)
-{space 20}_cons {c |}{col 27}{res}{space 2} 2.467494{col 39}{space 2} .8275399{col 50}{space 1}    2.98{col 59}{space 3}0.003{col 67}{space 4} .8455456{col 80}{space 3} 4.089442
-{txt}{hline 26}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
-
-{com}. logit workstatus i.urbanicity##c.CPI_gasoline age age2 children* inc_nonfemale i.race educ_*
-
-{txt}note: educ_beyond omitted because of collinearity
-{res}{txt}Iteration 0:{space 3}log likelihood = {res:-2751.7471}  
-Iteration 1:{space 3}log likelihood = {res:-2500.9723}  
-Iteration 2:{space 3}log likelihood = {res: -2486.529}  
-Iteration 3:{space 3}log likelihood = {res:-2486.4801}  
-Iteration 4:{space 3}log likelihood = {res:-2486.4801}  
-{res}
-{txt}Logistic regression{col 49}Number of obs{col 67}= {res}     5,542
-{txt}{col 49}LR chi2({res}35{txt}){col 67}= {res}    530.53
-{txt}{col 49}Prob > chi2{col 67}= {res}    0.0000
-{txt}Log likelihood = {res}-2486.4801{txt}{col 49}Pseudo R2{col 67}= {res}    0.0964
-
-{txt}{hline 26}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
-{col 1}               workstatus{col 27}{c |}      Coef.{col 39}   Std. Err.{col 51}      z{col 59}   P>|z|{col 67}     [95% Con{col 80}f. Interval]
-{hline 26}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
-{space 15}urbanicity {c |}
-{space 23}2  {c |}{col 27}{res}{space 2}-.4550906{col 39}{space 2} .8889098{col 50}{space 1}   -0.51{col 59}{space 3}0.609{col 67}{space 4}-2.197322{col 80}{space 3} 1.287141
-{txt}{space 23}3  {c |}{col 27}{res}{space 2}-.3385789{col 39}{space 2} .8186811{col 50}{space 1}   -0.41{col 59}{space 3}0.679{col 67}{space 4}-1.943164{col 80}{space 3} 1.266007
-{txt}{space 23}4  {c |}{col 27}{res}{space 2}-.5209766{col 39}{space 2} 1.071415{col 50}{space 1}   -0.49{col 59}{space 3}0.627{col 67}{space 4}-2.620912{col 80}{space 3} 1.578958
-{txt}{space 23}5  {c |}{col 27}{res}{space 2}-.2033985{col 39}{space 2} 1.393729{col 50}{space 1}   -0.15{col 59}{space 3}0.884{col 67}{space 4}-2.935056{col 80}{space 3}  2.52826
-{txt}{space 23}6  {c |}{col 27}{res}{space 2}-1.822933{col 39}{space 2} 1.457173{col 50}{space 1}   -1.25{col 59}{space 3}0.211{col 67}{space 4} -4.67894{col 80}{space 3} 1.033073
-{txt}{space 23}7  {c |}{col 27}{res}{space 2}-.1269917{col 39}{space 2} 1.075006{col 50}{space 1}   -0.12{col 59}{space 3}0.906{col 67}{space 4}-2.233965{col 80}{space 3} 1.979981
-{txt}{space 23}8  {c |}{col 27}{res}{space 2}-.1655513{col 39}{space 2} 1.059861{col 50}{space 1}   -0.16{col 59}{space 3}0.876{col 67}{space 4} -2.24284{col 80}{space 3} 1.911738
-{txt}{space 23}9  {c |}{col 27}{res}{space 2}-.7291114{col 39}{space 2} 1.404292{col 50}{space 1}   -0.52{col 59}{space 3}0.604{col 67}{space 4}-3.481473{col 80}{space 3}  2.02325
-{txt}{space 25} {c |}
-{space 13}CPI_gasoline {c |}{col 27}{res}{space 2}-.0016273{col 39}{space 2} .0045906{col 50}{space 1}   -0.35{col 59}{space 3}0.723{col 67}{space 4}-.0106247{col 80}{space 3}   .00737
-{txt}{space 25} {c |}
-urbanicity#c.CPI_gasoline {c |}
-{space 23}2  {c |}{col 27}{res}{space 2} .0029072{col 39}{space 2} .0065034{col 50}{space 1}    0.45{col 59}{space 3}0.655{col 67}{space 4}-.0098393{col 80}{space 3} .0156537
-{txt}{space 23}3  {c |}{col 27}{res}{space 2} .0010212{col 39}{space 2} .0059838{col 50}{space 1}    0.17{col 59}{space 3}0.864{col 67}{space 4}-.0107068{col 80}{space 3} .0127492
-{txt}{space 23}4  {c |}{col 27}{res}{space 2} .0015755{col 39}{space 2} .0078182{col 50}{space 1}    0.20{col 59}{space 3}0.840{col 67}{space 4}-.0137478{col 80}{space 3} .0168988
-{txt}{space 23}5  {c |}{col 27}{res}{space 2} .0007148{col 39}{space 2} .0101771{col 50}{space 1}    0.07{col 59}{space 3}0.944{col 67}{space 4}-.0192321{col 80}{space 3} .0206616
-{txt}{space 23}6  {c |}{col 27}{res}{space 2} .0092603{col 39}{space 2} .0107574{col 50}{space 1}    0.86{col 59}{space 3}0.389{col 67}{space 4}-.0118239{col 80}{space 3} .0303445
-{txt}{space 23}7  {c |}{col 27}{res}{space 2}-.0003519{col 39}{space 2} .0078471{col 50}{space 1}   -0.04{col 59}{space 3}0.964{col 67}{space 4} -.015732{col 80}{space 3} .0150283
-{txt}{space 23}8  {c |}{col 27}{res}{space 2} .0016942{col 39}{space 2} .0077553{col 50}{space 1}    0.22{col 59}{space 3}0.827{col 67}{space 4} -.013506{col 80}{space 3} .0168944
-{txt}{space 23}9  {c |}{col 27}{res}{space 2} .0043022{col 39}{space 2} .0103069{col 50}{space 1}    0.42{col 59}{space 3}0.676{col 67}{space 4} -.015899{col 80}{space 3} .0245035
-{txt}{space 25} {c |}
-{space 22}age {c |}{col 27}{res}{space 2}   .08184{col 39}{space 2} .0341712{col 50}{space 1}    2.40{col 59}{space 3}0.017{col 67}{space 4} .0148657{col 80}{space 3} .1488142
-{txt}{space 21}age2 {c |}{col 27}{res}{space 2}-.0016827{col 39}{space 2} .0003768{col 50}{space 1}   -4.47{col 59}{space 3}0.000{col 67}{space 4}-.0024212{col 80}{space 3}-.0009443
-{txt}{space 17}children {c |}{col 27}{res}{space 2}-1.775961{col 39}{space 2} 1.017081{col 50}{space 1}   -1.75{col 59}{space 3}0.081{col 67}{space 4}-3.769402{col 80}{space 3} .2174803
-{txt}{space 14}children0_2 {c |}{col 27}{res}{space 2} .9495807{col 39}{space 2} 1.022882{col 50}{space 1}    0.93{col 59}{space 3}0.353{col 67}{space 4}-1.055231{col 80}{space 3} 2.954392
-{txt}{space 14}children3_5 {c |}{col 27}{res}{space 2} 1.029573{col 39}{space 2} 1.020933{col 50}{space 1}    1.01{col 59}{space 3}0.313{col 67}{space 4}-.9714182{col 80}{space 3} 3.030565
-{txt}{space 13}children6_13 {c |}{col 27}{res}{space 2} 1.338976{col 39}{space 2} 1.017588{col 50}{space 1}    1.32{col 59}{space 3}0.188{col 67}{space 4}-.6554609{col 80}{space 3} 3.333412
-{txt}{space 11}children14_17m {c |}{col 27}{res}{space 2} 1.641837{col 39}{space 2} 1.024006{col 50}{space 1}    1.60{col 59}{space 3}0.109{col 67}{space 4}-.3651769{col 80}{space 3} 3.648852
-{txt}{space 11}children14_17f {c |}{col 27}{res}{space 2} 1.692278{col 39}{space 2} 1.024389{col 50}{space 1}    1.65{col 59}{space 3}0.099{col 67}{space 4} -.315487{col 80}{space 3} 3.700043
-{txt}{space 11}children18_21m {c |}{col 27}{res}{space 2} .1833009{col 39}{space 2} .1217088{col 50}{space 1}    1.51{col 59}{space 3}0.132{col 67}{space 4} -.055244{col 80}{space 3} .4218457
-{txt}{space 11}children18_21f {c |}{col 27}{res}{space 2} .3198539{col 39}{space 2} .1334082{col 50}{space 1}    2.40{col 59}{space 3}0.017{col 67}{space 4} .0583786{col 80}{space 3} .5813292
-{txt}{space 12}inc_nonfemale {c |}{col 27}{res}{space 2}-2.19e-06{col 39}{space 2} 3.44e-07{col 50}{space 1}   -6.38{col 59}{space 3}0.000{col 67}{space 4}-2.87e-06{col 80}{space 3}-1.52e-06
-{txt}{space 25} {c |}
-{space 15}race_indiv {c |}
-{space 23}2  {c |}{col 27}{res}{space 2}  .319351{col 39}{space 2} .1023866{col 50}{space 1}    3.12{col 59}{space 3}0.002{col 67}{space 4}  .118677{col 80}{space 3} .5200251
-{txt}{space 23}7  {c |}{col 27}{res}{space 2} -.355638{col 39}{space 2} .2200209{col 50}{space 1}   -1.62{col 59}{space 3}0.106{col 67}{space 4} -.786871{col 80}{space 3}  .075595
-{txt}{space 25} {c |}
-{space 14}educ_female {c |}{col 27}{res}{space 2}-.0033519{col 39}{space 2} .0035763{col 50}{space 1}   -0.94{col 59}{space 3}0.349{col 67}{space 4}-.0103613{col 80}{space 3} .0036575
-{txt}{space 15}educ_preHS {c |}{col 27}{res}{space 2}-1.728644{col 39}{space 2} .1800492{col 50}{space 1}   -9.60{col 59}{space 3}0.000{col 67}{space 4}-2.081534{col 80}{space 3}-1.375754
-{txt}{space 18}educ_HS {c |}{col 27}{res}{space 2}-.6336454{col 39}{space 2} .1505985{col 50}{space 1}   -4.21{col 59}{space 3}0.000{col 67}{space 4}-.9288131{col 80}{space 3}-.3384778
-{txt}{space 8}educ_some_college {c |}{col 27}{res}{space 2}-.3596936{col 39}{space 2} .1506568{col 50}{space 1}   -2.39{col 59}{space 3}0.017{col 67}{space 4}-.6549755{col 80}{space 3}-.0644117
-{txt}{space 13}educ_college {c |}{col 27}{res}{space 2}-.0903768{col 39}{space 2} .1569561{col 50}{space 1}   -0.58{col 59}{space 3}0.565{col 67}{space 4} -.398005{col 80}{space 3} .2172515
-{txt}{space 14}educ_beyond {c |}{col 27}{res}{space 2}        0{col 39}{txt}  (omitted)
-{space 20}_cons {c |}{col 27}{res}{space 2} 2.811549{col 39}{space 2} 1.008601{col 50}{space 1}    2.79{col 59}{space 3}0.005{col 67}{space 4} .8347271{col 80}{space 3} 4.788371
-{txt}{hline 26}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
-
-{com}. 
 . sum CPI_gasoline, detail
 
                     {txt}Gasoline (all types)
 {hline 61}
       Percentiles      Smallest
- 1%    {res}      116            116
-{txt} 5%    {res}      116            116
-{txt}10%    {res}      116            116       {txt}Obs         {res}      5,574
-{txt}25%    {res}      116            116       {txt}Sum of Wgt. {res}      5,574
+ 1%    {res}     91.6           91.6
+{txt} 5%    {res}     91.6           91.6
+{txt}10%    {res}     91.6           91.6       {txt}Obs         {res}      7,168
+{txt}25%    {res}    103.8           91.6       {txt}Sum of Wgt. {res}      7,168
 
-{txt}50%    {res}    128.6                      {txt}Mean          {res} 134.7667
-                        {txt}Largest       Std. Dev.     {res} 18.36726
-{txt}75%    {res}    159.7          159.7
-{txt}90%    {res}    159.7          159.7       {txt}Variance      {res} 337.3561
-{txt}95%    {res}    159.7          159.7       {txt}Skewness      {res} .4658027
-{txt}99%    {res}    159.7          159.7       {txt}Kurtosis      {res}      1.5
+{txt}50%    {res}    122.3                      {txt}Mean          {res}  123.975
+                        {txt}Largest       Std. Dev.     {res} 24.54457
+{txt}75%    {res}   144.15          159.7
+{txt}90%    {res}    159.7          159.7       {txt}Variance      {res} 602.4359
+{txt}95%    {res}    159.7          159.7       {txt}Skewness      {res} .1902993
+{txt}99%    {res}    159.7          159.7       {txt}Kurtosis      {res} 1.882423
 {txt}
-{com}. margins urbanicity, at(CPI_gas = 159.7 )
+{com}. local p1 `r(p1)'
+{txt}
+{com}. local p99 `r(p99)'
+{txt}
+{com}. di `p1'
+{res}91.6
+{txt}
+{com}. di `p99'
+{res}159.7
+{txt}
+{com}. 
+. replace urbanicity = 4 if urbanicity >= 4 // Population less than 250k 
+{txt}(2,201 real changes made)
+
+{com}. 
+. logit workstatus i.urbanicity#c.CPI_gasoline age age2 children* inc_nonfemale i.race educ_*
+
+{txt}note: educ_beyond omitted because of collinearity
+{res}{txt}Iteration 0:{space 3}log likelihood = {res:-3507.0096}  
+Iteration 1:{space 3}log likelihood = {res:-3193.6236}  
+Iteration 2:{space 3}log likelihood = {res:-3174.9647}  
+Iteration 3:{space 3}log likelihood = {res:-3174.8903}  
+Iteration 4:{space 3}log likelihood = {res:-3174.8903}  
 {res}
-{txt}Predictive margins{col 49}Number of obs{col 67}= {res}     5,542
+{txt}Logistic regression{col 49}Number of obs{col 67}= {res}     7,168
+{txt}{col 49}LR chi2({res}22{txt}){col 67}= {res}    664.24
+{txt}{col 49}Prob > chi2{col 67}= {res}    0.0000
+{txt}Log likelihood = {res}-3174.8903{txt}{col 49}Pseudo R2{col 67}= {res}    0.0947
+
+{txt}{hline 26}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{col 1}               workstatus{col 27}{c |}      Coef.{col 39}   Std. Err.{col 51}      z{col 59}   P>|z|{col 67}     [95% Con{col 80}f. Interval]
+{hline 26}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+urbanicity#c.CPI_gasoline {c |}
+{space 23}1  {c |}{col 27}{res}{space 2}  .000343{col 39}{space 2} .0014428{col 50}{space 1}    0.24{col 59}{space 3}0.812{col 67}{space 4}-.0024848{col 80}{space 3} .0031708
+{txt}{space 23}2  {c |}{col 27}{res}{space 2} .0001653{col 39}{space 2} .0014396{col 50}{space 1}    0.11{col 59}{space 3}0.909{col 67}{space 4}-.0026563{col 80}{space 3} .0029869
+{txt}{space 23}3  {c |}{col 27}{res}{space 2}-.0012796{col 39}{space 2}  .001385{col 50}{space 1}   -0.92{col 59}{space 3}0.356{col 67}{space 4}-.0039942{col 80}{space 3}  .001435
+{txt}{space 23}4  {c |}{col 27}{res}{space 2}-.0006672{col 39}{space 2} .0013536{col 50}{space 1}   -0.49{col 59}{space 3}0.622{col 67}{space 4}-.0033201{col 80}{space 3} .0019857
+{txt}{space 25} {c |}
+{space 22}age {c |}{col 27}{res}{space 2} .0682251{col 39}{space 2}  .029227{col 50}{space 1}    2.33{col 59}{space 3}0.020{col 67}{space 4} .0109413{col 80}{space 3}  .125509
+{txt}{space 21}age2 {c |}{col 27}{res}{space 2}-.0015312{col 39}{space 2} .0003277{col 50}{space 1}   -4.67{col 59}{space 3}0.000{col 67}{space 4}-.0021735{col 80}{space 3}-.0008889
+{txt}{space 17}children {c |}{col 27}{res}{space 2}-1.667821{col 39}{space 2} 1.020326{col 50}{space 1}   -1.63{col 59}{space 3}0.102{col 67}{space 4}-3.667623{col 80}{space 3} .3319816
+{txt}{space 14}children0_2 {c |}{col 27}{res}{space 2} .7316322{col 39}{space 2} 1.024732{col 50}{space 1}    0.71{col 59}{space 3}0.475{col 67}{space 4}-1.276805{col 80}{space 3} 2.740069
+{txt}{space 14}children3_5 {c |}{col 27}{res}{space 2} .9263311{col 39}{space 2} 1.023158{col 50}{space 1}    0.91{col 59}{space 3}0.365{col 67}{space 4}-1.079022{col 80}{space 3} 2.931684
+{txt}{space 13}children6_13 {c |}{col 27}{res}{space 2} 1.285926{col 39}{space 2} 1.020691{col 50}{space 1}    1.26{col 59}{space 3}0.208{col 67}{space 4}-.7145914{col 80}{space 3} 3.286444
+{txt}{space 11}children14_17m {c |}{col 27}{res}{space 2} 1.649405{col 39}{space 2} 1.026007{col 50}{space 1}    1.61{col 59}{space 3}0.108{col 67}{space 4}-.3615315{col 80}{space 3} 3.660341
+{txt}{space 11}children14_17f {c |}{col 27}{res}{space 2} 1.583509{col 39}{space 2} 1.025647{col 50}{space 1}    1.54{col 59}{space 3}0.123{col 67}{space 4}-.4267219{col 80}{space 3} 3.593741
+{txt}{space 11}children18_21m {c |}{col 27}{res}{space 2} .1892891{col 39}{space 2} .1085861{col 50}{space 1}    1.74{col 59}{space 3}0.081{col 67}{space 4}-.0235357{col 80}{space 3} .4021138
+{txt}{space 11}children18_21f {c |}{col 27}{res}{space 2} .2598823{col 39}{space 2} .1150962{col 50}{space 1}    2.26{col 59}{space 3}0.024{col 67}{space 4} .0342978{col 80}{space 3} .4854668
+{txt}{space 12}inc_nonfemale {c |}{col 27}{res}{space 2}-2.46e-06{col 39}{space 2} 3.24e-07{col 50}{space 1}   -7.60{col 59}{space 3}0.000{col 67}{space 4}-3.10e-06{col 80}{space 3}-1.83e-06
+{txt}{space 25} {c |}
+{space 15}race_indiv {c |}
+{space 23}2  {c |}{col 27}{res}{space 2} .3545461{col 39}{space 2} .0913256{col 50}{space 1}    3.88{col 59}{space 3}0.000{col 67}{space 4} .1755512{col 80}{space 3} .5335411
+{txt}{space 23}7  {c |}{col 27}{res}{space 2}-.4111184{col 39}{space 2} .1915509{col 50}{space 1}   -2.15{col 59}{space 3}0.032{col 67}{space 4}-.7865512{col 80}{space 3}-.0356855
+{txt}{space 25} {c |}
+{space 14}educ_female {c |}{col 27}{res}{space 2}-.0025232{col 39}{space 2} .0039891{col 50}{space 1}   -0.63{col 59}{space 3}0.527{col 67}{space 4}-.0103417{col 80}{space 3} .0052952
+{txt}{space 15}educ_preHS {c |}{col 27}{res}{space 2}-1.622243{col 39}{space 2}  .158018{col 50}{space 1}  -10.27{col 59}{space 3}0.000{col 67}{space 4}-1.931952{col 80}{space 3}-1.312533
+{txt}{space 18}educ_HS {c |}{col 27}{res}{space 2}-.6090341{col 39}{space 2} .1314788{col 50}{space 1}   -4.63{col 59}{space 3}0.000{col 67}{space 4}-.8667278{col 80}{space 3}-.3513403
+{txt}{space 8}educ_some_college {c |}{col 27}{res}{space 2}-.3083112{col 39}{space 2} .1318965{col 50}{space 1}   -2.34{col 59}{space 3}0.019{col 67}{space 4}-.5668235{col 80}{space 3}-.0497989
+{txt}{space 13}educ_college {c |}{col 27}{res}{space 2} -.039759{col 39}{space 2}  .137078{col 50}{space 1}   -0.29{col 59}{space 3}0.772{col 67}{space 4} -.308427{col 80}{space 3} .2289089
+{txt}{space 14}educ_beyond {c |}{col 27}{res}{space 2}        0{col 39}{txt}  (omitted)
+{space 20}_cons {c |}{col 27}{res}{space 2} 2.759733{col 39}{space 2} .6789869{col 50}{space 1}    4.06{col 59}{space 3}0.000{col 67}{space 4} 1.428943{col 80}{space 3} 4.090523
+{txt}{hline 26}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+
+{com}. logit workstatus i.urbanicity##c.CPI_gasoline age age2 children* inc_nonfemale i.race educ_*
+
+{txt}note: educ_beyond omitted because of collinearity
+{res}{txt}Iteration 0:{space 3}log likelihood = {res:-3507.0096}  
+Iteration 1:{space 3}log likelihood = {res:-3193.3822}  
+Iteration 2:{space 3}log likelihood = {res: -3174.682}  
+Iteration 3:{space 3}log likelihood = {res:-3174.6069}  
+Iteration 4:{space 3}log likelihood = {res:-3174.6069}  
+{res}
+{txt}Logistic regression{col 49}Number of obs{col 67}= {res}     7,168
+{txt}{col 49}LR chi2({res}25{txt}){col 67}= {res}    664.81
+{txt}{col 49}Prob > chi2{col 67}= {res}    0.0000
+{txt}Log likelihood = {res}-3174.6069{txt}{col 49}Pseudo R2{col 67}= {res}    0.0948
+
+{txt}{hline 26}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{col 1}               workstatus{col 27}{c |}      Coef.{col 39}   Std. Err.{col 51}      z{col 59}   P>|z|{col 67}     [95% Con{col 80}f. Interval]
+{hline 26}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{space 15}urbanicity {c |}
+{space 23}2  {c |}{col 27}{res}{space 2}   -.1547{col 39}{space 2}  .557044{col 50}{space 1}   -0.28{col 59}{space 3}0.781{col 67}{space 4}-1.246486{col 80}{space 3} .9370862
+{txt}{space 23}3  {c |}{col 27}{res}{space 2}-.3672731{col 39}{space 2} .5044324{col 50}{space 1}   -0.73{col 59}{space 3}0.467{col 67}{space 4}-1.355942{col 80}{space 3} .6213963
+{txt}{space 23}4  {c |}{col 27}{res}{space 2}-.1501208{col 39}{space 2} .4661855{col 50}{space 1}   -0.32{col 59}{space 3}0.747{col 67}{space 4}-1.063828{col 80}{space 3} .7635861
+{txt}{space 25} {c |}
+{space 13}CPI_gasoline {c |}{col 27}{res}{space 2} -.001033{col 39}{space 2} .0030436{col 50}{space 1}   -0.34{col 59}{space 3}0.734{col 67}{space 4}-.0069983{col 80}{space 3} .0049322
+{txt}{space 25} {c |}
+urbanicity#c.CPI_gasoline {c |}
+{space 23}2  {c |}{col 27}{res}{space 2} .0010167{col 39}{space 2} .0043631{col 50}{space 1}    0.23{col 59}{space 3}0.816{col 67}{space 4}-.0075348{col 80}{space 3} .0095681
+{txt}{space 23}3  {c |}{col 27}{res}{space 2} .0012074{col 39}{space 2} .0039633{col 50}{space 1}    0.30{col 59}{space 3}0.761{col 67}{space 4}-.0065606{col 80}{space 3} .0089754
+{txt}{space 23}4  {c |}{col 27}{res}{space 2} .0001482{col 39}{space 2} .0036534{col 50}{space 1}    0.04{col 59}{space 3}0.968{col 67}{space 4}-.0070123{col 80}{space 3} .0073087
+{txt}{space 25} {c |}
+{space 22}age {c |}{col 27}{res}{space 2} .0679246{col 39}{space 2} .0292395{col 50}{space 1}    2.32{col 59}{space 3}0.020{col 67}{space 4} .0106163{col 80}{space 3}  .125233
+{txt}{space 21}age2 {c |}{col 27}{res}{space 2}-.0015283{col 39}{space 2} .0003278{col 50}{space 1}   -4.66{col 59}{space 3}0.000{col 67}{space 4}-.0021709{col 80}{space 3}-.0008858
+{txt}{space 17}children {c |}{col 27}{res}{space 2}-1.667161{col 39}{space 2} 1.020556{col 50}{space 1}   -1.63{col 59}{space 3}0.102{col 67}{space 4}-3.667414{col 80}{space 3} .3330927
+{txt}{space 14}children0_2 {c |}{col 27}{res}{space 2} .7306285{col 39}{space 2} 1.024968{col 50}{space 1}    0.71{col 59}{space 3}0.476{col 67}{space 4}-1.278272{col 80}{space 3} 2.739529
+{txt}{space 14}children3_5 {c |}{col 27}{res}{space 2} .9256003{col 39}{space 2} 1.023375{col 50}{space 1}    0.90{col 59}{space 3}0.366{col 67}{space 4}-1.080178{col 80}{space 3} 2.931378
+{txt}{space 13}children6_13 {c |}{col 27}{res}{space 2} 1.284727{col 39}{space 2} 1.020914{col 50}{space 1}    1.26{col 59}{space 3}0.208{col 67}{space 4}-.7162276{col 80}{space 3} 3.285682
+{txt}{space 11}children14_17m {c |}{col 27}{res}{space 2} 1.647512{col 39}{space 2} 1.026252{col 50}{space 1}    1.61{col 59}{space 3}0.108{col 67}{space 4}-.3639044{col 80}{space 3} 3.658929
+{txt}{space 11}children14_17f {c |}{col 27}{res}{space 2} 1.583294{col 39}{space 2} 1.025918{col 50}{space 1}    1.54{col 59}{space 3}0.123{col 67}{space 4}-.4274682{col 80}{space 3} 3.594056
+{txt}{space 11}children18_21m {c |}{col 27}{res}{space 2} .1908282{col 39}{space 2} .1086334{col 50}{space 1}    1.76{col 59}{space 3}0.079{col 67}{space 4}-.0220894{col 80}{space 3} .4037458
+{txt}{space 11}children18_21f {c |}{col 27}{res}{space 2} .2605197{col 39}{space 2} .1151319{col 50}{space 1}    2.26{col 59}{space 3}0.024{col 67}{space 4} .0348654{col 80}{space 3}  .486174
+{txt}{space 12}inc_nonfemale {c |}{col 27}{res}{space 2}-2.46e-06{col 39}{space 2} 3.24e-07{col 50}{space 1}   -7.59{col 59}{space 3}0.000{col 67}{space 4}-3.10e-06{col 80}{space 3}-1.83e-06
+{txt}{space 25} {c |}
+{space 15}race_indiv {c |}
+{space 23}2  {c |}{col 27}{res}{space 2} .3534228{col 39}{space 2} .0913847{col 50}{space 1}    3.87{col 59}{space 3}0.000{col 67}{space 4}  .174312{col 80}{space 3} .5325336
+{txt}{space 23}7  {c |}{col 27}{res}{space 2}-.4118344{col 39}{space 2} .1915799{col 50}{space 1}   -2.15{col 59}{space 3}0.032{col 67}{space 4}-.7873241{col 80}{space 3}-.0363447
+{txt}{space 25} {c |}
+{space 14}educ_female {c |}{col 27}{res}{space 2} -.002563{col 39}{space 2} .0039878{col 50}{space 1}   -0.64{col 59}{space 3}0.520{col 67}{space 4}-.0103789{col 80}{space 3} .0052528
+{txt}{space 15}educ_preHS {c |}{col 27}{res}{space 2}-1.622835{col 39}{space 2} .1580867{col 50}{space 1}  -10.27{col 59}{space 3}0.000{col 67}{space 4}-1.932679{col 80}{space 3}-1.312991
+{txt}{space 18}educ_HS {c |}{col 27}{res}{space 2}-.6091431{col 39}{space 2} .1315148{col 50}{space 1}   -4.63{col 59}{space 3}0.000{col 67}{space 4}-.8669073{col 80}{space 3}-.3513788
+{txt}{space 8}educ_some_college {c |}{col 27}{res}{space 2}-.3085093{col 39}{space 2} .1319226{col 50}{space 1}   -2.34{col 59}{space 3}0.019{col 67}{space 4}-.5670728{col 80}{space 3}-.0499457
+{txt}{space 13}educ_college {c |}{col 27}{res}{space 2}-.0399396{col 39}{space 2}    .1371{col 50}{space 1}   -0.29{col 59}{space 3}0.771{col 67}{space 4}-.3086506{col 80}{space 3} .2287714
+{txt}{space 14}educ_beyond {c |}{col 27}{res}{space 2}        0{col 39}{txt}  (omitted)
+{space 20}_cons {c |}{col 27}{res}{space 2} 2.946895{col 39}{space 2} .7683902{col 50}{space 1}    3.84{col 59}{space 3}0.000{col 67}{space 4} 1.440878{col 80}{space 3} 4.452912
+{txt}{hline 26}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+
+{com}. 
+. 
+. margins urbanicity, at(CPI_gas = `p1'  )
+{res}
+{txt}Predictive margins{col 49}Number of obs{col 67}= {res}     7,168
+{txt}Model VCE{col 14}: {res}OIM
+
+{txt}{p2colset 1 14 16 2}{...}
+{p2col:Expression}:{space 1}{res:Pr(workstatus), predict()}{p_end}
+{p2colreset}{...}
+{txt}{p2colset 1 14 16 2}{...}
+{p2col:at}:{space 1}{res:{txt:CPI_gasoline}{space 4}{txt:=} {space 7}91.6}{p_end}
+{p2colreset}{...}
+
+{res}{txt}{hline 13}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{col 14}{c |}{col 26} Delta-method
+{col 14}{c |}     Margin{col 26}   Std. Err.{col 38}      z{col 46}   P>|z|{col 54}     [95% Con{col 67}f. Interval]
+{hline 13}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{space 2}urbanicity {c |}
+{space 10}1  {c |}{col 14}{res}{space 2} .8273518{col 26}{space 2}  .016312{col 37}{space 1}   50.72{col 46}{space 3}0.000{col 54}{space 4} .7953809{col 67}{space 3} .8593226
+{txt}{space 10}2  {c |}{col 14}{res}{space 2} .8192781{col 26}{space 2} .0176733{col 37}{space 1}   46.36{col 46}{space 3}0.000{col 54}{space 4}  .784639{col 67}{space 3} .8539172
+{txt}{space 10}3  {c |}{col 14}{res}{space 2} .7918532{col 26}{space 2} .0157224{col 37}{space 1}   50.36{col 46}{space 3}0.000{col 54}{space 4}  .761038{col 67}{space 3} .8226685
+{txt}{space 10}4  {c |}{col 14}{res}{space 2} .8090718{col 26}{space 2} .0120853{col 37}{space 1}   66.95{col 46}{space 3}0.000{col 54}{space 4}  .785385{col 67}{space 3} .8327586
+{txt}{hline 13}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{res}{txt}
+{com}. margins urbanicity, at(CPI_gas = `p99' )
+{res}
+{txt}Predictive margins{col 49}Number of obs{col 67}= {res}     7,168
 {txt}Model VCE{col 14}: {res}OIM
 
 {txt}{p2colset 1 14 16 2}{...}
@@ -1424,43 +1460,10 @@ urbanicity#c.CPI_gasoline {c |}
 {col 14}{c |}     Margin{col 26}   Std. Err.{col 38}      z{col 46}   P>|z|{col 54}     [95% Con{col 67}f. Interval]
 {hline 13}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
 {space 2}urbanicity {c |}
-{space 10}1  {c |}{col 14}{res}{space 2} .8149339{col 26}{space 2} .0191012{col 37}{space 1}   42.66{col 46}{space 3}0.000{col 54}{space 4} .7774961{col 67}{space 3} .8523716
-{txt}{space 10}2  {c |}{col 14}{res}{space 2} .8161758{col 26}{space 2} .0193402{col 37}{space 1}   42.20{col 46}{space 3}0.000{col 54}{space 4} .7782696{col 67}{space 3} .8540819
-{txt}{space 10}3  {c |}{col 14}{res}{space 2} .7900214{col 26}{space 2} .0174976{col 37}{space 1}   45.15{col 46}{space 3}0.000{col 54}{space 4} .7557269{col 67}{space 3}  .824316
-{txt}{space 10}4  {c |}{col 14}{res}{space 2} .7757625{col 26}{space 2} .0302094{col 37}{space 1}   25.68{col 46}{space 3}0.000{col 54}{space 4}  .716553{col 67}{space 3} .8349719
-{txt}{space 10}5  {c |}{col 14}{res}{space 2} .8025481{col 26}{space 2} .0392368{col 37}{space 1}   20.45{col 46}{space 3}0.000{col 54}{space 4} .7256454{col 67}{space 3} .8794509
-{txt}{space 10}6  {c |}{col 14}{res}{space 2} .7639571{col 26}{space 2} .0496682{col 37}{space 1}   15.38{col 46}{space 3}0.000{col 54}{space 4} .6666091{col 67}{space 3} .8613051
-{txt}{space 10}7  {c |}{col 14}{res}{space 2} .7888779{col 26}{space 2} .0290932{col 37}{space 1}   27.12{col 46}{space 3}0.000{col 54}{space 4} .7318562{col 67}{space 3} .8458995
-{txt}{space 10}8  {c |}{col 14}{res}{space 2} .8287595{col 26}{space 2}  .024699{col 37}{space 1}   33.55{col 46}{space 3}0.000{col 54}{space 4} .7803503{col 67}{space 3} .8771687
-{txt}{space 10}9  {c |}{col 14}{res}{space 2} .8091724{col 26}{space 2} .0399422{col 37}{space 1}   20.26{col 46}{space 3}0.000{col 54}{space 4} .7308871{col 67}{space 3} .8874576
-{txt}{hline 13}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
-{res}{txt}
-{com}. margins urbanicity, at(CPI_gas = 116 )
-{res}
-{txt}Predictive margins{col 49}Number of obs{col 67}= {res}     5,542
-{txt}Model VCE{col 14}: {res}OIM
-
-{txt}{p2colset 1 14 16 2}{...}
-{p2col:Expression}:{space 1}{res:Pr(workstatus), predict()}{p_end}
-{p2colreset}{...}
-{txt}{p2colset 1 14 16 2}{...}
-{p2col:at}:{space 1}{res:{txt:CPI_gasoline}{space 4}{txt:=} {space 8}116}{p_end}
-{p2colreset}{...}
-
-{res}{txt}{hline 13}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
-{col 14}{c |}{col 26} Delta-method
-{col 14}{c |}     Margin{col 26}   Std. Err.{col 38}      z{col 46}   P>|z|{col 54}     [95% Con{col 67}f. Interval]
-{hline 13}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
-{space 2}urbanicity {c |}
-{space 10}1  {c |}{col 14}{res}{space 2} .8243845{col 26}{space 2} .0163048{col 37}{space 1}   50.56{col 46}{space 3}0.000{col 54}{space 4} .7924277{col 67}{space 3} .8563412
-{txt}{space 10}2  {c |}{col 14}{res}{space 2} .8085204{col 26}{space 2} .0172567{col 37}{space 1}   46.85{col 46}{space 3}0.000{col 54}{space 4} .7746978{col 67}{space 3} .8423429
-{txt}{space 10}3  {c |}{col 14}{res}{space 2} .7939272{col 26}{space 2}   .01519{col 37}{space 1}   52.27{col 46}{space 3}0.000{col 54}{space 4} .7641554{col 67}{space 3}  .823699
-{txt}{space 10}4  {c |}{col 14}{res}{space 2} .7761143{col 26}{space 2}  .027002{col 37}{space 1}   28.74{col 46}{space 3}0.000{col 54}{space 4} .7231913{col 67}{space 3} .8290373
-{txt}{space 10}5  {c |}{col 14}{res}{space 2} .8081549{col 26}{space 2}  .034214{col 37}{space 1}   23.62{col 46}{space 3}0.000{col 54}{space 4} .7410967{col 67}{space 3} .8752131
-{txt}{space 10}6  {c |}{col 14}{res}{space 2} .7063944{col 26}{space 2} .0459865{col 37}{space 1}   15.36{col 46}{space 3}0.000{col 54}{space 4} .6162625{col 67}{space 3} .7965263
-{txt}{space 10}7  {c |}{col 14}{res}{space 2} .8014886{col 26}{space 2} .0248188{col 37}{space 1}   32.29{col 46}{space 3}0.000{col 54}{space 4} .7528447{col 67}{space 3} .8501326
-{txt}{space 10}8  {c |}{col 14}{res}{space 2} .8283857{col 26}{space 2} .0215898{col 37}{space 1}   38.37{col 46}{space 3}0.000{col 54}{space 4} .7860705{col 67}{space 3} .8707008
-{txt}{space 10}9  {c |}{col 14}{res}{space 2} .7924689{col 26}{space 2} .0360404{col 37}{space 1}   21.99{col 46}{space 3}0.000{col 54}{space 4}  .721831{col 67}{space 3} .8631067
+{space 10}1  {c |}{col 14}{res}{space 2} .8181045{col 26}{space 2} .0175948{col 37}{space 1}   46.50{col 46}{space 3}0.000{col 54}{space 4} .7836194{col 67}{space 3} .8525896
+{txt}{space 10}2  {c |}{col 14}{res}{space 2} .8191294{col 26}{space 2} .0178005{col 37}{space 1}   46.02{col 46}{space 3}0.000{col 54}{space 4} .7842411{col 67}{space 3} .8540178
+{txt}{space 10}3  {c |}{col 14}{res}{space 2} .7936027{col 26}{space 2} .0160831{col 37}{space 1}   49.34{col 46}{space 3}0.000{col 54}{space 4} .7620804{col 67}{space 3} .8251249
+{txt}{space 10}4  {c |}{col 14}{res}{space 2} .8005684{col 26}{space 2} .0124492{col 37}{space 1}   64.31{col 46}{space 3}0.000{col 54}{space 4} .7761684{col 67}{space 3} .8249683
 {txt}{hline 13}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
 {res}{txt}
 {com}. 
@@ -1468,7 +1471,7 @@ urbanicity#c.CPI_gasoline {c |}
       {txt}name:  {res}<unnamed>
        {txt}log:  {res}C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID\Results\Louise\Logit.smcl
   {txt}log type:  {res}smcl
- {txt}closed on:  {res}10 Sep 2018, 23:23:41
+ {txt}closed on:  {res}24 Oct 2018, 00:07:25
 {txt}{.-}
 {smcl}
 {txt}{sf}{ul off}

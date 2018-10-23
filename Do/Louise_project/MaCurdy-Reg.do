@@ -5,12 +5,22 @@ set more off
 global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 use "$folder/Data/Intermediate/Basic-Panel-Louise-1999-to-2005.dta", clear
 
+/*
+use "$folder/Data/Intermediate/Basic-Panel-Louise-2009-to-2015.dta", clear
+sort pid wave
+replace urbanicity = L.urbanicity if wave == 2015
+replace wave = 1999 if wave == 2009
+replace wave = 2001 if wave == 2011
+replace wave = 2003 if wave == 2013
+replace wave = 2005 if wave == 2015
+*/
+
 * Drop people who say they are working but have zero wage
 gen obs_to_drop = (wage_rate_female == 0 | wage_rate_female == .) & working_even_years_100 == 1
 tab obs_to_drop
 by pid, sort: egen pid_to_drop = max(obs_to_drop)
 drop if pid_to_drop == 1
-save "$folder/Data/Intermediate/Basic-Panel-Louise-1999-to-2005-Clean.dta", replace
+saveold "$folder/Data/Intermediate/Basic-Panel-Louise-1999-to-2005-Clean.dta", replace version(13)
 
 
 gen inc_nonwife = (inc_fam_nonlabor + inc_male) / 1000
@@ -19,7 +29,6 @@ gen mobility = urbanicity * CPI_gasoline
 gen cum_experience2 = cum_experience ^ 2
 gen inc_nonwife2 = inc_nonwife ^ 2
 drop if pid == 1094173 // weirdo
-
 
 
 
@@ -54,7 +63,7 @@ by pid, sort: egen counter = sum(working_even_years_100)
 tab counter
 
 gen hours = hours_annual_female
-
+sort pid wave
 foreach var of varlist hours log_wage_rate inc_nonwife {
 
 	gen d_`var' = D.`var'
@@ -87,9 +96,11 @@ reg d_hours d_log_wage_rate d_inc_nonwife if counter == 4, nocons
 * Robinson Regression
 reg hours_robinson log_wage_rate_robinson inc_nonwife_robinson if counter == 4, nocons
 
-
+sdfsdf
 * Heckman
 heckman hours log_wage_rate inc_nonwife, select(working_even_years_100 = inc_nonwife age children0_2 children3_5 children6_13 cum_experience mobility cum_experience2 inc_nonwife2) mills(mills_ratio)
+
+sdfdsf
 
 * Question: why doesnt this command recover the previous coefs?
 reg hours log_wage_rate inc_nonwife mills_ratio

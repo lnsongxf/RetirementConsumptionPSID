@@ -123,7 +123,7 @@ wage_rate_female total_hours_head emp_status_indiv ///
 educ_female spouse_father_educlevel spouse_mother_educlevel year_left_college ret_year ret_year_spouse ///
 children0_2 children3_5 children6_13 children14_17m children14_17f children18_21m children18_21f married ///
 race_indiv wage_rate_male emp_status_1 emp_status_2 emp_status_3 ///
-expf_1999 expp_1999 pexp_1999 metro_pre2015
+expf_1999 expp_1999 pexp_1999 metro_pre2015 why_last_job_end*
 
 rename metro_pre2015 urbanicity
 replace urbanicity = . if urbanicity == 0
