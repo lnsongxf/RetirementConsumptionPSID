@@ -21,7 +21,7 @@ global allow_kids_to_leave_hh 1 // When looking for stable households, what shou
 
 global aux_model_in_logs 1 // 1 = logs, 0 = levels
 
-global drop_top_x 5 // can be 0, 1, or 5
+global drop_top_x 5 // 5 // can be 0, 1, or 5
 global drop_by_income 1 // can be 1 to drop by income, 0 to drop by wealth
 
 global estimate_reg_by_age 0 // 0 is our baseline where we estimate SUREG with everyone pooled together. 1 is alternative where we do two buckets
@@ -108,6 +108,19 @@ gen owner_upgrade = owner_transition & (housevalue_real > L.housevalue_real)
 gen owner_downgrade = owner_transition & (housevalue_real <= L.housevalue_real)
 
 
+
+****************************************************************************************************
+** Look into home equity loans by year
+****************************************************************************************************
+
+/*
+gen mortgage = (type_mortgage1 >= 1 & type_mortgage1 <= 7 ) | (type_mortgage2 >= 1 & type_mortgage2 <= 7 )
+gen home_equity_loan = (type_mortgage1 == 3 | type_mortgage2 == 3) 
+gen HELOC = (type_mortgage1 == 5 | type_mortgage2 == 5) 
+
+collapse (sum) mortgage home_equity_loan HELOC, by(wave)
+*/
+
 ****************************************************************************************************
 ** Define variables
 ****************************************************************************************************
@@ -145,6 +158,10 @@ tab underwater // just 58 observations
 
 gen new_mort = dummy_mort == 1 & L.dummy_mort == 0
 
+
+* TODO -- IMPORTANT
+* As in Blundell Pistaferri 
+* drop if income < 100 // important!!! about 100 people. many with negative income!
 
 * New variables
 // housevalue_real
@@ -356,6 +373,60 @@ forvalues i = 1/8 {
 
 }
 }
+
+****************************************************************************************************
+** Compute income and consumption variance
+****************************************************************************************************
+
+
+gen d_log_income = D.log_income
+drop if d_log_income < -0.8
+drop if d_log_income > 5 & d_log_income != .
+
+drop if log_consumption == 0
+drop if log_income == 0
+
+drop if exp(log_income) < 100	
+
+count if exp(log_income) < 5000
+
+
+keep if sex_head == 1
+
+
+sum log_consumption, det 
+sum log_income, det 
+
+
+
+preserve
+	keep if age >= 30 
+
+	* Keep only those who are always employed!! Makes persistence in logY more similar to model
+	keep if emp_status_head == 1 | emp_status_head_2 == 1 | emp_status_head_3 == 1 
+
+	collapse (mean) log_consumption log_income (sd) sd_c = log_consumption sd_y = log_income, by(age)
+	tsset age
+	gen var_y = sd_y^2
+	gen var_c = sd_c^2
+	tsline log_*, name(logs, replace)
+	tsline var_*, name(var, replace)
+restore
+
+preserve
+	keep if age >= 30 
+
+	* Keep only those who are always employed!! Makes persistence in logY more similar to model
+	* eep if emp_status_head == 1 | emp_status_head_2 == 1 | emp_status_head_3 == 1 
+
+	collapse (mean) log_consumption log_income (sd) sd_c = log_consumption sd_y = log_income, by(age)
+	tsset age
+	gen var_y = sd_y^2
+	gen var_c = sd_c^2
+	tsline log_*, name(logs_all, replace)
+	tsline var_*, name(var_all, replace)
+restore
+
 
 ****************************************************************************************************
 ** Convert endogenous variables to "residualized" variables
@@ -575,10 +646,58 @@ sureg `sureg_command'
 ****************************************************************************************************
 ** Income Calibration - very complicated
 ****************************************************************************************************
+* TODO: try this with vs without residualized variables!
 
-gen age2d = age2/10
-reg log_income age age2d
 
+* collapse log_income, by(age)
+
+
+* gen age2d = age2/10
+reg log_income age age2 age3
+predict residuals, xb
+
+
+duplicates tag pid age, gen(dup)
+edit if dup == 1
+
+keep pid age residuals wave
+
+by pid, sort: egen c = count(residuals)
+
+drop if c == 1 // is this needed?
+
+duplicates tag pid age, gen(dup)
+drop if dup == 1
+drop dup c
+
+keep if age <= 50
+
+gen d_age = D.age
+tab d_age 
+
+
+xtset pid age
+tsfill, full
+
+gen d = residuals != .
+replace residuals = 0 if residuals == .
+rename residuals u
+
+keep pid age u d
+
+reshape wide u d, i(pid) j(age)
+
+preserve
+keep pid u*
+export delimited using "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID\Data\IncomeResiduals\u.csv", replace
+restore
+
+preserve
+keep pid d*
+export delimited using "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID\Data\IncomeResiduals\d.csv", replace
+restore
+
+sdfsdf
 
 ****************************************************************************************************
 ** Run SU regression
@@ -600,7 +719,7 @@ reg log_income age age2d
 // di e(rmse)
 
 
-
+save "$folder\Data\Intermediate\Basic-Panel-Ready-for-SUREG.dta", replace
 
 if $estimate_reg_by_age == 0{
 	di "sureg (`endog_vars' =  L.(`endog_vars') `exog_vars' )"	
