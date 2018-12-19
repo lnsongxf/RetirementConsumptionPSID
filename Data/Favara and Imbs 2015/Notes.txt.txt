@@ -1,0 +1,7 @@
+RiceStrahan2010Index_Inverse.dta was extracted from Favara and Imb's data
+
+The variable inter_bra goes from 0 to 4. Starts with a mean around 0 in 1995, 1.5 in 1999, and 2 in 2005
+Here a larger number indicates more openness to interstate banking.
+It's actually the inverse of Rice and Strahan. Favara and Imbs take 4 - Rice and Strahan measure.
+
+Ex: In Rice and Strahan: New hamshipre 
