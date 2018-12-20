@@ -113,7 +113,7 @@ gen owner_downgrade = owner_transition & (housevalue_real <= L.housevalue_real)
 ** Look into home equity loans by year
 ****************************************************************************************************
 
-
+* TODO: count number of home owners
 gen mortgage = (type_mortgage1 >= 1 & type_mortgage1 <= 7 ) | (type_mortgage2 >= 1 & type_mortgage2 <= 7 )
 gen HEL   = (type_mortgage1 == 3 | type_mortgage2 == 3) 
 gen HELOC = (type_mortgage1 == 5 | type_mortgage2 == 5) 
@@ -123,6 +123,13 @@ gen New_HELOC = HELOC == 1 & L.HELOC == 0
 * collapse (sum) mortgage home_equity_loan HELOC, by(wave)
 
 collapse (sum) mortgage HEL HELOC New_HEL New_HELOC (count) n = mortgage, by(wave current_state)
+
+xtset current_state wave, delta(2)
+gen D_mortgage = D.mortgage
+gen D_HEL = D.HEL
+gen D_HELOC = D.HELOC
+gen D_New_HEL = D.New_HEL
+gen D_New_HELOC = D.New_HELOC
 
 ****************************************************************************************************
 * Expand forward the deregulation data -- note that it would be more rigorous to look at what happens later in time
@@ -157,11 +164,21 @@ rename state_n state
 xtset state year
 
 
-reg mortgage L.inter_bra i.state i.year 
-reg HELOC L.inter_bra i.state i.year 
-reg HEL L.inter_bra i.state i.year
-reg New_HEL  L.inter_bra i.state i.year
-reg New_HELOC L.inter_bra i.state i.year
+reg mortgage  L4.inter_bra i.state i.year 
+reg HELOC     L4.inter_bra i.state i.year 
+reg HEL       L4.inter_bra i.state i.year
+reg New_HEL   L4.inter_bra i.state i.year
+reg New_HELOC L4.inter_bra i.state i.year
+sdfds
+
+reg D_mortgage  L2.inter_bra i.state i.year 
+reg D_HELOC     L2.inter_bra i.state i.year 
+reg D_HEL       L2.inter_bra i.state i.year
+reg D_New_HEL   L2.inter_bra i.state i.year
+reg D_New_HELOC L2.inter_bra i.state i.year
+
+
+sdfdsf
 
 * Look at HELOCs etc by state
 gen mortgage_n = mortgage / n
