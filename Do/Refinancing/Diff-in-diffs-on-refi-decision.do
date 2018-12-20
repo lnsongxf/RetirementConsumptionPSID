@@ -117,19 +117,10 @@ gen owner_downgrade = owner_transition & (housevalue_real <= L.housevalue_real)
 gen mortgage = (type_mortgage1 >= 1 & type_mortgage1 <= 7 ) | (type_mortgage2 >= 1 & type_mortgage2 <= 7 )
 gen HEL   = (type_mortgage1 == 3 | type_mortgage2 == 3) 
 gen HELOC = (type_mortgage1 == 5 | type_mortgage2 == 5) 
+gen New_mortgage = mortgage == 1 & L.mortgage == 0
 gen New_HEL   = HEL   == 1 & L.HEL   == 0
 gen New_HELOC = HELOC == 1 & L.HELOC == 0
 
-* collapse (sum) mortgage home_equity_loan HELOC, by(wave)
-
-collapse (sum) mortgage HEL HELOC New_HEL New_HELOC (count) n = mortgage, by(wave current_state)
-
-xtset current_state wave, delta(2)
-gen D_mortgage = D.mortgage
-gen D_HEL = D.HEL
-gen D_HELOC = D.HELOC
-gen D_New_HEL = D.New_HEL
-gen D_New_HELOC = D.New_HELOC
 
 ****************************************************************************************************
 * Expand forward the deregulation data -- note that it would be more rigorous to look at what happens later in time
@@ -143,17 +134,31 @@ forvalues v = 2005(1)2009{
 	replace year = `v'+1 if year == `v' & new == 1
 	drop new
 }
+
+sort state_n year
+forvalues i = 1(1)5{
+	gen L`i'_inter_bra = L`i'.inter_bra
+}
 sort state year
 tempfile dereg_index
 save `dereg_index', replace
 restore
 
 ****************************************************************************************************
-** Merge in banking deregulation measure
+** Collapse to state level and merge in banking deregulation measure
 ** inter_bra is larger for more deregulated states
 ** Note: could have done this at individual level, but for now look at state level, since we're not sure how to treat years not observed
 ** Note: should only keep HHs that dont move from wave to wave
 ****************************************************************************************************
+/*
+preserve
+collapse (sum) mortgage HEL HELOC New_HEL New_HELOC (count) n = mortgage, by(wave current_state)
+xtset current_state wave, delta(2)
+gen D_mortgage = D.mortgage
+gen D_HEL = D.HEL
+gen D_HELOC = D.HELOC
+gen D_New_HEL = D.New_HEL
+gen D_New_HELOC = D.New_HELOC
 
 drop if current_state == 0 | current_state == 99
 gen state_n = current_state
@@ -164,21 +169,18 @@ rename state_n state
 xtset state year
 
 
-reg mortgage  L4.inter_bra i.state i.year 
-reg HELOC     L4.inter_bra i.state i.year 
-reg HEL       L4.inter_bra i.state i.year
-reg New_HEL   L4.inter_bra i.state i.year
-reg New_HELOC L4.inter_bra i.state i.year
-sdfds
-
-reg D_mortgage  L2.inter_bra i.state i.year 
-reg D_HELOC     L2.inter_bra i.state i.year 
-reg D_HEL       L2.inter_bra i.state i.year
-reg D_New_HEL   L2.inter_bra i.state i.year
-reg D_New_HELOC L2.inter_bra i.state i.year
+* reg mortgage  L4.inter_bra i.state i.year 
+* reg HELOC     L4.inter_bra i.state i.year 
+* reg HEL       L4.inter_bra i.state i.year
+* reg New_HEL   L4.inter_bra i.state i.year
+* reg New_HELOC L4.inter_bra i.state i.year
 
 
-sdfdsf
+reg D_mortgage  L4.inter_bra i.state i.year 
+reg D_HELOC     L4.inter_bra i.state i.year 
+reg D_HEL       L4.inter_bra i.state i.year
+reg D_New_HEL   L4.inter_bra i.state i.year
+reg D_New_HELOC L4.inter_bra i.state i.year
 
 * Look at HELOCs etc by state
 gen mortgage_n = mortgage / n
@@ -195,5 +197,32 @@ reg New_HELOC_n L.inter_bra i.state i.year
 
 sum HEL_n if inter_bra == 0
 
+restore
+*/
 * perhaps better to do at the individual level from the beginning...
 
+****************************************************************************************************
+** Individual level regression
+****************************************************************************************************
+
+drop if current_state == 0 | current_state == 99
+gen state_n = current_state
+gen year = wave
+merge m:1 year state_n using `dereg_index'
+keep if _m == 3
+drop current_state wave
+rename state_n state
+xtset pid year, delta(2)
+order pid year 
+
+gen mover = D.state != 0
+drop if mover == 1
+
+
+* logit HELOC     L.inter_bra i.state i.year 
+* logit HEL       L.inter_bra i.state i.year
+
+* keep if year <= 2005
+logit New_mortgage  L3_inter_bra i.state i.year 
+logit New_HEL       L3_inter_bra i.state i.year
+logit New_HELOC     L3_inter_bra i.state i.year
