@@ -591,6 +591,54 @@ restore
 * 	tsline var, name(varZ, replace)
 * restore
 
+****************************************************************************************************
+** New regressions -- Euler Equation esque 
+****************************************************************************************************
+
+* Exactly what we were running on the model
+reg D.log_consumption log_liq_wealth if liq_wealth > 1000 
+
+* NICEEEEEEE
+reg D.log_consumption log_liq_wealth age age2 if liq_wealth > 1000 
+
+* NICEEEEEE
+reg D.log_consumption log_liq_wealth i.age if liq_wealth > 1000 
+
+reg D.log_consumption log_liq_wealth i.age if liq_wealth > 500
+
+* These are not as nice... but in the end i think using the income restriction is wrong
+reg D.log_consumption log_liq_wealth if liq_wealth > 10000 & abs(D.log_income) < 0.1
+reg D.log_consumption log_liq_wealth if liq_wealth > 10000 & abs(D.log_income) < 0.1 & owner_transition == 0
+* Slightly different specification - significant at last
+* AHH but it's not significant on the model! 
+reg D.log_consumption log_liq_wealth if liq_wealth > 5000 & liq_wealth < 500000 & abs(D.log_income) < 0.2
+
+
+
+
+gen y = log_income 
+gen d_c = D.log_consumption
+gen log_a = log_liq_wealth
+gen a = liq_wealth
+
+global controls a > 1000 & a != . 
+eststo clear 
+qui eststo, title(baseline):              reg d_c       log_a if $controls
+qui eststo, title(age control):           reg d_c i.age log_a if $controls
+qui eststo, title(age polynomial):           reg d_c age age2 log_a if $controls
+
+qui eststo, title(IV):         ivregress 2sls d_c       (log_a = L.log_a) if $controls, first
+
+qui eststo, title(IV):         ivregress 2sls d_c       (log_a = L.log_a L.y) if $controls, first
+qui eststo, title(IV):         ivregress 2sls d_c i.age (log_a = L.log_a L.y) if $controls, first
+global esttab_opts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate(Age controls = *age*)
+esttab , $esttab_opts title("Log Assets")
+
+* TODO: try all of this without the residualized data!!!!!!!!!!!!
+
+* TODO: look at lagged log assets 
+
+sdfdsf
 
 ****************************************************************************************************
 ** Test our version of SU regression

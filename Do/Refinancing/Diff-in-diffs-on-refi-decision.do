@@ -121,6 +121,17 @@ gen New_mortgage = mortgage == 1 & L.mortgage == 0
 gen New_HEL   = HEL   == 1 & L.HEL   == 0
 gen New_HELOC = HELOC == 1 & L.HELOC == 0
 
+* Compute HEW by Age (useful to compare with model)
+preserve
+	egen age_group = cut(age), at(20, 25, 30, 35, 40, 45, 50, 55, 60, 65)
+	collapse HEL HELOC New_HEL New_HELOC, by(age_group)
+	tsset age
+	tsline HEL New_HEL
+	list 
+restore
+
+* collapse HEL HELOC New_HEL New_HELOC, by(wave)
+* tsset wave
 
 ****************************************************************************************************
 * Expand forward the deregulation data -- note that it would be more rigorous to look at what happens later in time
