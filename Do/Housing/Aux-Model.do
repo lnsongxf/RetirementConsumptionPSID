@@ -592,7 +592,7 @@ restore
 * restore
 
 ****************************************************************************************************
-** New regressions -- Euler Equation esque 
+** New regressions -- Euler Equation estimation 
 ****************************************************************************************************
 
 * Exactly what we were running on the model
