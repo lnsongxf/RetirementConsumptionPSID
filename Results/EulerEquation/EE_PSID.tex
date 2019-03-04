@@ -1,0 +1,24 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{longtable}{l*{7}{c}}
+\caption{PSID Euler Equation}\\
+\toprule\endfirsthead\midrule\endhead\midrule\endfoot\endlastfoot
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}&\multicolumn{1}{c}{(7)}\\
+                    &\multicolumn{1}{c}{baseline}&\multicolumn{1}{c}{age control}&\multicolumn{1}{c}{age polynomial}&\multicolumn{1}{c}{IV L.a}&\multicolumn{1}{c}{IV L.y}&\multicolumn{1}{c}{IV L.a L.y}&\multicolumn{1}{c}{IV L.a L.c L.y}\\
+\midrule
+log\_a               &     0.00187         &     0.00737\sym{*}  &     0.00729\sym{*}  &     0.00381         &     0.00327         &     0.00371         &     0.00104         \\
+                    &   (0.00291)         &   (0.00298)         &   (0.00298)         &   (0.00457)         &   (0.00678)         &   (0.00445)         &   (0.00445)         \\
+\addlinespace
+Constant            &     0.02529         &     0.04737         &    -0.05347         &    -0.08533         &    -0.07977         &    -0.08438         &    -0.05642         \\
+                    &   (0.02979)         &   (0.05206)         &   (0.08451)         &   (0.05251)         &   (0.07411)         &   (0.05133)         &   (0.05133)         \\
+\addlinespace
+Age controls        &          No         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
+\midrule
+Adjusted \(R^{2}\)  &      -0.000         &       0.009         &       0.008         &       0.009         &       0.009         &       0.009         &       0.009         \\
+Observations        &       10680         &       10680         &       10680         &       10680         &       10680         &       10680         &       10680         \\
+\bottomrule
+\multicolumn{8}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{8}{l}{\footnotesize Sample: Households with liq assets between 1,000 and 500,000, ages 25 to 60, not moving homes that year, and not HtM today or yesterday}\\
+\multicolumn{8}{l}{\footnotesize \sym{*} \(p<0.05\), \sym{**} \(p<0.01\), \sym{***} \(p<0.001\)}\\
+\end{longtable}
+}

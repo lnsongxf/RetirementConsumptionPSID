@@ -7,6 +7,8 @@ graph close
 set autotabgraphs on
 
 global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
+global folder_output "$folder\Results\EulerEquation"
+
 use "$folder\Data\Intermediate\Basic-Panel.dta", clear
 
 cap mkdir "$folder/Results/Aux_Model_Estimates/AuxModelLatex/"
@@ -297,6 +299,7 @@ reg D.log_consumption log_liq_wealth if liq_wealth > 10000 & abs(D.log_income) <
 reg D.log_consumption log_liq_wealth if liq_wealth > 5000 & liq_wealth < 500000 & abs(D.log_income) < 0.2
 
 
+drop if consumption == 0 | L.consumption == 0
 
 gen y = log_income 
 gen d_c = D.log_consumption
@@ -305,7 +308,7 @@ gen a = liq_wealth
 
 sum d_c, det
 xtile p_d_c = d_c, nquantiles(100)
-drop if p_d_c == 1 | p_d_c == 100 // results seem robust to doing this... magnitudes just change a bit. but it's a bit crazy to see such large changes in consumption
+drop if p_d_c == 1 | p_d_c == 100 // results seem robust to doing this... magnitudes just change a bit. but it's a bit crazy to see such large changes in Consumption
 * drop if p_d_c <= 5 | p_d_c >= 95 // results seem robust to doing this.... though magnitudes change a bit
 * drop if p_d_c <= 10 | p_d_c >= 90 
 sum d_c, det
@@ -326,7 +329,6 @@ sum d_y, det
 */
 
 * drop if d_c < -1 | d_c > 1
-drop if consumption == 0 | L.consumption == 0
 
 global controls a > 1000 & a != .  & age >= 25 & age <= 60 & housing_transition == 0
 eststo clear 
@@ -353,10 +355,12 @@ qui eststo, title(IV L.a L.y):         ivregress 2sls d_c i.age (log_a = L.log_a
 qui eststo, title(IV L.a L.c L.y):         ivregress 2sls d_c i.age (log_a = L.log_a L.y L.log_consumption) if $controls, first
 global esttab_opts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate(Age controls = *age*)
 esttab , $esttab_opts title("Depvar: d_c. $controls")
+esttab using "$folder_output\EE_PSID.tex", $esttab_opts longtable booktabs obslast replace title("PSID Euler Equation") addnotes("Sample: Households with liq assets between 1,000 and 500,000, ages 25 to 60, not moving homes that year, and not HtM today or yesterday")
+esttab using "$folder_output\EE_PSID.csv", $esttab_opts csv obslast replace
 
-
-
-global controls a > 1000 & a < 500000 & a != . & age >= 20 & age <= 65 & housing_transition == 0 & HtM == 0 & L.HtM == 0
+* Same thing but slightly broader age band
+* Previously was getting different results when using D.log_consumption. But now it's foxed because I calculate d_c after dropping some observations
+global controls a > 1000 & a < 500000 & a != . & age >= 22 & age <= 65 & housing_transition == 0 & HtM == 0 & L.HtM == 0
 eststo clear 
 qui eststo, title(baseline):                          reg D.log_consumption       log_a if $controls
 qui eststo, title(age control):                       reg D.log_consumption i.age log_a if $controls
@@ -390,3 +394,4 @@ esttab , $esttab_opts title("Lag Log Assets")
 
 * TODO: restrict to those who do not change homes!
 * TODO: Look at all ages, ie dont restrict to the not old
+* TODO: control for interest rates?
