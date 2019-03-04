@@ -342,8 +342,7 @@ qui eststo, title(IV a & y):         ivregress 2sls d_c i.age (log_a = L.log_a L
 global esttab_opts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate(Age controls = *age*)
 esttab , $esttab_opts title("Depvar: d_c. $controls")
 
-
-* NOTE: since d_c was calculated before we drop some people, we are running the regression even when the lagged observation is dropped
+* It seems that the L.HtM == 0 has a lot of bite
 global controls a > 1000 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & HtM == 0  & L.HtM == 0
 eststo clear 
 qui eststo, title(baseline):              reg d_c       log_a if $controls
@@ -357,21 +356,6 @@ global esttab_opts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate(Age c
 esttab , $esttab_opts title("Depvar: d_c. $controls")
 esttab using "$folder_output\EE_PSID.tex", $esttab_opts longtable booktabs obslast replace title("PSID Euler Equation") addnotes("Sample: Households with liq assets between 1,000 and 500,000, ages 25 to 60, not moving homes that year, and not HtM today or yesterday")
 esttab using "$folder_output\EE_PSID.csv", $esttab_opts csv obslast replace
-
-* Same thing but slightly broader age band
-* Previously was getting different results when using D.log_consumption. But now it's foxed because I calculate d_c after dropping some observations
-global controls a > 1000 & a < 500000 & a != . & age >= 22 & age <= 65 & housing_transition == 0 & HtM == 0 & L.HtM == 0
-eststo clear 
-qui eststo, title(baseline):                          reg D.log_consumption       log_a if $controls
-qui eststo, title(age control):                       reg D.log_consumption i.age log_a if $controls
-qui eststo, title(age polynomial):                    reg D.log_consumption age age2 log_a if $controls
-qui eststo, title(IV L.a):                 ivregress 2sls D.log_consumption i.age (log_a = L.log_a) if $controls, first
-qui eststo, title(IV L.y):                 ivregress 2sls D.log_consumption i.age (log_a = L.y) if $controls, first
-qui eststo, title(IV L.a L.y):             ivregress 2sls D.log_consumption i.age (log_a = L.log_a L.y) if $controls, first
-qui eststo, title(IV L.a L.c L.y):         ivregress 2sls D.log_consumption i.age (log_a = L.log_a L.y L.log_consumption) if $controls, first
-global esttab_opts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate(Age controls = *age*)
-esttab , $esttab_opts title("Depvar: D.log_consumption. $controls")
-
 
 
 * TODO: look at employment status & emp_status_head == 1 & L.emp_status_head == 1
