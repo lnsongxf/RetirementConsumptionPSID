@@ -138,7 +138,7 @@ gen housing_wealth = homeequity_real
 gen mortgage       = mortgage_debt_real
 gen housing_price  = housing_wealth + mortgage
 gen housing = housingstatus == 1 // renting or living with parents are considered as the same
-gen income = inc_fam_real_2015 // TODO: will need to subtract out taxes using NBER TAXSIM
+gen income = inc_fam_real_2015
 gen illiq_wealth = fam_wealth_real - fam_liq_wealth_real // NOTE: we do not use this in the regressions, just use it for our alternative measure of WHtM
 gen HtM = liq_wealth <= (income / 24) // TODO: not sure it should be 24 exactly
 gen dummy_mort = mortgage>0
@@ -300,8 +300,26 @@ reg D.log_consumption log_liq_wealth if liq_wealth > 5000 & liq_wealth < 500000 
 
 
 drop if consumption == 0 | L.consumption == 0
-
 gen y = log_income 
+
+
+gen d_y = D.y
+/*
+preserve
+  collapse d_y, by(age)
+  tsset age
+  tsline d_y
+restore
+*/
+/*
+sum d_y, det
+xtile p_d_y = d_y, nquantiles(100)
+drop if p_d_y == 1 | p_d_y == 100
+* drop if p_d_y <= 5 | p_d_y >= 95
+drop p_d_y
+sum d_y, det
+*/
+
 gen d_c = D.log_consumption
 gen log_a = log_liq_wealth
 gen a = liq_wealth
@@ -313,23 +331,28 @@ drop if p_d_c == 1 | p_d_c == 100 // results seem robust to doing this... magnit
 * drop if p_d_c <= 10 | p_d_c >= 90 
 sum d_c, det
 
-gen d_y = D.y
-/*
-preserve
-  collapse d_y, by(age)
-  tsset age
-  tsline d_y
-restore
-sum d_y, det
-xtile p_d_y = d_y, nquantiles(100)
-drop if p_d_y == 1 | p_d_y == 100
-drop if p_d_y <= 5 | p_d_y >= 95
-drop p_d_y
-sum d_y, det
-*/
+
+
+
+* TODO: should we drop those with 700% change in income?
 
 * drop if d_c < -1 | d_c > 1
 
+
+****************************************************************************************************
+** Consumption Euler Equation - Baseline used for Indirect Inference
+****************************************************************************************************
+
+* reg d_c age age2 log_a if a > 1000 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & HtM == 0  & L.HtM == 0 & L.a > 1000
+
+* NOTE: Looks like we can get rid of the HtM and L.HtM requirement as long as everyone holds at least $1,000 today and yesterday
+reg d_c age age2 log_a if a > 1000 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 1000
+
+****************************************************************************************************
+** Tables with Consumption Euler Equation
+****************************************************************************************************
+
+* Produce EE version controlling for assets today, but not yesterday
 global controls a > 1000 & a != .  & age >= 25 & age <= 60 & housing_transition == 0
 eststo clear 
 qui eststo, title(baseline):              reg d_c       log_a if $controls
@@ -339,24 +362,46 @@ qui eststo, title(IV L.a):         ivregress 2sls d_c       (log_a = L.log_a) if
 qui eststo, title(IV L.a):         ivregress 2sls d_c       (log_a = L.log_a L.y) if $controls, first
 qui eststo, title(IV a & y):         ivregress 2sls d_c i.age (log_a = L.log_a) if $controls, first
 qui eststo, title(IV a & y):         ivregress 2sls d_c i.age (log_a = L.log_a L.y) if $controls, first
-global esttab_opts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate(Age controls = *age*)
+global esttab_opts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate(Age controls = *age*) star(* 0.10 ** 0.05 *** 0.01)
 esttab , $esttab_opts title("Depvar: d_c. $controls")
 
 * It seems that the L.HtM == 0 has a lot of bite
-global controls a > 1000 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & HtM == 0  & L.HtM == 0
+* Or maybe L.a > 1000 has a lot of bite
+global controls a > 1000 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & HtM == 0  & L.HtM == 0 & L.a > 1000
+* This is slightly better: less restrictive, gives more observations, and gives more precision to IV estimates
+global controls a > 1000 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 1000
 eststo clear 
-qui eststo, title(baseline):              reg d_c       log_a if $controls
-qui eststo, title(age control):           reg d_c i.age log_a if $controls
-qui eststo, title(age polynomial):           reg d_c age age2 log_a if $controls
-qui eststo, title(IV L.a):         ivregress 2sls d_c i.age (log_a = L.log_a) if $controls, first
-qui eststo, title(IV L.y):         ivregress 2sls d_c i.age (log_a = L.y) if $controls, first
-qui eststo, title(IV L.a L.y):         ivregress 2sls d_c i.age (log_a = L.log_a L.y) if $controls, first
+qui eststo, title(baseline):                          reg d_c       log_a if $controls
+qui eststo, title(age control):                       reg d_c i.age log_a if $controls
+qui eststo, title(age polynomial):                    reg d_c age age2 log_a if $controls
+qui eststo, title(IV L.a):                 ivregress 2sls d_c i.age (log_a = L.log_a) if $controls, first
+* qui eststo, title(IV L.y):                 ivregress 2sls d_c i.age (log_a = L.y) if $controls, first
+qui eststo, title(IV L.a L.y):             ivregress 2sls d_c i.age (log_a = L.log_a L.y) if $controls, first
 qui eststo, title(IV L.a L.c L.y):         ivregress 2sls d_c i.age (log_a = L.log_a L.y L.log_consumption) if $controls, first
-global esttab_opts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate(Age controls = *age*)
+global esttab_opts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate(Age controls = *age*) star(* 0.10 ** 0.05 *** 0.01)
 esttab , $esttab_opts title("Depvar: d_c. $controls")
 esttab using "$folder_output\EE_PSID.tex", $esttab_opts longtable booktabs obslast replace title("PSID Euler Equation") addnotes("Sample: Households with liq assets between 1,000 and 500,000, ages 25 to 60, not moving homes that year, and not HtM today or yesterday")
 esttab using "$folder_output\EE_PSID.csv", $esttab_opts csv obslast replace
 
+* It seems that the L.HtM == 0 has a lot of bite
+global controls a > 1000 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & HtM == 0  & L.HtM == 0 & L.a > 1000
+eststo clear 
+qui eststo, title(baseline):                          reg d_c       i.wave  D.fsize          log_a if $controls
+qui eststo, title(age control):                       reg d_c       i.wave  D.fsize    i.age log_a if $controls
+qui eststo, title(age polynomial):                    reg d_c       i.wave  D.fsize    age age2 log_a if $controls
+qui eststo, title(IV L.a):                 ivregress 2sls d_c       i.wave  D.fsize    i.age (log_a = L.log_a) if $controls, first
+qui eststo, title(IV L.y):                 ivregress 2sls d_c       i.wave  D.fsize    i.age (log_a = L.y) if $controls, first
+qui eststo, title(IV L.a L.y):             ivregress 2sls d_c       i.wave  D.fsize    i.age (log_a = L.log_a L.y) if $controls, first
+qui eststo, title(IV L.a L.c L.y):         ivregress 2sls d_c       i.wave  D.fsize    i.age (log_a = L.log_a L.y L.log_consumption) if $controls, first
+global esttab_opts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
+esttab , $esttab_opts title("Depvar: d_c. $controls")
+esttab using "$folder_output\EE_PSID_Control_for_kids_and_year.tex", $esttab_opts longtable booktabs obslast replace title("PSID Euler Equation") addnotes("Sample: Households with liq assets between 1,000 and 500,000, ages 25 to 60, not moving homes that year, and not HtM today or yesterday")
+esttab using "$folder_output\EE_PSID_Control_for_kids_and_year.csv", $esttab_opts csv obslast replace
+
+
+* DONE - try age polynomial for IV - gives very similar results
+
+* TODO: put net housing wealth into the regressions
 
 * TODO: look at employment status & emp_status_head == 1 & L.emp_status_head == 1
 * TODO: look at lagged log assets 
@@ -375,7 +420,6 @@ esttab , $esttab_opts title("Lag Log Assets")
 */
 
 * TODO: look at loq assets + net housing wealth. when allowed to refinance, both should enter into EE
-
 * TODO: restrict to those who do not change homes!
 * TODO: Look at all ages, ie dont restrict to the not old
 * TODO: control for interest rates?
