@@ -1,0 +1,41 @@
+\documentclass[12pt, letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin = 0.75in]{geometry}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{pdflscape}
+%\setlength{\pdfpagewidth}{25in} \setlength{\pdfpageheight}{15in}
+
+
+%\usepackage[latin1]{inputenc}
+%\usepackage{epstopdf}
+%\usepackage{hyperref}
+\usepackage{color}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\definecolor{lightgreen}{rgb}{0,0.5,0}
+\graphicspath{{../Output/}}
+
+
+
+
+
+\begin{document}
+
+\begin{landscape}
+
+\title{ \vspace{-1cm} Euler Equation Estimation \vspace{-1cm} }
+\date{}
+\maketitle
+
+
+\section{PSID}
+\input{"../EE_PSID.tex"}
+
+\pagebreak
+\input{"../EE_PSID_Control_for_kids_and_year.tex"}
+
+\end{landscape}
+
+\end{document}

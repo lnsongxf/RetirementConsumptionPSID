@@ -1,28 +1,28 @@
 {
 \def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
-\begin{longtable}{l*{7}{c}}
-\caption{PSID Euler Equation}\\
+\begin{longtable}{l*{6}{c}}
+\caption{PSID Euler Equation (More Controls)}\\
 \toprule\endfirsthead\midrule\endhead\midrule\endfoot\endlastfoot
-                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}&\multicolumn{1}{c}{(7)}\\
-                    &\multicolumn{1}{c}{baseline}&\multicolumn{1}{c}{age control}&\multicolumn{1}{c}{age polynomial}&\multicolumn{1}{c}{IV L.a}&\multicolumn{1}{c}{IV L.y}&\multicolumn{1}{c}{IV L.a L.y}&\multicolumn{1}{c}{IV L.a L.c L.y}\\
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}\\
+                    &\multicolumn{1}{c}{baseline}&\multicolumn{1}{c}{age control}&\multicolumn{1}{c}{age polynomial}&\multicolumn{1}{c}{IV L.a}&\multicolumn{1}{c}{IV L.a L.y}&\multicolumn{1}{c}{IV L.a L.c L.y}\\
 \midrule
-log\_a               &     0.00280         &     0.00631\sym{*}  &     0.00622\sym{*}  &     0.00416         &     0.00712         &     0.00468         &     0.00106         \\
-                    &   (0.00289)         &   (0.00296)         &   (0.00296)         &   (0.00455)         &   (0.00676)         &   (0.00442)         &   (0.00442)         \\
+log\_a               &     0.00430\sym{**} &     0.00766\sym{***}&     0.00755\sym{***}&     0.00476         &     0.00432         &     0.00638\sym{*}  \\
+                    &   (0.00212)         &   (0.00216)         &   (0.00216)         &   (0.00336)         &   (0.00330)         &   (0.00330)         \\
 \addlinespace
-Constant            &     0.05199         &     0.06967         &    -0.09916         &    -0.09659         &    -0.12736         &    -0.10199\sym{*}  &    -0.06434         \\
-                    &   (0.03135)         &   (0.05317)         &   (0.08631)         &   (0.05311)         &   (0.07435)         &   (0.05189)         &   (0.05188)         \\
+Constant            &     0.03992\sym{*}  &     0.02140         &    -0.05555         &    -0.09961\sym{**} &    -0.09523\sym{**} &    -0.11579\sym{***}\\
+                    &   (0.02242)         &   (0.04306)         &   (0.07178)         &   (0.03955)         &   (0.03910)         &   (0.03909)         \\
 \addlinespace
-Age controls        &          No         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
+Age controls        &          No         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
 \addlinespace
-Year controls       &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
+Year controls       &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
 \addlinespace
-Kids controls       &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
+Kids controls       &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
 \midrule
-Adjusted \(R^{2}\)  &       0.023         &       0.029         &       0.027         &       0.029         &       0.029         &       0.029         &       0.029         \\
-Observations        &       10659         &       10659         &       10659         &       10659         &       10659         &       10659         &       10659         \\
+Adjusted \(R^{2}\)  &       0.023         &       0.028         &       0.028         &       0.028         &       0.028         &       0.028         \\
+Observations        &       15092         &       15092         &       15092         &       15092         &       15092         &       15092         \\
 \bottomrule
-\multicolumn{8}{l}{\footnotesize Standard errors in parentheses}\\
-\multicolumn{8}{l}{\footnotesize Sample: Households with liq assets between 1,000 and 500,000, ages 25 to 60, not moving homes that year, and not HtM today or yesterday}\\
-\multicolumn{8}{l}{\footnotesize \sym{*} \(p<0.05\), \sym{**} \(p<0.01\), \sym{***} \(p<0.001\)}\\
+\multicolumn{7}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{7}{l}{\footnotesize Sample: Households with liq assets between 1,000 and 500,000, ages 25 to 60, not moving homes that year, and not HtM today or yesterday}\\
+\multicolumn{7}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
 \end{longtable}
 }

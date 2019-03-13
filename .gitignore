@@ -28,3 +28,6 @@ $RECYCLE.BIN/
 *.lnk
 
 Do/Louise_project/sublime2stata.do
+*.gz
+*.aux
+Results/EulerEquation/Euler Equation Results Summary/Euler Equation on PSID.log

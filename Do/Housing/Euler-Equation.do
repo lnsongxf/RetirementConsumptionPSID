@@ -374,28 +374,27 @@ eststo clear
 qui eststo, title(baseline):                          reg d_c       log_a if $controls
 qui eststo, title(age control):                       reg d_c i.age log_a if $controls
 qui eststo, title(age polynomial):                    reg d_c age age2 log_a if $controls
-qui eststo, title(IV L.a):                 ivregress 2sls d_c i.age (log_a = L.log_a) if $controls, first
-* qui eststo, title(IV L.y):                 ivregress 2sls d_c i.age (log_a = L.y) if $controls, first
-qui eststo, title(IV L.a L.y):             ivregress 2sls d_c i.age (log_a = L.log_a L.y) if $controls, first
-qui eststo, title(IV L.a L.c L.y):         ivregress 2sls d_c i.age (log_a = L.log_a L.y L.log_consumption) if $controls, first
+qui eststo, title(IV L.a):                 ivregress 2sls d_c age age2 (log_a = L.log_a) if $controls, first
+qui eststo, title(IV L.a L.y):             ivregress 2sls d_c age age2 (log_a = L.log_a L.y) if $controls, first
+qui eststo, title(IV L.a L.c L.y):         ivregress 2sls d_c age age2 (log_a = L.log_a L.y L.log_consumption) if $controls, first
 global esttab_opts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate(Age controls = *age*) star(* 0.10 ** 0.05 *** 0.01)
 esttab , $esttab_opts title("Depvar: d_c. $controls")
-esttab using "$folder_output\EE_PSID.tex", $esttab_opts longtable booktabs obslast replace title("PSID Euler Equation") addnotes("Sample: Households with liq assets between 1,000 and 500,000, ages 25 to 60, not moving homes that year, and not HtM today or yesterday")
+esttab using "$folder_output\EE_PSID.tex", $esttab_opts longtable booktabs obslast replace title("PSID Euler Equation (Baseline)") addnotes("Sample: Households with liq assets between 1,000 and 500,000, ages 25 to 60, not moving homes that year, and not HtM today or yesterday")
 esttab using "$folder_output\EE_PSID.csv", $esttab_opts csv obslast replace
 
 * It seems that the L.HtM == 0 has a lot of bite
-global controls a > 1000 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & HtM == 0  & L.HtM == 0 & L.a > 1000
+* global controls a > 1000 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & HtM == 0  & L.HtM == 0 & L.a > 1000
+global controls a > 1000 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 1000
 eststo clear 
 qui eststo, title(baseline):                          reg d_c       i.wave  D.fsize          log_a if $controls
 qui eststo, title(age control):                       reg d_c       i.wave  D.fsize    i.age log_a if $controls
 qui eststo, title(age polynomial):                    reg d_c       i.wave  D.fsize    age age2 log_a if $controls
 qui eststo, title(IV L.a):                 ivregress 2sls d_c       i.wave  D.fsize    i.age (log_a = L.log_a) if $controls, first
-qui eststo, title(IV L.y):                 ivregress 2sls d_c       i.wave  D.fsize    i.age (log_a = L.y) if $controls, first
 qui eststo, title(IV L.a L.y):             ivregress 2sls d_c       i.wave  D.fsize    i.age (log_a = L.log_a L.y) if $controls, first
 qui eststo, title(IV L.a L.c L.y):         ivregress 2sls d_c       i.wave  D.fsize    i.age (log_a = L.log_a L.y L.log_consumption) if $controls, first
 global esttab_opts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
 esttab , $esttab_opts title("Depvar: d_c. $controls")
-esttab using "$folder_output\EE_PSID_Control_for_kids_and_year.tex", $esttab_opts longtable booktabs obslast replace title("PSID Euler Equation") addnotes("Sample: Households with liq assets between 1,000 and 500,000, ages 25 to 60, not moving homes that year, and not HtM today or yesterday")
+esttab using "$folder_output\EE_PSID_Control_for_kids_and_year.tex", $esttab_opts longtable booktabs obslast replace title("PSID Euler Equation (More Controls)") addnotes("Sample: Households with liq assets between 1,000 and 500,000, ages 25 to 60, not moving homes that year, and not HtM today or yesterday")
 esttab using "$folder_output\EE_PSID_Control_for_kids_and_year.csv", $esttab_opts csv obslast replace
 
 

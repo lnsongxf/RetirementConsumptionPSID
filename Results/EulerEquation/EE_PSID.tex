@@ -1,20 +1,20 @@
 {
 \def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
 \begin{longtable}{l*{6}{c}}
-\caption{PSID Euler Equation}\\
+\caption{PSID Euler Equation (Baseline)}\\
 \toprule\endfirsthead\midrule\endhead\midrule\endfoot\endlastfoot
                     &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}\\
                     &\multicolumn{1}{c}{baseline}&\multicolumn{1}{c}{age control}&\multicolumn{1}{c}{age polynomial}&\multicolumn{1}{c}{IV L.a}&\multicolumn{1}{c}{IV L.a L.y}&\multicolumn{1}{c}{IV L.a L.c L.y}\\
 \midrule
-log\_a               &     0.00355\sym{*}  &     0.00825\sym{***}&     0.00815\sym{***}&     0.00557\sym{*}  &     0.00480         &     0.00785\sym{**} \\
-                    &   (0.00215)         &   (0.00219)         &   (0.00218)         &   (0.00338)         &   (0.00333)         &   (0.00333)         \\
+log\_a               &     0.00355\sym{*}  &     0.00825\sym{***}&     0.00815\sym{***}&     0.00546         &     0.00461         &     0.00745\sym{**} \\
+                    &   (0.00215)         &   (0.00219)         &   (0.00218)         &   (0.00338)         &   (0.00332)         &   (0.00332)         \\
 \addlinespace
-Constant            &     0.00583         &     0.00306         &    -0.00554         &    -0.09689\sym{**} &    -0.08914\sym{**} &    -0.11974\sym{***}\\
-                    &   (0.02090)         &   (0.04272)         &   (0.07055)         &   (0.03907)         &   (0.03862)         &   (0.03861)         \\
+Constant            &     0.00583         &     0.00306         &    -0.00554         &     0.01648         &     0.02266         &     0.00193         \\
+                    &   (0.02090)         &   (0.04272)         &   (0.07055)         &   (0.07289)         &   (0.07277)         &   (0.07276)         \\
 \addlinespace
 Age controls        &          No         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
 \midrule
-Adjusted \(R^{2}\)  &       0.000         &       0.009         &       0.008         &       0.009         &       0.009         &       0.010         \\
+Adjusted \(R^{2}\)  &       0.000         &       0.009         &       0.008         &       0.009         &       0.009         &       0.009         \\
 Observations        &       15166         &       15166         &       15166         &       15092         &       15092         &       15092         \\
 \bottomrule
 \multicolumn{7}{l}{\footnotesize Standard errors in parentheses}\\
