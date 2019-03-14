@@ -1,16 +1,16 @@
 {
 \def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
 \begin{longtable}{l*{6}{c}}
-\caption{PSID Euler Equation (More Controls)}\\
+\caption{PSID Euler Equation (Log Liquid Assets in Checking/savings accounts)}\\
 \toprule\endfirsthead\midrule\endhead\midrule\endfoot\endlastfoot
                     &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}\\
                     &\multicolumn{1}{c}{baseline}&\multicolumn{1}{c}{age control}&\multicolumn{1}{c}{age polynomial}&\multicolumn{1}{c}{IV L.a}&\multicolumn{1}{c}{IV L.a L.y}&\multicolumn{1}{c}{IV L.a L.c L.y}\\
 \midrule
-Log Liquid Assets   &     0.00430\sym{**} &     0.00766\sym{***}&     0.00755\sym{***}&     0.00476         &     0.00432         &     0.00638\sym{*}  \\
-                    &   (0.00212)         &   (0.00216)         &   (0.00216)         &   (0.00336)         &   (0.00330)         &   (0.00330)         \\
+Log Bank Balances   &     0.00554\sym{**} &     0.00863\sym{***}&     0.00850\sym{***}&     0.00334         &     0.00283         &     0.00869\sym{**} \\
+                    &   (0.00233)         &   (0.00236)         &   (0.00236)         &   (0.00432)         &   (0.00422)         &   (0.00422)         \\
 \addlinespace
-Constant            &     0.03992\sym{*}  &     0.02140         &    -0.05555         &    -0.09961\sym{**} &    -0.09523\sym{**} &    -0.11579\sym{***}\\
-                    &   (0.02242)         &   (0.04306)         &   (0.07178)         &   (0.03955)         &   (0.03910)         &   (0.03909)         \\
+Constant            &     0.03109         &     0.01588         &    -0.06311         &    -0.08472         &    -0.08082         &    -0.12565\sym{*}  \\
+                    &   (0.02303)         &   (0.04347)         &   (0.07215)         &   (0.07672)         &   (0.07639)         &   (0.07637)         \\
 \addlinespace
 Age controls        &          No         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
 \addlinespace
@@ -18,7 +18,7 @@ Year controls       &         Yes         &         Yes         &         Yes   
 \addlinespace
 Kids controls       &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
 \midrule
-Adjusted \(R^{2}\)  &       0.023         &       0.028         &       0.028         &       0.028         &       0.028         &       0.028         \\
+Adjusted \(R^{2}\)  &       0.023         &       0.028         &       0.028         &       0.027         &       0.027         &       0.028         \\
 Observations        &       15092         &       15092         &       15092         &       15092         &       15092         &       15092         \\
 \bottomrule
 \multicolumn{7}{l}{\footnotesize Standard errors in parentheses}\\
