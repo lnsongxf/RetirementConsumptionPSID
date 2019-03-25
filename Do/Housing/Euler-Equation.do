@@ -452,7 +452,7 @@ esttab using "$folder_output\EE_PSID.csv", $esttab_opts csv obslast replace
 * This looks pretty good!
 global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 500
 * Also looks good!
-global sample a > 0 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 0
+* global sample a > 0 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 0
 eststo clear 
 global control_vars i.wave D.fsize
 * global control_vars i.wave D.fsize quarter#l_quarter
@@ -519,6 +519,22 @@ esttab , $esttab_opts title("Lag Log Assets")
 * TODO: restrict to those who do not change homes!
 * TODO: Look at all ages, ie dont restrict to the not old
 * TODO: control for interest rates?
+
+
+****************************************************************************************************
+** Plot change in consumption by assets
+****************************************************************************************************
+
+* Look at mean change in consumption by liquid asset category
+preserve
+  keep if age >= 25 & $sample
+  di "Sample: $sample"
+  egen a_group = cut(a), at(0, 100, 500, 1000, 5000, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000, 150000, 200000, 10000000000)
+  collapse (mean) d_c d_y (count) n = d_c, by(a_group) 
+  scatter d_c a_group, name(scattergroups_levels, replace)
+  scatter d_y a_group, name(scatter_d_y, replace)
+  list
+restore
 
 ****************************************************************************************************
 ** First stage regressions
