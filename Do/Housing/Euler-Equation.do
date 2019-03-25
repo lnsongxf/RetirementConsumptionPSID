@@ -22,8 +22,6 @@ global allow_kids_to_leave_hh 1 // When looking for stable households, what shou
 
 * cap ssc install mat2txt
 
-global aux_model_in_logs 1 // 1 = logs, 0 = levels
-
 global drop_top_x 0 // 5 // can be 0, 1, or 5
 global drop_by_income 1 // can be 1 to drop by income, 0 to drop by wealth
 
@@ -55,6 +53,7 @@ qui do "$folder\Do\Sample-Selection.do"
 * Generate aggregate consumption (following Blundell et al)
 qui do "$folder\Do\Consumption-Measures.do"
 
+
 * TODO: make income / wealth real
 
 * Todo: try before or after sample selection
@@ -77,17 +76,6 @@ drop if fam_wealth_real - L.fam_wealth_real > 100 * inc_fam_real & fam_wealth !=
 
 * Find first home purcahses (two alternative definitions)
 qui do "$folder\Do\Housing\Find-First-Home-Purchase.do"
-
-
-****************************************************************************************************
-** Aux Model Versions
-****************************************************************************************************
-
-* Version 5 (Original)
-* local non_log_endog_vars WHtM PHtM dummy_mort housing
-
-* Version 5 (New - remove dummy_mort b/c in the model dummy_mort is collinear with housing)
-local non_log_endog_vars WHtM PHtM housing
 
 ****************************************************************************************************
 ** Find housing upgrades/downgrades (owner to owner transitions)
@@ -198,25 +186,14 @@ drop if income < 100 // important!!! about 100 people. many with negative income
 * TODO: if I combine these, do I get housing_wealth?
 
 
-* HtM
-
-if $aux_model_in_logs == 1{
-  * Run the model in logs
-  local level_vars consumption liq_wealth housing_wealth income mortgage
-  local endog_vars 
-  foreach var of varlist `level_vars' {
-    gen log_`var' = log(`var')
-    replace log_`var' = log(1) if `var' <= 0 & `var' != .
-    local endog_vars `endog_vars' log_`var'
-  }
-  
-  * Now add in the remaining "non log" variables
-  local endog_vars `endog_vars' `non_log_endog_vars'
-}
-else if $aux_model_in_logs == 0{
-  * Run the model in levels
-  local level_vars
-  local endog_vars housing consumption liq_wealth housing_wealth income mortgage
+* Convert variables to logs
+local level_vars consumption liq_wealth housing_wealth income mortgage
+sum `level_vars', det // notice lots of negative or zero values here!
+local endog_vars 
+foreach var of varlist `level_vars' {
+  gen log_`var' = log(`var')
+  * replace log_`var' = log(1) if `var' <= 0 & `var' != . // Not totally sure if we should use this
+  local endog_vars `endog_vars' log_`var'
 }
 
 /*
@@ -307,8 +284,19 @@ sum housing_wealth if housing == 0*/
 ** Generate variables
 ****************************************************************************************************
 
+* TODO: Sample selection refinement: ie drop HHs with one off "jumps" in consumption or earnings
+do "$folder\Do\Scripts\Extra-Sample-Selection.do"
+
+replace consumption     = . if consumption == 0 | L.consumption == 0
+replace log_consumption = . if consumption == 0 | L.consumption == 0 // this changes nothing because we've already dropped such people
+
+* Drop bottom 1% of consumption (it's a bit weird for households to have consumption < 2,000)
+* Meanwhile we have one household that consumes 500k
 sum consumption, det
-drop if consumption < 1000
+xtile p_c = consumption, nquantiles(100)
+drop if p_c == 1 
+drop p_c
+* drop if consumption < 1000
 sum consumption, det
 
 gen y     = log_income 
@@ -340,7 +328,7 @@ if $EE_Food_Consumption {
 }
 
 ****************************************************************************************************
-** Consumption Euler Equation
+** Consumption Euler Equation -- first look
 ****************************************************************************************************
 
 /*
@@ -363,8 +351,6 @@ reg D.log_consumption log_liq_wealth if liq_wealth > 10000 & abs(D.log_income) <
 reg D.log_consumption log_liq_wealth if liq_wealth > 5000 & liq_wealth < 500000 & abs(D.log_income) < 0.2
 */
 
-replace consumption = . if consumption == 0 | L.consumption == 0
-* drop if consumption == 0 | L.consumption == 0
 
 /*
 preserve
@@ -385,7 +371,7 @@ sum d_y, det
 sum d_c, det
 xtile p_d_c = d_c, nquantiles(100)
 drop if p_d_c == 1 | p_d_c == 100 // results seem robust to doing this... magnitudes just change a bit. but it's a bit crazy to see such large changes in Consumption
-drop if p_d_c <= 5 | p_d_c >= 95 // much better IV results from this
+* drop if p_d_c <= 5 | p_d_c >= 95 // much better IV results from this
 * drop if p_d_c <= 10 | p_d_c >= 90 
 sum d_c, det
 pause
@@ -402,7 +388,7 @@ pause
 * reg d_c age age2 log_a if a > 1000 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & HtM == 0  & L.HtM == 0 & L.a > 1000
 
 * NOTE: Looks like we can get rid of the HtM and L.HtM requirement as long as everyone holds at least $1,000 today and yesterday
-reg d_c age age2 log_a if a > 1000 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 1000
+* reg d_c age age2 log_a if a > 1000 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 1000
 
 ****************************************************************************************************
 ** Tables with Consumption Euler Equation
@@ -489,7 +475,7 @@ global esttab_opts keep(log_bank* _cons) ar2 label b(5) se(5) mtitles indicate("
 esttab , $esttab_opts title("Depvar: d_c. Liquid Assets in Checking/Savings Account. $sample")
 esttab using "$folder_output\EE_PSID_Bank_Account.tex", $esttab_opts longtable booktabs obslast replace title("PSID Euler Equation (Log Liquid Assets in Checking/savings accounts)") addnotes("Sample: Households with liq assets $>$ 1,000 at time t and t-1, ages 25 to 60, not moving homes that year")
 esttab using "$folder_output\EE_PSID_Bank_Account.csv", $esttab_opts csv obslast replace
-pause
+
 * TODO: look at lagged assets
 
 

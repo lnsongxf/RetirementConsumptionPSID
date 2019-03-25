@@ -35,8 +35,22 @@ homeinsuranceexpenditure rent_imputed
 egen transportation_blundell = rowtotal(`transportation_blundell')
 lab var transportation_blundell "Transportation Services (Blundell et al)"
 
+/*
+* NOTE that here we get no missings
+* The reason is because we're using PSID imputed consumption measures
+* TODO: would be better to look at the actual variable (ie self reported gasoline expenditure last month) and aggregate that up
+* That way we can explicitly deal with any missings, as in Blundell
+* TODO: what's their cutoff for how many missing expenditure responses are needed to drop an observation?
+
+foreach var of varlist `expenditure_blundell' `transportation_blundell'{
+	replace `var' = . if `var' < 0
+}
+missings report `expenditure_blundell' `transportation_blundell'
+*/
+
 * Blundell et al Expenditure (equivalence scale)
 egen expenditure_blundell          = rowtotal(`expenditure_blundell')
+egen expenditure_blundell_missings = rowmiss(`expenditure_blundell')
 gen expenditure_blundell_exhealth  = expenditure_blundell - healthservicesexpenditure - healthinsuranceexpenditure
 gen expenditure_blundell_exhous    = expenditure_blundell - rent_imputed - homeinsuranceexpenditure
 gen expenditure_blundell_exedu     = expenditure_blundell - educationexpenditure
