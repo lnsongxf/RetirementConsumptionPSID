@@ -5,6 +5,7 @@
 set more off
 graph close
 set autotabgraphs on
+pause on 
 
 global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 global folder_output "$folder\Results\EulerEquation"
@@ -36,6 +37,8 @@ global house_price_by_age 0 // plot distribution of house price by age?
 global compute_htm_persistence 0
 global makeplots 0
 
+* Estimate the euler equation using food consumption (1) or total nondurable consumption (0)
+global EE_Food_Consumption 0 
 
 * cap net install xtserial.pkg
 
@@ -301,9 +304,42 @@ drop if housing == 0 & mortgage != 0 // no such people anyway :)
 sum housing_wealth if housing == 0*/
 
 ****************************************************************************************************
+** Generate variables
+****************************************************************************************************
+
+gen y     = log_income 
+gen d_y   = D.y
+gen d_c   = D.log_consumption
+gen log_a = log_liq_wealth
+gen a     = liq_wealth
+
+lab var log_a "Log Liquid Assets"
+lab var a "Liquid Assets"
+
+****************************************************************************************************
+** ALTERNATIVE: Try euler equation with food consumption
+****************************************************************************************************
+
+if $EE_Food_Consumption {
+    drop d_c consumption log_consumption
+    
+    * gen consumption = foodawayfromhomeexpenditure
+    * gen consumption = foodathomeexpenditure
+    gen consumption = foodathomeexpenditure + foodawayfromhomeexpenditure + foodstamp
+    
+    sum consumption, det
+    replace consumption = . if consumption < 1000
+    sum consumption, det
+    
+    gen log_consumption = log(consumption)
+    gen d_c = D.log_consumption
+}
+
+****************************************************************************************************
 ** Consumption Euler Equation
 ****************************************************************************************************
 
+/*
 * Exactly what we were running on the model
 reg D.log_consumption log_liq_wealth if liq_wealth > 1000 
 
@@ -321,13 +357,12 @@ reg D.log_consumption log_liq_wealth if liq_wealth > 10000 & abs(D.log_income) <
 * Slightly different specification - significant at last
 * AHH but it's not significant on the model! 
 reg D.log_consumption log_liq_wealth if liq_wealth > 5000 & liq_wealth < 500000 & abs(D.log_income) < 0.2
+*/
+
+replace consumption = . if consumption == 0 | L.consumption == 0
+* drop if consumption == 0 | L.consumption == 0
 
 
-drop if consumption == 0 | L.consumption == 0
-gen y = log_income 
-
-
-gen d_y = D.y
 /*
 preserve
   collapse d_y, by(age)
@@ -344,22 +379,12 @@ drop p_d_y
 sum d_y, det
 */
 
-gen d_c = D.log_consumption
-gen log_a = log_liq_wealth
-gen a = liq_wealth
-
-lab var log_a "Log Liquid Assets"
-lab var a "Liquid Assets"
-
 sum d_c, det
 xtile p_d_c = d_c, nquantiles(100)
 drop if p_d_c == 1 | p_d_c == 100 // results seem robust to doing this... magnitudes just change a bit. but it's a bit crazy to see such large changes in Consumption
 * drop if p_d_c <= 5 | p_d_c >= 95 // results seem robust to doing this.... though magnitudes change a bit
 * drop if p_d_c <= 10 | p_d_c >= 90 
 sum d_c, det
-
-
-
 
 * TODO: should we drop those with 700% change in income?
 
@@ -411,11 +436,12 @@ qui eststo, title(IV L.a):                 ivregress 2sls d_c age age2 (log_a = 
 * qui eststo, title(IV L.cash stock):      ivregress 2sls d_c age age2 (log_a = L.log_bank_account_wealth L.log_stock_wealth) if $controls, first
 * qui eststo, title(IV lag difs):            ivregress 2sls d_c age age2 (log_a = L.D.log_a L.D.y L.D.log_consumption) if $controls, first
 qui eststo, title(IV L.a L.y):             ivregress 2sls d_c age age2 (log_a = L.log_a L.y) if $controls, first
-qui eststo, title(IV L.a L.c L.y):         ivregress 2sls d_c age age2 (log_a = L.log_a L.y L.log_consumption) if $controls, first
+qui eststo, title(IV L.a L2.c L.y):         ivregress 2sls d_c age age2 (log_a = L(1 2).(log_a y log_bank_account_wealth) L2.log_consumption) if $controls, first
 global esttab_opts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate(Age controls = *age*) star(* 0.10 ** 0.05 *** 0.01)
 esttab , $esttab_opts title("Depvar: d_c. $controls")
 esttab using "$folder_output\EE_PSID.tex", $esttab_opts longtable booktabs obslast replace title("PSID Euler Equation (Baseline)") addnotes("Sample: Households with liq assets $>$ 1,000 at time t and t-1, ages 25 to 60, not moving homes that year")
 esttab using "$folder_output\EE_PSID.csv", $esttab_opts csv obslast replace
+pause
 
 * It seems that the L.HtM == 0 has a lot of bite
 * global controls a > 1000 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & HtM == 0  & L.HtM == 0 & L.a > 1000
@@ -430,12 +456,12 @@ qui eststo, title(age polynomial):                    reg d_c       i.wave  D.fs
 qui eststo, title(IV L.a):                 ivregress 2sls d_c       i.wave  D.fsize    i.age (log_a = L.log_a) if $controls, first
 * qui eststo, title(IV L.cash stock):        ivregress 2sls d_c       i.wave  D.fsize    i.age (log_a = L.log_bank_account_wealth L.log_stock_wealth) if $controls, first
 qui eststo, title(IV L.a L.y):             ivregress 2sls d_c       i.wave  D.fsize    i.age (log_a = L.log_a L.y) if $controls, first
-qui eststo, title(IV L.a L.c L.y):         ivregress 2sls d_c       i.wave  D.fsize    i.age (log_a = L.log_a L.y L.log_consumption) if $controls, first
+qui eststo, title(IV L.a L2.c L.y):         ivregress 2sls d_c       i.wave  D.fsize    i.age (log_a = L(1 2).(log_a y log_bank_account_wealth) L2.log_consumption) if $controls, first
 global esttab_opts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
 esttab , $esttab_opts title("Depvar: d_c. Kid and Year Controls. $controls")
 esttab using "$folder_output\EE_PSID_Control_for_kids_and_year.tex", $esttab_opts longtable booktabs obslast replace title("PSID Euler Equation (More Controls)") addnotes("Sample: Households with liq assets $>$ 1,000 at time t and t-1, ages 25 to 60, not moving homes that year")
 esttab using "$folder_output\EE_PSID_Control_for_kids_and_year.csv", $esttab_opts csv obslast replace
-
+pause
 
 * Looking at bank account wealth makes nicer IV results!
 global sample a > 1000 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 1000 
@@ -448,13 +474,13 @@ qui eststo, title(age control):                       reg d_c i.age     log_bank
 qui eststo, title(age polynomial):                    reg d_c age age2  log_bank_account_wealth                                                    $control_vars if $sample
 qui eststo, title(IV L.a):                 ivregress 2sls d_c age age2 (log_bank_account_wealth = L.log_bank_account_wealth)                       $control_vars if $sample, first
 qui eststo, title(IV L.a L.y):             ivregress 2sls d_c age age2 (log_bank_account_wealth = L.log_bank_account_wealth L.y)                   $control_vars if $sample, first
-qui eststo, title(IV L.a L.c L.y):         ivregress 2sls d_c age age2 (log_bank_account_wealth = L.log_bank_account_wealth L.y L.log_consumption) $control_vars if $sample, first
+qui eststo, title(IV L.a L2.c L.y):         ivregress 2sls d_c age age2 (log_bank_account_wealth = L(1 2).(log_bank_account_wealth y log_a) L2.log_consumption) $control_vars if $sample, first
 global esttab_opts keep(log_bank* _cons) ar2 label b(5) se(5) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
 esttab , $esttab_opts title("Depvar: d_c. Liquid Assets in Checking/Savings Account. $sample")
 esttab using "$folder_output\EE_PSID_Bank_Account.tex", $esttab_opts longtable booktabs obslast replace title("PSID Euler Equation (Log Liquid Assets in Checking/savings accounts)") addnotes("Sample: Households with liq assets $>$ 1,000 at time t and t-1, ages 25 to 60, not moving homes that year")
 esttab using "$folder_output\EE_PSID_Bank_Account.csv", $esttab_opts csv obslast replace
-
-
+pause
+* TODO: look at lagged assets
 
 
 
@@ -520,3 +546,16 @@ gen d_log_bank_account_wealth = D.log_bank_account_wealth
 sum d_log_bank_account_wealth
 */
 
+
+****************************************************************************************************
+** Things to do
+****************************************************************************************************
+
+* look into IVs
+* in the monte carlo results, interact log_a with dummies for liquid assets low/mid/high
+* and make some plots that might be helpful to understand these results. both plot the simulated data and also plot the policy function
+* in psid, see if results hold if i restrict to food consumption ???
+* in psid, see what happens if i put in housing wealth that can be extracted
+* previously i tried with net housing wealth = house price - mortgage
+* maybe i should try with net housing wealth that can be extracted = max(0, houseprice * 0.9 - mortgage). in other words, if you have a 50% LTV, you can only lever up to 90%.
+* aka net housing wealth that can be extracted = (0.9 - LTV) * houseprice = 0.9* houseprice - mortgage
