@@ -32,6 +32,10 @@ set maxvar 32767
 cap mkdir "$folder/Data/Raw/PSID_Install"
 psid install using "$folder/Data/Raw/PSID_Download", to("$folder/Data/Raw/PSID_Install")
 
+* Note that before updating to 2017, the psidtools package will need to be updated
+* C:\ado\plus\p\psid.ado
+* adoupdate psidtools, update
+
 ****************************************************************************************************
 ** Select variables and construct panel using year-level files
 ** Note cannot use * comment inside the #delimit code
@@ -48,7 +52,8 @@ psid use
 	[86]ER30500 [87]ER30537 [88]ER30572 [89]ER30608 [90]ER30644 [91]ER30691
 	[92]ER30735 [93]ER30808 [94]ER33103 [95]ER33203 [96]ER33303 [97]ER33403
 	[99]ER33503 [01]ER33603 [03]ER33703 [05]ER33803 [07]ER33903
-	[09]ER34003 [11]ER34103 [13]ER34203 [15]ER34303
+	[09]ER34003 [11]ER34103 [13]ER34203 [15]ER34303 
+	// [17]ER34503
 
 	// age of individual
 	|| age
@@ -59,7 +64,8 @@ psid use
 	[88]ER30573 [89]ER30609 [90]ER30645 [91]ER30692 [92]ER30736
 	[93]ER30809 [94]ER33104 [95]ER33204 [96]ER33304 [97]ER33404
 	[99]ER33504 [01]ER33604 [03]ER33704 [05]ER33804 [07]ER33904
-	[09]ER34004 [11]ER34104 [13]ER34204 [15]ER34305
+	[09]ER34004 [11]ER34104 [13]ER34204 [15]ER34305 
+	// [17]ER34504
 
 	// year individual born
 	|| year_born
@@ -67,12 +73,15 @@ psid use
 	[89]ER30611 [90]ER30647 [91]ER30694 [92]ER30738 [93]ER30811 [94]ER33106
 	[95]ER33206 [96]ER33306 [97]ER33406
 	[99]ER33506 [01]ER33606 [03]ER33706 [05]ER33806 [07]ER33906 [09]ER34006
-	[11]ER34106 [13]ER34206 [15]ER34307
+	[11]ER34106 [13]ER34206 [15]ER34307 
+	// [17]ER34506
 
 	// sex of head
 	|| sex_head
-	[99]ER13011 [01]ER17014 [03]ER21018 [05]ER25018 [07]ER36018 [09]ER42018
-	[11]ER47318 [13]ER53018 [15]ER60018
+	[83]V8962 [84]V10420 [85]V11607 [86]V13012 [87]V14115 [88]V15131
+	[89]V16632 [90]V18050 [91]V19350 [92]V20652 [93]V22407 [94]ER2008
+	[95]ER5007 [96]ER7007 [97]ER10010 [99]ER13011 [01]ER17014 [03]ER21018
+	[05]ER25018 [07]ER36018 [09]ER42018 [11]ER47318 [13]ER53018 [15]ER60018	
 	// note: if you want sex of the individual, use ER32000 instead
 	// TODO: look up sex head
 
@@ -94,9 +103,9 @@ psid use
 	|| fchg
 	// [69]V542 [70]V1109 [71]V1809 [72]V2410 [73]V3010 [74]V3410 [75]V3810
 	// [76]V4310 [77]V5210 [78]V5710 [79]V6310 [80]V6910 [81]V7510 [82]V8210
-	// [83]V8810 [84]V10010 [85]V11112 [86]V12510 [87]V13710 [88]V14810
-	// [89]V16310 [90]V17710 [91]V19010 [92]V20310 [93]V21608 [94]ER2005A
-	// [95]ER5004A [96]ER7004A [97]ER10004A
+	[83]V8810 [84]V10010 [85]V11112 [86]V12510 [87]V13710 [88]V14810
+	[89]V16310 [90]V17710 [91]V19010 [92]V20310 [93]V21608 [94]ER2005A
+	[95]ER5004A [96]ER7004A [97]ER10004A
 	[99]ER13008A [01]ER17007 [03]ER21007 [05]ER25007 [07]ER36007 [09]ER42007
 	[11]ER47307 [13]ER53007 [15]ER60007
 
@@ -124,11 +133,10 @@ psid use
 	|| splitoff_indicator
 	// [69]V909 [70]V1106 [71]V1806 [72]V2407 [73]V3007 [74]V3407 [75]V3807
 	// [76]V4307 [77]V5207 [78]V5707 [79]V6307 [80]V6907 [81]V7507 [82]V8207
-	// [83]V8807 [84]V10007 [85]V11107 [86]V12507 [87]V13707 [88]V14807
-	// [89]V16307 [90]V17707 [91]V19007 [92]V20307 [93]V21606 [94]ER2005F
-	// [95]ER5005F [96]ER7005F [97]ER10005F
-	[99]ER13005E [01]ER17006 [03]ER21005 [05]ER25005 [07]ER36005 [09]ER42005
-	[11]ER47305 [13]ER53005 [15]ER60005
+	[83]V8807 [84]V10007 [85]V11107 [86]V12507 [87]V13707 [88]V14807
+	[89]V16307 [90]V17707 [91]V19007 [92]V20307 [93]V21606 [94]ER2005F
+	[95]ER5005F [96]ER7005F [97]ER10005F [99]ER13005E [01]ER17006 [03]ER21005
+	[05]ER25005 [07]ER36005 [09]ER42005 [11]ER47305 [13]ER53005 [15]ER60005
 
 	// 1	Reinterview family
 	// 2	Splitoff from reinterview family
@@ -148,13 +156,17 @@ psid use
 	// who are neither Head nor wife/"wife" from newborns through those 17 years
 	// of age, whether or not they are actually children of the Head or Wife/"Wife."
 	|| children
-	[99]ER13013 [01]ER17016 [03]ER21020 [05]ER25020 [07]ER36020 [09]ER42020
-	[11]ER47320 [13]ER53020 [15]ER60021
+	[83]V8964 [84]V10422 [85]V11609 [86]V13014 [87]V14117 [88]V15133
+	[89]V16634 [90]V18052 [91]V19352 [92]V20654 [93]V22409 [94]ER2010
+	[95]ER5009 [96]ER7009 [97]ER10012 [99]ER13013 [01]ER17016 [03]ER21020
+	[05]ER25020 [07]ER36020 [09]ER42020 [11]ER47320 [13]ER53020 [15]ER60021
 
 	// Marital status of the Head
 	|| married
-	[99]ER13021 [01]ER17024 [03]ER21023 [05]ER25023 [07]ER36023 [09]ER42023
-	[11]ER47323 [13]ER53023 [15]ER60024
+	[83]V9276 [84]V10426 [85]V11612 [86]V13017 [87]V14120 [88]V15136
+	[89]V16637 [90]V18055 [91]V19355 [92]V20657 [93]V22412 [94]ER2014
+	[95]ER5013 [96]ER7013 [97]ER10016 [99]ER13021 [01]ER17024 [03]ER21023
+	[05]ER25023 [07]ER36023 [09]ER42023 [11]ER47323 [13]ER53023 [15]ER60024
 
 	// Race of head (first mention -- they record up to 3 mentions)
 	|| racehead
@@ -170,21 +182,21 @@ psid use
 	|| fsize
 	// [68]V115 [69]V549 [70]V1238 [71]V1941 [72]V2541 [73]V3094 [74]V3507
 	// [75]V3920 [76]V4435 [77]V5349 [78]V5849 [79]V6461 [80]V7066 [81]V7657
-	// [82]V8351 [83]V8960 [84]V10418 [85]V11605 [86]V13010 [87]V14113
-	// [88]V15129 [89]V16630 [90]V18048 [91]V19348 [92]V20650 [93]V22405
-	// [94]ER2006 [95]ER5005 [96]ER7005 [97]ER10008
-	[99]ER13009 [01]ER17012 [03]ER21016 [05]ER25016 [07]ER36016 [09]ER42016
-	[11]ER47316 [13]ER53016 [15]ER60016
+	// [82]V8351 
+	[83]V8960 [84]V10418 [85]V11605 [86]V13010 [87]V14113 [88]V15129
+	[89]V16630 [90]V18048 [91]V19348 [92]V20650 [93]V22405 [94]ER2006
+	[95]ER5005 [96]ER7005 [97]ER10008 [99]ER13009 [01]ER17012 [03]ER21016
+	[05]ER25016 [07]ER36016 [09]ER42016 [11]ER47316 [13]ER53016 [15]ER60016
 
 	// Geographical Region of the 2015 Interview
 	|| region
 	// [68]V361 [69]V876 [70]V1572 [71]V2284 [72]V2911 [73]V3279 [74]V3699
 	// [75]V4178 [76]V5054 [77]V5633 [78]V6180 [79]V6773 [80]V7419 [81]V8071
-	// [82]V8695 [83]V9381 [84]V11028 [85]V12379 [86]V13631 [87]V14678 [88]V16152
-	// [89]V17538 [90]V18889 [91]V20189 [92]V21495 [93]V23327 [94]ER4157E
-	// [95]ER6997E [96]ER9248E [97]ER12221E
-	[99]ER16430 [01]ER20376 [03]ER24143 [05]ER28042 [07]ER41032 [09]ER46974
-	[11]ER52398 [13]ER58215 [15]ER65451
+	// [82]V8695 
+	[83]V9381 [84]V11028 [85]V12379 [86]V13631 [87]V14678 [88]V16152
+	[89]V17538 [90]V18889 [91]V20189 [92]V21495 [93]V23327 [94]ER4157E
+	[95]ER6997E [96]ER9248E [97]ER12221E [99]ER16430 [01]ER20376 [03]ER24143
+	[05]ER28042 [07]ER41032 [09]ER46974 [11]ER52398 [13]ER58215 [15]ER65451
 
 	// 1,089 	12.04 	1 	Northeast
 	// 2,227 	24.61 	2 	North Central
@@ -337,11 +349,11 @@ psid use
 
 	// [68]V81 [69]V529 [70]V1514 [71]V2226 [72]V2852 [73]V3256 [74]V3676
 	// [75]V4154 [76]V5029 [77]V5626 [78]V6173 [79]V6766 [80]V7412 [81]V8065
-	// [82]V8689 [83]V9375 [84]V11022 [85]V12371 [86]V13623 [87]V14670 [88]V16144
-	// [89]V17533 [90]V18875 [91]V20175 [92]V21481 [93]V23322 [94]ER4153
-	// [95]ER6993 [96]ER9244 [97]ER12079
-	[99]ER16462 [01]ER20456 [03]ER24099 [05]ER28037 [07]ER41027 [09]ER46935
-	[11]ER52343 [13]ER58152 [15]ER65349
+	// [82]V8689 
+	[83]V9375 [84]V11022 [85]V12371 [86]V13623 [87]V14670 [88]V16144
+	[89]V17533 [90]V18875 [91]V20175 [92]V21481 [93]V23322 [94]ER4153
+	[95]ER6993 [96]ER9244 [97]ER12079 [99]ER16462 [01]ER20456 [03]ER24099
+	[05]ER28037 [07]ER41027 [09]ER46935 [11]ER52343 [13]ER58152 [15]ER65349
 
 
 	// Head's Labor Income, Excluding Farm and Unincorporated Business Income
@@ -357,11 +369,11 @@ psid use
 	// assigned.
 	// [68]V74 [69]V514 [70]V1196 [71]V1897 [72]V2498 [73]V3051 [74]V3463
 	// [75]V3863 [76]V5031 [77]V5627 [78]V6174 [79]V6767 [80]V7413 [81]V8066
-	// [82]V8690 [83]V9376 [84]V11023 [85]V12372 [86]V13624 [87]V14671 [88]V16145
-	// [89]V17534 [90]V18878 [91]V20178 [92]V21484 [93]V23323 [94]ER4140
-	// [95]ER6980 [96]ER9231 [97]ER12080
-	[99]ER16463 [01]ER20443 [03]ER24116 [05]ER27931 [07]ER40921 [09]ER46829
-	[11]ER52237 [13]ER58038 [15]ER65216
+	// [82]V8690 
+	[83]V9376 [84]V11023 [85]V12372 [86]V13624 [87]V14671 [88]V16145
+	[89]V17534 [90]V18878 [91]V20178 [92]V21484 [93]V23323 [94]ER4140
+	[95]ER6980 [96]ER9231 [97]ER12080 [99]ER16463 [01]ER20443 [03]ER24116
+	[05]ER27931 [07]ER40921 [09]ER46829 [11]ER52237 [13]ER58038 [15]ER65216
 
 	// Spouse's Labor Income, Excluding Farm and Unincorporated Business Income
 	|| inc_spouse
@@ -383,12 +395,11 @@ psid use
 	// Head and spouse's transfer income (except social security)
 	|| inc_transfer
 	// [70]V1220 [71]V1922 [72]V2523 [73]V3076 [74]V3488 [75]V3889 [76]V4404
-	// [77]V5316 [78]V5815 [79]V6426 [80]V7016 [81]V7608 [82]V8301 [83]V8909
-	// [84]V10305 [85]V11461 [86]V12868 [87]V13970 [88]V14985 [89]V16485
-	// [90]V17901 [91]V19201 [92]V20501 [93]V22366 [94]ER4147 [95]ER6987
-	// [96]ER9238 [97]ER12071
-	[99]ER16454 [01]ER20450 [03]ER24101 [05]ER28002 [07]ER40992 [09]ER46900
-	[11]ER52308 [13]ER58117 [15]ER65314
+	// [77]V5316 [78]V5815 [79]V6426 [80]V7016 [81]V7608 [82]V8301 
+	[83]V8909 [84]V10305 [85]V11461 [86]V12868 [87]V13970 [88]V14985
+	[89]V16485 [90]V17901 [91]V19201 [92]V20501 [93]V22366 [94]ER4147
+	[95]ER6987 [96]ER9238 [97]ER12071 [99]ER16454 [01]ER20450 [03]ER24101
+	[05]ER28002 [07]ER40992 [09]ER46900 [11]ER52308 [13]ER58117 [15]ER65314
 
 	// Head's Income from Social Security last year
 	|| inc_ss_head
@@ -420,7 +431,7 @@ psid use
 
 
 	//////////////////////////////////////////////////////////////////////////
-	// EXPENDITURE
+	// FOOD EXPENDITURE
 	//////////////////////////////////////////////////////////////////////////
 
 	// Expenditures are reported for the family as a whole, where a PSID
@@ -443,22 +454,145 @@ psid use
 	[99]ER16515A2 [01]ER20456A2 [03]ER24138A2 [05]ER28037A2 [07]ER41027A2
 	[09]ER46971A2 [11]ER52395A2 [13]ER58212A2 [15]ER65411
 
+	// YUCK!!! this variable is missing for 1988 and 1989 -- and that was one
+	// of the years where they asked about wealth. I looked in Pistaferri's
+	// code and confirmed that they also had missing values for 1988 and 1989
+	|| foodhome_early
+	// Annual Food Expenditure for Food Used at Home (Question F15/17/19/21)
+	// This variable excludes the expenditure for food purchased with food
+	// stamps and is the sum of F15 and F17 orF19 and F21. It includes the
+	// cost of food delivered to the door. Values represent the annual food
+	// expenditure in whole dollars. All missing data were assigned. [68]V37
+	// [69]V500 [70]V1175 [71]V1876 [72]V2476 [74]V3441 [75]V3841 [76]V4354
+	// [77]V5271 [78]V5770 [79]V6376 [80]V6972 [81]V7564 [82]V8256
+	[83]V8864 [84]V10235 [85]V11375 [86]V12774 [87]V13876 [90]V17807
+	[91]V19107 [92]V20407 [93]V21707
+
+	|| foodhome_no_fstmp_reported
+	[94]ER3085 [95]ER6084 [96]ER8181 [97]ER11076 [99]ER14295 [01]ER18431
+	[03]ER21696 [05]ER25698 [07]ER36716 [09]ER42722 [11]ER48038 [13]ER53735
+	[15]ER60750 
+	// [17]ER66797
+
+	|| foodhome_no_fstmp_freq
+	[94]ER3086 [95]ER6085 [96]ER8182 [97]ER11077 [99]ER14296 [01]ER18432
+	[03]ER21697 [05]ER25699 [07]ER36717 [09]ER42723 [11]ER48039 [13]ER53736
+	[15]ER60751 
+	// [17]ER66798
+
 	|| foodawayfromhomeexpenditure
 	// F21. About how much do you spend eating out?
 	// F25. About how much do you (and everyone else in your family) spend eating out?
+	// This is an imputed variable created by the PSID for 1999 onwards. Therefore to look at the value prior, will need to create it ourselves
 	[99]ER16515A3 [01]ER20456A3 [03]ER24138A3 [05]ER28037A3 [07]ER41027A3
 	[09]ER46971A3 [11]ER52395A3 [13]ER58212A3 [15]ER65412
+	// Total Family Food Expenditure: Generated variable combining
+	// expenditures for food at home, delivered, and eaten away from home.
+	// Missing values are imputed. Imputation may result in negative values
+	// due to linear regression model. These negative values are kept in order
+	// to preserve population mean consistent with the estimation.
+
+	|| foodaway_no_fstmp_reported
+	//F22. About how much do you (and everyone else in your family) spend
+	//eating out, not counting meals at work or school?--AMOUNT
+	[94]ER3090 [95]ER6089 [96]ER8186 [97]ER11081 [99]ER14300 [01]ER18438
+	[03]ER21703 [05]ER25705 [07]ER36723 [09]ER42729 [11]ER48045 [13]ER53742
+	[15]ER60757 
+	// [17]ER66804
+	// 99,998.00 	DK
+	// 99,999.00 	NA; refused
+
+	|| foodaway_no_fstmp_freq
+	// Time unit for food expenditure
+	[94]ER3091 [95]ER6090 [96]ER8187 [97]ER11082 [99]ER14301 [01]ER18439
+	[03]ER21704 [05]ER25706 [07]ER36724 [09]ER42730 [11]ER48046 [13]ER53743
+	[15]ER60758 
+	// [17]ER66805
+	// In 1994:
+	// 1	Week
+	// 2	Two weeks
+	// 3	Month
+	// 4	Other
+	// 8	DK
+	// 9	NA; refused
+	// 0	Inap.: used food stamps last month
+
+	// In 1995 onwards:
+	// 2	Day
+	// 3	Week
+	// 4	Two weeks
+	// 5	Month
+	// 6	Year
+	// 7	Other
+	// 8	DK
+	// 9	NA; refused
+	// 0	Inap.: used food stamps last month
+
+	|| foodaway_on_fstmp_reported
+	// F18. About how much do you (and everyone else in your family) spend
+	// eating out, not counting meals at work or at school?--AMOUNT
+	// NOTE: must convert to annual frequency!
+	[94]ER3083 [95]ER6082 [96]ER8179 [97]ER11073 [99]ER14293 [01]ER18428
+	[03]ER21693 [05]ER25695 [07]ER36713 [09]ER42719 [11]ER48035 [13]ER53732
+	[15]ER60747 
+	// [17]ER66794
+	// 99,998.00 	DK
+	// 99,999.00 	NA; refused
+	
+	|| foodaway_on_fstmp_freq
+	[94]ER3084 [95]ER6083 [96]ER8180 [97]ER11074 [99]ER14294 [01]ER18429
+	[03]ER21694 [05]ER25696 [07]ER36714 [09]ER42720 [11]ER48036 [13]ER53733
+	[15]ER60748 
+	// [17]ER66795
+	// Uses same codes as foodaway_no_fstmp_freq 
+
+	|| foodaway_early
+	// Annual Food Expenditure for Meals Away From Home (Question F18 and F22)
+	// This variable excludes the amount spent for meals at work and/or
+	// school. Values for this variable represent the annual expenditure in
+	// whole dollars. All missing data were assigned.	
+	// [69]V506 [70]V1185 [71]V1886 [72]V2480 [74]V3445 [75]V3853 [76]V4368
+	// [77]V5273 [78]V5772 [79]V6378 [80]V6974 [81]V7566 [82]V8258 
+	[83]V8866 [84]V10237 [85]V11377 [86]V12776 [87]V13878 [90]V17809
+	[91]V19109 [92]V20409 [93]V21711
 
 	|| fooddeliveredexpenditure
 	[99]ER16515A4 [01]ER20456A4 [03]ER24138A4 [05]ER28037A4 [07]ER41027A4
 	[09]ER46971A4 [11]ER52395A4 [13]ER58212A4 [15]ER65413
 
+	// Food delivered - raw data on what was reported
+	|| fooddeliv_no_fstmp_reported
+	[94]ER3088 [95]ER6087 [96]ER8184 [97]ER11079 [99]ER14298 [01]ER18435
+	[03]ER21700 [05]ER25702 [07]ER36720 [09]ER42726 [11]ER48042 [13]ER53739
+	[15]ER60754 
+	// [17]ER66801
+
+	|| fooddeliv_no_fstmp_freq
+	[94]ER3089 [95]ER6088 [96]ER8185 [97]ER11080 [99]ER14299 [01]ER18436
+	[03]ER21701 [05]ER25703 [07]ER36721 [09]ER42727 [11]ER48043 [13]ER53740
+	[15]ER60755 
+	// [17]ER66802
+
 	// F12. How much did (you/they) receive in food stamp benefits in previous year?
 	// (included because food stamps is not measured in food expenditure)
-	|| foodstamp
-	// [93]V21713 [94]ER3060 [95]ER6059 [96]ER8156 [97]ER11050
-	[99]ER14256 [01]ER18387 [03]ER21653 [05]ER25655 [07]ER36673 [09]ER42692
-	[11]ER48008 [13]ER53705 [15]ER60720
+	|| foodstamp	
+	[93]V21713 [94]ER3060 [95]ER6059 [96]ER8156 [97]ER11050 [99]ER14256
+	[01]ER18387 [03]ER21653 [05]ER25655 [07]ER36673 [09]ER42692 [11]ER48008
+	[13]ER53705 [15]ER60720
+
+	|| foodstamp_early
+	// Food stamps
+	// Value of Food Stamps Received in 1992 (Question F9) The values for this
+	// variable represent the actual annual value of the stamps in whole
+	// dollars. All missing data were assigned.
+	// Note that in 1993 there are two options: V21713 (which contains N/As coded as 9999) and V21727 (which has imputed values for these N/As) 
+	// [70]V1765 [80]V6976 [81]V7568 [82]V8260 
+	[83]V8868 [84]V10239 [85]V11379 [86]V12778 [87]V13880 [88]V14895
+	[89]V16395 [90]V17811 [91]V19111 [92]V20411 [93]V21727
+
+	//////////////////////////////////////////////////////////////////////////
+	// OTHER EXPENDITURE
+	//////////////////////////////////////////////////////////////////////////
 
 	// housing expenditure
 	|| housingexpenditure
@@ -493,8 +627,6 @@ psid use
 	[99]ER16515B1 [01]ER20456B1 [03]ER24138B1 [05]ER28037B1 [07]ER41027B1
 	[09]ER46971B1 [11]ER52395B1 [13]ER58212B1 [15]ER65419
 
-	
-	
 	|| transportationexpenditure
 	// Total Family Transportation Expenditure: Generated variable combining
 	// expenditures for vehicle loan, lease, and down payments, insurance,
@@ -787,7 +919,7 @@ psid use
 	|| type_mortgage2
 	// may be interesting! I notice that in 2013, 246 obs with home equity loan (2.7%)
 	// and 38 obs (.4%) with line of credit loan
-	// [96]ER7037 [97]ER10041
+	[96]ER7037 [97]ER10041
 	[99]ER13054 [01]ER17061 [03]ER21060 [05]ER25051 [07]ER36052 [09]ER42060
 	[11]ER47367 [13]ER53067 [15]ER60068
 
@@ -828,9 +960,10 @@ psid use
 	// Year Moved into current house
 	|| year_moved
 	// What is the street address and move-in date of (your/HEAD's) current residence?
-	//[93]V22443 [94]ER2064 [95]ER5063 [96]ER7157 [97]ER10074
+	[93]V22443 [94]ER2064 [95]ER5063 [96]ER7157 [97]ER10074
 	[99]ER13079 [01]ER17090 [03]ER21119 [05]ER25100 [07]ER36105 [09]ER42134
 	[11]ER47442 [13]ER53142 [15]ER60157
+	// TODO: can we find this going back further?
 
 	|| month_moved
 	// The month coded here is that of the most recent move since the yyyy interview.
@@ -867,25 +1000,25 @@ psid use
 	// last x years, have you (or anyone in your family) received any large
 	// gifts or inheritances of money or property worth $10,000 or more?
 	// x is infinity in 1984, 5 in 1989, 1994, and 1999. Then 2 since then
-	// [84]V10937 [89]V17381 [94]ER3836
+	[84]V10937 [89]V17381 [94]ER3836
 	[99]ER15115 [01]ER19311 [03]ER22706 [05]ER26687 [07]ER37705 [09]ER43696
 	[11]ER49041 [13]ER54797 [15]ER61908
 
 	// What year did you receive that?--FIRST INHERITANCE
 	|| year_gift_1
-	// [84]V10939 [89]V17383 [94]ER3837
+	[84]V10939 [89]V17383 [94]ER3837
 	[99]ER15116 [01]ER19312 [03]ER22707 [05]ER26688 [07]ER37706 [09]ER43697
 	[11]ER49042 [13]ER54798 [15]ER61910
 
 	// W125. How much was it worth altogether, at that time?--FIRST INHERITANCE
 	|| value_gift_1
-	// [84]V10940 [89]V17384 [94]ER3838
+	[84]V10940 [89]V17384 [94]ER3838
 	[99]ER15117 [01]ER19313 [03]ER22708 [05]ER26689 [07]ER37707 [09]ER43698
 	[11]ER49043 [13]ER54799 [15]ER61913
 
 	// W129. What year did you receive that?--SECOND INHERITANCE
 	|| year_gift_2
-	// [84]V10944 [89]V17386 [94]ER3842
+	[84]V10944 [89]V17386 [94]ER3842
 	[99]ER15121 [01]ER19317 [03]ER22712 [05]ER26693 [07]ER37711 [09]ER43702
 	[11]ER49047 [13]ER54803 [15]ER61918
 
@@ -1158,8 +1291,13 @@ rename x11102 family_id
 * members from the 1968 family or their lineal descendents born after 1968.
 
 * Deal with DK or NA codings
-replace foodstamp       = 0 if foodstamp >= 999998
+replace foodstamp_early = 0 if foodstamp_early >= 9999
+replace foodstamp       = 0 if foodstamp >= 9998 & wave == 1993
+replace foodstamp       = 0 if foodstamp >= 99998 & wave <= 1997
+replace foodstamp       = 0 if foodstamp >= 999998 & wave > 1997
+replace foodstamp       = foodstamp_early if foodstamp == . & wave <= 1993
 lab var foodstamp       "Food stamps value last year"
+
 lab var age             "Age"
 replace housevalue      = 0 if housevalue >= 9999998
 replace age_spouse      = . if age_spouse == 999
@@ -1219,6 +1357,72 @@ forvalues i = 1/3{
 }
 egen value_gifts = rowtotal(value_gift_1 value_gift_2 value_gift_3)
 lab var value_gifts "Value of inheritance/gifts since last wave"
+
+* Clean up food data
+replace foodaway_no_fstmp_reported = . if foodaway_no_fstmp_reported >= 99998
+replace foodaway_on_fstmp_reported = . if foodaway_on_fstmp_reported >= 99998
+replace foodhome_no_fstmp_reported = . if foodhome_no_fstmp_reported >= 99998 
+
+
+
+
+* Generate annual food away from home expenditure using the reported spending
+foreach var in foodaway_no_fstmp foodaway_on_fstmp foodhome_no_fstmp fooddeliv_no_fstmp {
+	replace `var'_reported = . if `var'_reported >= 99998 | `var'_reported == 80000
+
+
+	di "Generate `var'_annual using the reported expenditure and the frequency of that expenditure"
+	gen     `var'_annual = .
+	replace `var'_annual = `var'_reported * 52 if `var'_freq == 1 & wave == 1994
+	replace `var'_annual = `var'_reported * 26 if `var'_freq == 2 & wave == 1994
+	replace `var'_annual = `var'_reported * 12 if `var'_freq == 3 & wave == 1994
+	* They switch to a different frequency starting in 1995
+	replace `var'_annual = `var'_reported * 365 if `var'_freq == 2 & wave > 1994
+	replace `var'_annual = `var'_reported * 52  if `var'_freq == 3 & wave > 1994
+	replace `var'_annual = `var'_reported * 26  if `var'_freq == 4 & wave > 1994
+	replace `var'_annual = `var'_reported * 12  if `var'_freq == 5 & wave > 1994
+	replace `var'_annual = `var'_reported * 1   if `var'_freq == 6 & wave > 1994
+}
+
+egen foodaway_computed = rowtotal(foodaway_no_fstmp_annual foodaway_on_fstmp_annual), missing
+* TODO: will want to compare this to foodawayfromhomeexpenditure for the years where they overlap
+
+gen looksgood = 0
+replace looksgood = 1 if foodaway_computed == foodawayfromhomeexpenditure
+* we should have fewer observations now cause PSID imputes things 
+replace looksgood = 2 if looksgood == 0 & foodaway_computed == . 
+replace looksgood = 3 if looksgood == 0 & foodawayfromhomeexpenditure == 0
+gen dif_foodaway = foodaway_computed - foodawayfromhomeexpenditure if looksgood == 0
+* tab wave looksgood if wave >= 1999
+
+/*
+edit pid wave foodaway_no_fstmp* foodaway_no_fstmp_annual foodaway_on_fstmp_annual foodaway_computed foodawayfromhomeexpenditure fooddeliveredexpenditure foodstamp looksgood if looksgood == 0 & wave >= 1999 
+sum pid wave foodaway_no_fstmp_annual foodaway_on_fstmp_annual foodaway_computed foodawayfromhomeexpenditure fooddeliveredexpenditure foodstamp looksgood if looksgood == 0 & wave >= 1999 
+*/
+drop dif_foodaway
+drop looksgood
+
+* Total food expenditure (not including foodstamps) plus foodstamps
+egen foodexpenditure_post1993 = rowtotal(foodhome_no_fstmp foodaway_no_fstmp_annual fooddeliv_no_fstmp foodstamp), missing
+egen foodexpenditure_early    = rowtotal(foodstamp_early foodaway_early foodhome_early), missing // this data is already annual
+
+* compare food expenditure after 1999
+
+gen looksgood = "bad"
+replace looksgood = "match" if foodexpenditure_post1993 == fooedexpenditure
+replace looksgood = "missing" if looksgood == "bad" & foodexpenditure_post1993 == . 
+replace looksgood = "zero" if looksgood == 0 & fooedexpenditure == 0
+
+gen dif_food = foodexpenditure_post1993 - fooedexpenditure if looksgood == 0
+tab wave looksgood if wave >= 1999
+sum dif_food
+
+
+
+
+* Food expenditure has 3 different periods: pre 1993, 1993 to 1999, and 1999 onward
+replace fooedexpenditure = foodexpenditure_post1993 if wave >= 1993 & wave < 1999
+replace fooedexpenditure = foodexpenditure_early    if wave < 1993
 
 * Look for other variables with error codes
 summ *
