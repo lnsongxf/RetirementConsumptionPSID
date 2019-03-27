@@ -1,28 +1,28 @@
 {
 \def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
-\begin{longtable}{l*{6}{c}}
+\begin{longtable}{l*{5}{c}}
 \caption{PSID Euler Equation (Log Liquid Assets in Checking/savings accounts)}\\
 \toprule\endfirsthead\midrule\endhead\midrule\endfoot\endlastfoot
-                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}\\
-                    &\multicolumn{1}{c}{baseline}&\multicolumn{1}{c}{age control}&\multicolumn{1}{c}{age polynomial}&\multicolumn{1}{c}{IV L.a}&\multicolumn{1}{c}{IV L.a L.y}&\multicolumn{1}{c}{IV L.a L.c L.y}\\
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}\\
+                    &\multicolumn{1}{c}{age dum}&\multicolumn{1}{c}{age poly}&\multicolumn{1}{c}{IV L.b}&\multicolumn{1}{c}{IV L.b L.y}&\multicolumn{1}{c}{IV L.b L.y L2.c}\\
 \midrule
-Log Bank Balances   &     0.00554\sym{**} &     0.00863\sym{***}&     0.00850\sym{***}&     0.00334         &     0.00283         &     0.00869\sym{**} \\
-                    &   (0.00233)         &   (0.00236)         &   (0.00236)         &   (0.00432)         &   (0.00422)         &   (0.00422)         \\
+Log Bank Balances   &     0.01034\sym{***}&     0.01019\sym{***}&     0.00515         &     0.00420         &     0.00758\sym{**} \\
+                    &   (0.00209)         &   (0.00208)         &   (0.00365)         &   (0.00355)         &   (0.00377)         \\
 \addlinespace
-Constant            &     0.03109         &     0.01588         &    -0.06311         &    -0.08472         &    -0.08082         &    -0.12565\sym{*}  \\
-                    &   (0.02303)         &   (0.04347)         &   (0.07215)         &   (0.07672)         &   (0.07639)         &   (0.07637)         \\
+Constant            &    -0.04946         &    -0.12911\sym{*}  &    -0.14816\sym{**} &    -0.14143\sym{**} &    -0.20698\sym{**} \\
+                    &   (0.03813)         &   (0.06658)         &   (0.06957)         &   (0.06931)         &   (0.08921)         \\
 \addlinespace
-Age controls        &          No         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
+Age controls        &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
 \addlinespace
-Year controls       &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
+Year controls       &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
 \addlinespace
-Kids controls       &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
+Kids controls       &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
 \midrule
-Adjusted \(R^{2}\)  &       0.023         &       0.028         &       0.028         &       0.027         &       0.027         &       0.028         \\
-Observations        &       15092         &       15092         &       15092         &       15092         &       15092         &       15092         \\
+Adjusted \(R^{2}\)  &       0.030         &       0.029         &       0.029         &       0.029         &       0.027         \\
+Observations        &       16592         &       16592         &       16592         &       16576         &       11872         \\
 \bottomrule
-\multicolumn{7}{l}{\footnotesize Standard errors in parentheses}\\
-\multicolumn{7}{l}{\footnotesize Sample: Households with liq assets $>$ 1,000 at time t and t-1, ages 25 to 60, not moving homes that year}\\
-\multicolumn{7}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\multicolumn{6}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{6}{l}{\footnotesize Sample: Households with liq assets $>$ 500 at time t and t-1, ages 25 to 60, not moving homes that year}\\
+\multicolumn{6}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
 \end{longtable}
 }

@@ -415,7 +415,7 @@ drop if p_d_c == 1 | p_d_c == 100 // results seem robust to doing this... magnit
 * drop if p_d_c <= 5 | p_d_c >= 95 // much better IV results from this
 * drop if p_d_c <= 10 | p_d_c >= 90 
 sum d_c, det
-pause
+
 
 * TODO: should we drop those with 700% change in income?
 
@@ -448,8 +448,8 @@ qui eststo, title(IV L.a):         ivregress 2sls d_c       (log_a = L.log_a) if
 qui eststo, title(IV L.a):         ivregress 2sls d_c       (log_a = L.log_a L.y) if $sample, first
 qui eststo, title(IV a & y):         ivregress 2sls d_c i.age (log_a = L.log_a) if $sample, first
 qui eststo, title(IV a & y):         ivregress 2sls d_c i.age (log_a = L.log_a L.y) if $sample, first
-global esttab_opts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate(Age controls = *age*) star(* 0.10 ** 0.05 *** 0.01)
-esttab , $esttab_opts title("Depvar: d_c. $sample")
+global esttabopts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate(Age controls = *age*) star(* 0.10 ** 0.05 *** 0.01)
+esttab , $esttabopts title("Depvar: d_c. $sample")
 */
 
 
@@ -474,25 +474,28 @@ global sample a > 1000 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_t
 
 * NOTE: It seems that the L.HtM == 0 has a lot of bite
 * global sample a > 1000 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & HtM == 0  & L.HtM == 0 & L.a > 1000
+global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 500
 
 eststo clear 
-qui eststo, title(age dum):                       reg d_c i.age     log_a            if $sample
-qui eststo, title(age poly):                    reg d_c age age2  log_a            if $sample
-qui eststo, title(IV L.a):                 ivregress 2sls d_c age age2 (log_a = L.log_a) if $sample, first
-* qui eststo, title(IV lag difs):            ivregress 2sls d_c age age2 (log_a = L.D.log_a L.D.y L.D.log_consumption) if $sample, first
-qui eststo, title(IV L.cash stock):         ivregress 2sls d_c age age2 (log_a = L.(log_a log_bank_account_wealth log_stock_wealth) ) if $sample, first
-qui eststo, title(IV L.y):                  ivregress 2sls d_c age age2 (log_a = L.HtM L.y) if $sample, first
-qui eststo, title(IV L2.y):                 ivregress 2sls d_c age age2 (log_a = L.HtM L2.y) if $sample, first
-qui eststo, title(IV L.a L.y):              ivregress 2sls d_c age age2 (log_a = L.HtM L.log_a L.y) if $sample, first
-qui eststo, title(IV L.a L2.c L.y):         ivregress 2sls d_c age age2 (log_a = L.HtM L(1 2).(log_a y log_bank_account_wealth) L2.log_consumption) if $sample, first
-global esttab_opts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate(Age controls = *age*) star(* 0.10 ** 0.05 *** 0.01)
-esttab , $esttab_opts title("Depvar: d_c. $sample")
-esttab using "$folder_output\EE_PSID.tex", $esttab_opts longtable booktabs obslast replace title("PSID Euler Equation (Baseline)") addnotes("Sample: Households with liq assets $>$ 1,000 at time t and t-1, ages 25 to 60, not moving homes that year")
-esttab using "$folder_output\EE_PSID.csv", $esttab_opts csv obslast replace
+global controls
+qui eststo, title(age dum):                           reg d_c  $controls ib35.age log_a if $sample
+qui eststo, title(age poly):                          reg d_c  $controls age age2 log_a if $sample
+qui eststo, title(IV L.a):                 ivregress 2sls d_c  $controls ib35.age (log_a = L.log_a) if $sample, first
+qui eststo, title(IV a y b s):             ivregress 2sls d_c  $controls ib35.age (log_a = L.(log_a y log_bank_account_wealth log_stock_wealth) ) if $sample, first
+qui eststo, title(IV a y b L2.c):          ivregress 2sls d_c  $controls ib35.age (log_a = L(1 2).(log_a y log_bank_account_wealth) L2.log_consumption) if $sample, first
+qui eststo, title(IV a y b s L2.c):        ivregress 2sls d_c  $controls ib35.age (log_a = L(1 2).(log_a y log_bank_account_wealth log_stock) L2.log_consumption) if $sample, first
+global esttabopts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate(Age controls = *age*) star(* 0.10 ** 0.05 *** 0.01)
+esttab , $esttabopts title("Depvar: d_c. $sample")
+esttab using "$folder_output\EE_PSID.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation (Baseline)") addnotes("Sample: Households with liq assets $>$ 500 at time t and t-1, ages 25 to 60, not moving homes that year")
+esttab using "$folder_output\EE_PSID.csv", $esttabopts csv obslast replace
 
 * BASLELINE - Contains good controls. IV results "robust"
-* This looks pretty good!
+* This looks very good!
 global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 500
+
+* I'll stick with this for now so it's easier to compare with our other results
+* global sample a > 1000 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 1000 
+
 * Also looks good!
 * global sample a > 0 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 0
 eststo clear 
@@ -501,31 +504,30 @@ global controls i.wave D.fsize
 qui eststo, title(age dum):                           reg d_c  $controls ib35.age log_a if $sample
 qui eststo, title(age poly):                          reg d_c  $controls age age2 log_a if $sample
 qui eststo, title(IV L.a):                 ivregress 2sls d_c  $controls ib35.age (log_a = L.log_a) if $sample, first
-qui eststo, title(IV L.cash stock):        ivregress 2sls d_c  $controls ib35.age (log_a = L.(log_a log_bank_account_wealth log_stock_wealth) ) if $sample, first
-qui eststo, title(IV L.a L.y):             ivregress 2sls d_c  $controls ib35.age (log_a = L.log_a L.y) if $sample, first
-qui eststo, title(IV L.a L2.c L.y):        ivregress 2sls d_c  $controls ib35.age (log_a = L(1 2).(log_a y log_bank_account_wealth) L2.log_consumption) if $sample, first
-qui eststo, title(IV L.a L2.c L.y):        ivregress 2sls d_c  $controls ib35.age (log_a = L(1 2).(log_a y log_stock log_bank_account_wealth) L2.log_consumption) if $sample, first
-global esttab_opts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
-esttab , $esttab_opts title("Depvar: d_c. Kid and Year Controls. $sample")
-esttab using "$folder_output\EE_PSID_Control_for_kids_and_year.tex", $esttab_opts longtable booktabs obslast replace title("PSID Euler Equation (More Controls)") addnotes("Sample: Households with liq assets $>$ 1,000 at time t and t-1, ages 25 to 60, not moving homes that year")
-esttab using "$folder_output\EE_PSID_Control_for_kids_and_year.csv", $esttab_opts csv obslast replace
-pause
+qui eststo, title(IV a y b s):             ivregress 2sls d_c  $controls ib35.age (log_a = L.(log_a y log_bank_account_wealth log_stock_wealth) ) if $sample, first
+qui eststo, title(IV a y b L2.c):          ivregress 2sls d_c  $controls ib35.age (log_a = L(1 2).(log_a y log_bank_account_wealth) L2.log_consumption) if $sample, first
+qui eststo, title(IV a y b s L2.c):        ivregress 2sls d_c  $controls ib35.age (log_a = L(1 2).(log_a y log_bank_account_wealth log_stock) L2.log_consumption) if $sample, first
+global esttabopts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
+esttab , $esttabopts title("Depvar: d_c. Kid and Year Controls. $sample")
+esttab using "$folder_output\EE_PSID_Control_for_kids_and_year.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation (More Controls)") addnotes("Sample: Households with liq assets $>$ 500 at time t and t-1, ages 25 to 60, not moving homes that year.")
+esttab using "$folder_output\EE_PSID_Control_for_kids_and_year.csv", $esttabopts csv obslast replace
 
 * Maybe no longer true - Looking at bank account wealth makes nicer IV results!
 * IV results also work for texas!
+* global sample a > 1000 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 1000
+global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 500
+
 eststo clear 
 global controls i.wave D.fsize 
 qui eststo, title(age dum):                       reg d_c i.age     log_bank_account_wealth                                                    $controls if $sample
 qui eststo, title(age poly):                    reg d_c age age2  log_bank_account_wealth                                                    $controls if $sample
-qui eststo, title(IV L.a):                 ivregress 2sls d_c age age2 (log_bank_account_wealth = L.log_bank_account_wealth)                       $controls if $sample, first
-qui eststo, title(IV L.a L.y):             ivregress 2sls d_c age age2 (log_bank_account_wealth = L.log_bank_account_wealth L.y)                   $controls if $sample, first
-qui eststo, title(IV L.a L2.c L.y):         ivregress 2sls d_c age age2 (log_bank_account_wealth = L(1 2).(log_bank_account_wealth y log_a) L2.log_consumption) $controls if $sample, first
-global esttab_opts keep(log_bank* _cons) ar2 label b(5) se(5) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
-esttab , $esttab_opts title("Depvar: d_c. Liquid Assets in Checking/Savings Account. $sample")
-esttab using "$folder_output\EE_PSID_Bank_Account.tex", $esttab_opts longtable booktabs obslast replace title("PSID Euler Equation (Log Liquid Assets in Checking/savings accounts)") addnotes("Sample: Households with liq assets $>$ 1,000 at time t and t-1, ages 25 to 60, not moving homes that year")
-esttab using "$folder_output\EE_PSID_Bank_Account.csv", $esttab_opts csv obslast replace
-
-* TODO: look at lagged assets
+qui eststo, title(IV L.b):                 ivregress 2sls d_c age age2 (log_bank_account_wealth = L.log_bank_account_wealth)                       $controls if $sample, first
+qui eststo, title(IV L.b L.y):             ivregress 2sls d_c age age2 (log_bank_account_wealth = L.log_bank_account_wealth L.y)                   $controls if $sample, first
+qui eststo, title(IV L.b L.y L2.c):         ivregress 2sls d_c age age2 (log_bank_account_wealth = L(1 2).(log_bank_account_wealth y log_a) L2.log_consumption) $controls if $sample, first
+global esttabopts keep(log_bank* _cons) ar2 label b(5) se(5) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
+esttab , $esttabopts title("Depvar: d_c. Liquid Assets in Checking/Savings Account. $sample")
+esttab using "$folder_output\EE_PSID_Bank_Account.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation (Log Liquid Assets in Checking/savings accounts)") addnotes("Sample: Households with liq assets $>$ 500 at time t and t-1, ages 25 to 60, not moving homes that year")
+esttab using "$folder_output\EE_PSID_Bank_Account.csv", $esttabopts csv obslast replace
 
 
 
@@ -552,8 +554,8 @@ qui eststo, title(age polynomial):       reg d_c age age2 L.log_a if $sample
 * qui eststo, title(ee):              reg d_c i.age L.log_a exp_error if $sample 
 * qui eststo, title(low ee):              reg d_c       L.log_a if $sample & abs(exp_error) < 0.2
 * qui eststo, title(low ee):              reg d_c i.age L.log_a if $sample & abs(exp_error) < 0.2
-global esttab_opts keep(L.log_a _cons) ar2 label b(5) se(5) mtitles indicate(Age dummies = *age*)
-esttab , $esttab_opts title("Lag Log Assets")
+global esttabopts keep(L.log_a _cons) ar2 label b(5) se(5) mtitles indicate(Age dummies = *age*)
+esttab , $esttabopts title("Lag Log Assets")
 */
 
 * TODO: look at loq assets + net housing wealth. when allowed to refinance, both should enter into EE
@@ -581,7 +583,27 @@ restore
 ** Euler equation with LAGGED assets
 ****************************************************************************************************
 
+cap drop housing_wealth_tempt
+cap drop log_housing_wealth_tempt
+cap drop log_housing_wealth_temptp1
+cap drop net_wealth
+cap drop log_net_wealth
 
+gen housing_wealth_tempt = 1 * (0.9 * house_price - mortgage) if 1 * (0.9 * house_price - mortgage  > 1000)
+replace housing_wealth_tempt = 0 if housing_wealth_tempt == . & homeowner == 1
+
+sum housing_wealth_tempt, det
+gen log_housing_wealth_tempt = log(housing_wealth_tempt)
+
+cap drop log_housing_wealth_temptp1
+gen log_housing_wealth_temptp1 = log(housing_wealth_tempt)
+replace log_housing_wealth_temptp1 = 0 if log_housing_wealth_temptp1 == .
+* hist log_housing_wealth_tempt
+
+gen net_wealth = a + housing_wealth if housing_wealth > 0
+replace net_wealth = a if housing_wealth <= 0
+gen log_net_wealth = log(net_wealth)
+replace log_net_wealth = . if log_net_wealth < 2.5 | log_net_wealth > 15
 
 global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 500
 eststo clear 
@@ -590,19 +612,40 @@ global controls i.wave D.fsize
 * global controls i.wave D.fsize quarter#l_quarter
 qui eststo, title(age dum):                           reg d_c  $controls ib35.age L.log_a if $sample
 qui eststo, title(age poly):                          reg d_c  $controls age age2 L.log_a if $sample
-global esttab_opts keep(*log_a _cons) ar2 label b(5) se(5) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
-esttab , $esttab_opts title("Depvar: d_c. Kid and Year Controls. $sample")
+qui eststo, title(age dum):                           reg d_c  $controls ib35.age L.log_a L.log_housing_wealth_tempt if $sample
+qui eststo, title(age poly):                          reg d_c  $controls age age2 L.log_a L.log_housing_wealth_tempt if $sample
+
+global esttabopts keep(*log_* _cons) ar2 label b(5) se(5) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*")  star(* 0.10 ** 0.05 *** 0.01)
+esttab , $esttabopts title("Depvar: d_c. Kid and Year Controls. $sample") 
+esttab using "$folder_output\EE_PSID_Lagged_Liquid_Assets.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation (Log Lagged Assets)") addnotes("Sample: Households with liq assets $>$ 500 at time t and t-1, ages 25 to 60, not moving homes that year")
 
 
+eststo clear 
+global controls i.wave D.fsize
+* robust to including seasonality fixed effects
+* global controls i.wave D.fsize quarter#l_quarter
+qui eststo, title(age dum):                           reg d_c  $controls ib35.age L.log_a if $sample
+qui eststo, title(age poly):                          reg d_c  $controls age age2 L.log_a if $sample
+
+qui eststo, title(age dum):                           reg d_c  $controls ib35.age L.log_a L.log_housing_wealth_tempt if $sample
+qui eststo, title(age poly):                          reg d_c  $controls age age2 L.log_a L.log_housing_wealth_tempt if $sample
+
+qui eststo, title(age dum):                           reg d_c  $controls ib35.age c.L.log_a L.log_housing_wealth_temptp1 i.L.homeowner if $sample
+qui eststo, title(age poly):                          reg d_c  $controls age age2 c.L.log_a L.log_housing_wealth_temptp1 i.L.homeowner if $sample
+
+qui eststo, title(age dum):                           reg d_c  $controls ib35.age c.L.log_a#i.L.homeowner L.log_housing_wealth_temptp1 i.L.homeowner if $sample
+qui eststo, title(age poly):                          reg d_c  $controls age age2 c.L.log_a#i.L.homeowner L.log_housing_wealth_temptp1 i.L.homeowner if $sample
+
+global esttabopts keep(*log_* _cons 1L.homeowner) ar2 label b(5) se(5) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*")  star(* 0.10 ** 0.05 *** 0.01)
+esttab , $esttabopts title("Depvar: d_c. Kid and Year Controls. $sample")
+esttab using "$folder_output\EE_PSID_Lagged_Liquid_Assets_Full.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation (Log Lagged Assets)") addnotes("Sample: Households with liq assets $>$ 500 at time t and t-1, ages 25 to 60, not moving homes that year")
+
+pause
 
 ****************************************************************************************************
 ** Euler equation with LAGGED liquid assets and housing
 ****************************************************************************************************
 
-gen housing_wealth_tempt = 1 * (0.9 * house_price - mortgage) if 1 * (0.9 * house_price - mortgage  > 1000)
-sum housing_wealth_tempt, det
-gen log_housing_wealth_tempt = log(housing_wealth_tempt)
-* hist log_housing_wealth_tempt
 
 
 global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 500
@@ -611,8 +654,8 @@ global controls i.wave D.fsize
 * global controls i.wave D.fsize quarter#l_quarter
 qui eststo, title(age dum):                           reg d_c  $controls ib35.age L.log_a L.log_housing_wealth_tempt if $sample
 qui eststo, title(age poly):                          reg d_c  $controls age age2 L.log_a L.log_housing_wealth_tempt if $sample
-global esttab_opts keep(*log_* _cons) ar2 label b(5) se(5) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
-esttab , $esttab_opts title("Depvar: d_c. Kid and Year Controls. $sample")
+global esttabopts keep(*log_* _cons) ar2 label b(5) se(5) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
+esttab , $esttabopts title("Depvar: d_c. Kid and Year Controls. $sample")
 
 
 * Question: how to account for ppl who extract home equity and convert it to liquid? Then liquid assets will pick up the consumption growth of ppl who give in to temptation
@@ -631,15 +674,15 @@ gen ctilde = a + housing_wealth_tempt
 gen log_ctilde = log(ctilde)
 sum ctilde log_ctilde, det
 
-global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 500 & wave <= 2007
-* Also looks good!
+global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 500 
+* & wave <= 2007
+
+* I KINDA LIKE THESE RESULTS -- BEST SO FAR
+* Seems it's very important to restrict log_ctilde not to be super small
 * global sample a > 0 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 0
+global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 500  & log_ctilde > 2.5
 eststo clear 
 global controls i.wave D.fsize
-* global controls i.wave D.fsize quarter#l_quarter
-* qui eststo, title(age dum):                           reg d_c  $controls ib35.age log_a log_housing_wealth_tempt if $sample
-* qui eststo, title(age poly):                          reg d_c  $controls age age2 log_a log_housing_wealth_tempt if $sample
-
 qui eststo, title(age dum):                           reg d_c  $controls ib35.age  log_ctilde if $sample
 qui eststo, title(age poly):                          reg d_c  $controls age age2  log_ctilde if $sample
 qui eststo, title(IV L.ctilde):            ivregress 2sls d_c  $controls ib35.age (log_ctilde = L.log_ctilde ) if $sample, first
@@ -648,21 +691,72 @@ qui eststo, title(IV L.a L.y):             ivregress 2sls d_c  $controls ib35.ag
 qui eststo, title(IV L.cash stock):        ivregress 2sls d_c  $controls ib35.age (log_ctilde = L.(log_a log_housing_wealth log_bank_account_wealth log_stock_wealth) ) if $sample, first
 qui eststo, title(IV L.a L2.c L.y):        ivregress 2sls d_c  $controls ib35.age (log_ctilde = L(1 2).(log_a y log_housing_wealth log_bank_account_wealth) L2.log_consumption) if $sample, first
 qui eststo, title(IV L.a L2.c L.y):        ivregress 2sls d_c  $controls ib35.age (log_ctilde = L(1 2).(log_a y log_housing_wealth log_stock log_bank_account_wealth) L2.log_consumption) if $sample, first
-global esttab_opts keep( *ctilde* _cons) ar2 label b(5) se(5) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
-esttab , $esttab_opts title("Depvar: d_c. Kid and Year Controls. $sample")
+global esttabopts keep( *ctilde* _cons) ar2 label b(4) se(4) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
+esttab , $esttabopts title("Depvar: d_c. Kid and Year Controls. $sample")
+esttab using "$folder_output\EE_PSID_Ctilde.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation (ctilde)") addnotes("Sample: Households with liq assets $>$ 500. Ctilde is liq plus housing up to 90 \% LTV.")
 
+
+* I think this shows our problem pretty well
+* Liq asset coef is positive, housing asset coef is negative
+* NOTE this sample only includes homeowners I think
+global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 500
 eststo clear 
 global controls i.wave D.fsize
-qui eststo, title(age dum):                           reg d_c  $controls ib35.age  log_housing_wealth_tempt log_a if $sample
-qui eststo, title(age poly):                          reg d_c  $controls age age2  log_housing_wealth_tempt log_a if $sample
-qui eststo, title(IV L.ctilde):            ivregress 2sls d_c  $controls ib35.age (log_housing_wealth_tempt log_a = L.log_ctilde ) if $sample, first
-qui eststo, title(IV L.a):                 ivregress 2sls d_c  $controls ib35.age (log_housing_wealth_tempt log_a = L.log_a ) if $sample, first
-qui eststo, title(IV L.a L.y):             ivregress 2sls d_c  $controls ib35.age (log_housing_wealth_tempt log_a = L.log_a L.y) if $sample, first
-qui eststo, title(IV L.cash stock):        ivregress 2sls d_c  $controls ib35.age (log_housing_wealth_tempt log_a = L.(log_a log_housing_wealth log_bank_account_wealth log_stock_wealth) ) if $sample, first
-qui eststo, title(IV L.a L2.c L.y):        ivregress 2sls d_c  $controls ib35.age (log_housing_wealth_tempt log_a = L(1 2).(log_a y log_housing_wealth log_bank_account_wealth) L2.log_consumption) if $sample, first
-qui eststo, title(IV L.a L2.c L.y):        ivregress 2sls d_c  $controls ib35.age (log_housing_wealth_tempt log_a = L(1 2).(log_a y log_housing_wealth log_stock log_bank_account_wealth) L2.log_consumption) if $sample, first
-global esttab_opts keep( *log_a* *log_housing_wealth_tempt* _cons) ar2 label b(5) se(5) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
-esttab , $esttab_opts title("Depvar: d_c. Kid and Year Controls. $sample")
+qui eststo, title(age dum):                           reg d_c  $controls ib35.age  log_a log_housing_wealth_tempt if $sample
+qui eststo, title(age poly):                          reg d_c  $controls age age2  log_a log_housing_wealth_tempt if $sample
+qui eststo, title(IV L.a L.y):             ivregress 2sls d_c  $controls ib35.age (log_a log_housing_wealth_tempt = L.log_a L.y) if $sample, first
+qui eststo, title(IV L.cash stock):        ivregress 2sls d_c  $controls ib35.age (log_a log_housing_wealth_tempt = L.(log_a log_housing_wealth log_bank_account_wealth log_stock_wealth) ) if $sample, first
+qui eststo, title(IV L.a L2.c L.y):        ivregress 2sls d_c  $controls ib35.age (log_a log_housing_wealth_tempt = L(1 2).(log_a y log_housing_wealth log_bank_account_wealth) L2.log_consumption) if $sample, first
+qui eststo, title(IV L.a L2.c L.y):        ivregress 2sls d_c  $controls ib35.age (log_a log_housing_wealth_tempt = L(1 2).(log_a y log_housing_wealth log_stock log_bank_account_wealth) L2.log_consumption) if $sample, first
+global esttabopts keep( *log_a* *log_housing_wealth_tempt* _cons) ar2 label b(4) se(4) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
+esttab , $esttabopts title("Depvar: d_c. Kid and Year Controls. $sample")
+esttab using "$folder_output\EE_PSID_Liquid_and_Housing.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation (Liquid Assets and Net Housing Wealth)") addnotes("Sample: Households with liq assets $>$ 500. Ctilde is liq plus housing up to 90 \% LTV.")
+
+
+
+* HOUSING ONLY
+global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 500
+eststo clear 
+global controls i.wave D.fsize
+qui eststo, title(age dum):                           reg d_c  $controls ib35.age  log_housing_wealth_tempt if $sample
+qui eststo, title(age poly):                          reg d_c  $controls age age2  log_housing_wealth_tempt if $sample
+qui eststo, title(IV L.a L.y):             ivregress 2sls d_c  $controls ib35.age (log_housing_wealth_tempt = L.log_a L.y) if $sample, first
+qui eststo, title(IV L.cash stock):        ivregress 2sls d_c  $controls ib35.age (log_housing_wealth_tempt = L.(log_a log_housing_wealth log_bank_account_wealth log_stock_wealth) ) if $sample, first
+qui eststo, title(IV L.a L2.c L.y):        ivregress 2sls d_c  $controls ib35.age (log_housing_wealth_tempt = L(1 2).(log_a y log_housing_wealth log_bank_account_wealth) L2.log_consumption) if $sample, first
+qui eststo, title(IV L.a L2.c L.y):        ivregress 2sls d_c  $controls ib35.age (log_housing_wealth_tempt = L(1 2).(log_a y log_housing_wealth log_stock log_bank_account_wealth) L2.log_consumption) if $sample, first
+global esttabopts keep( *log_* *log_housing_wealth_tempt* _cons) ar2 label b(4) se(4) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
+esttab , $esttabopts title("Depvar: d_c. Kid and Year Controls. $sample")
+esttab using "$folder_output\EE_PSID_Housing_Only.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation (Housing Only)") addnotes("Sample: Households with liq assets $>$ 500. Ctilde is liq plus housing up to 90 \% LTV.")
+
+
+* Now allow homeowners to enter into that regression - hmm doesnt help at all
+/*
+gen log_housing_wealth_tempt_0 = log_housing_wealth_tempt
+replace log_housing_wealth_tempt_0 = 0 if log_housing_wealth_tempt == .
+global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 500
+eststo clear 
+global controls i.wave D.fsize
+qui eststo, title(age dum):                           reg d_c  $controls ib35.age i.homeowner  log_a log_housing_wealth_tempt_0 if $sample
+qui eststo, title(age poly):                          reg d_c  $controls age age2 i.homeowner  log_a log_housing_wealth_tempt_0 if $sample
+qui eststo, title(IV L.a L.y):             ivregress 2sls d_c  $controls ib35.age i.homeowner (log_a log_housing_wealth_tempt_0 = L.log_a L.y) if $sample, first
+qui eststo, title(IV L.cash stock):        ivregress 2sls d_c  $controls ib35.age i.homeowner (log_a log_housing_wealth_tempt_0 = L.(log_a log_housing_wealth_tempt_0 log_bank_account_wealth log_stock_wealth) ) if $sample, first
+qui eststo, title(IV L.a L2.c L.y):        ivregress 2sls d_c  $controls ib35.age i.homeowner (log_a log_housing_wealth_tempt_0 = L(1 2).(log_a y log_housing_wealth_tempt_0 log_bank_account_wealth) L2.log_consumption) if $sample, first
+qui eststo, title(IV L.a L2.c L.y):        ivregress 2sls d_c  $controls ib35.age i.homeowner (log_a log_housing_wealth_tempt_0 = L(1 2).(log_a y log_housing_wealth_tempt_0 log_stock log_bank_account_wealth) L2.log_consumption) if $sample, first
+global esttabopts keep( *log_a* *log_housing_wealth_tempt* _cons *homeowner*) ar2 label b(5) se(5) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
+esttab , $esttabopts title("Depvar: d_c. Kid and Year Controls. $sample")
+*/
+
+global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 500 & log_ctilde > 2.5
+eststo clear 
+global controls i.wave D.fsize
+qui eststo, title(age dum):                           reg d_c  $controls ib35.age  log_a log_ctilde if $sample
+qui eststo, title(age poly):                          reg d_c  $controls age age2  log_a log_ctilde if $sample
+qui eststo, title(IV L.a L.y):             ivregress 2sls d_c  $controls ib35.age (log_a log_ctilde = L.log_a L.y) if $sample, first
+qui eststo, title(IV L.cash stock):        ivregress 2sls d_c  $controls ib35.age (log_a log_ctilde = L.(log_a log_housing_wealth log_bank_account_wealth log_stock_wealth) ) if $sample, first
+qui eststo, title(IV L.a L2.c L.y):        ivregress 2sls d_c  $controls ib35.age (log_a log_ctilde = L(1 2).(log_a y log_housing_wealth log_bank_account_wealth) L2.log_consumption) if $sample, first
+qui eststo, title(IV L.a L2.c L.y):        ivregress 2sls d_c  $controls ib35.age (log_a log_ctilde = L(1 2).(log_a y log_housing_wealth log_stock log_bank_account_wealth) L2.log_consumption) if $sample, first
+global esttabopts keep( *log_* _cons) ar2 label b(5) se(5) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
+esttab , $esttabopts title("Depvar: d_c. Kid and Year Controls. $sample")
 
 
 

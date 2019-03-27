@@ -1,0 +1,31 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{longtable}{l*{4}{c}}
+\caption{PSID Euler Equation (Log Lagged Assets)}\\
+\toprule\endfirsthead\midrule\endhead\midrule\endfoot\endlastfoot
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
+                    &\multicolumn{1}{c}{age dum}&\multicolumn{1}{c}{age poly}&\multicolumn{1}{c}{age dum}&\multicolumn{1}{c}{age poly}\\
+\midrule
+L.Log Liquid Assets &     0.00356\sym{*}  &     0.00354\sym{*}  &     0.00345         &     0.00334         \\
+                    &   (0.00185)         &   (0.00185)         &   (0.00237)         &   (0.00236)         \\
+\addlinespace
+L.log\_housing\_wealth\_tempt&                     &                     &     0.00138         &     0.00157         \\
+                    &                     &                     &   (0.00346)         &   (0.00346)         \\
+\addlinespace
+Constant            &     0.08394\sym{***}&    -0.07955         &     0.05159         &    -0.03827         \\
+                    &   (0.02600)         &   (0.06607)         &   (0.04256)         &   (0.09409)         \\
+\addlinespace
+Age controls        &         Yes         &         Yes         &         Yes         &         Yes         \\
+\addlinespace
+Year controls       &         Yes         &         Yes         &         Yes         &         Yes         \\
+\addlinespace
+Kids controls       &         Yes         &         Yes         &         Yes         &         Yes         \\
+\midrule
+Adjusted \(R^{2}\)  &       0.028         &       0.028         &       0.028         &       0.028         \\
+Observations        &       16592         &       16592         &       11093         &       11093         \\
+\bottomrule
+\multicolumn{5}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{5}{l}{\footnotesize Sample: Households with liq assets $>$ 500 at time t and t-1, ages 25 to 60, not moving homes that year}\\
+\multicolumn{5}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{longtable}
+}

@@ -1,0 +1,28 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{longtable}{l*{8}{c}}
+\caption{PSID Euler Equation (ctilde)}\\
+\toprule\endfirsthead\midrule\endhead\midrule\endfoot\endlastfoot
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}&\multicolumn{1}{c}{(7)}&\multicolumn{1}{c}{(8)}\\
+                    &\multicolumn{1}{c}{age dum}&\multicolumn{1}{c}{age poly}&\multicolumn{1}{c}{IV L.ctilde}&\multicolumn{1}{c}{IV L.a}&\multicolumn{1}{c}{IV L.a L.y}&\multicolumn{1}{c}{IV L.cash stock}&\multicolumn{1}{c}{IV L.a L2.c L.y}&\multicolumn{1}{c}{IV L.a L2.c L.y}\\
+\midrule
+log\_ctilde          &     0.00648\sym{***}&     0.00639\sym{***}&     0.00376         &     0.00644\sym{*}  &     0.00453         &     0.00853\sym{**} &     0.01186\sym{***}&     0.01178\sym{***}\\
+                    &   (0.00181)         &   (0.00180)         &   (0.00243)         &   (0.00335)         &   (0.00314)         &   (0.00347)         &   (0.00426)         &   (0.00425)         \\
+\addlinespace
+Constant            &     0.04947\sym{*}  &    -0.09045         &     0.02475         &    -0.00234         &     0.01731         &    -0.04011         &    -0.08069         &    -0.07988         \\
+                    &   (0.02715)         &   (0.06562)         &   (0.03154)         &   (0.03926)         &   (0.03746)         &   (0.04371)         &   (0.05367)         &   (0.05365)         \\
+\addlinespace
+Age controls        &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
+\addlinespace
+Year controls       &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
+\addlinespace
+Kids controls       &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
+\midrule
+Adjusted \(R^{2}\)  &       0.029         &       0.028         &       0.029         &       0.029         &       0.029         &       0.030         &       0.026         &       0.026         \\
+Observations        &       16592         &       16592         &       16592         &       16592         &       16576         &       12295         &        8175         &        8175         \\
+\bottomrule
+\multicolumn{9}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{9}{l}{\footnotesize Sample: Households with liq assets $>$ 500. Ctilde is liq plus housing up to 90 \% LTV.}\\
+\multicolumn{9}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{longtable}
+}

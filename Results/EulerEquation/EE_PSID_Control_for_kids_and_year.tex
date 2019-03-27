@@ -4,25 +4,25 @@
 \caption{PSID Euler Equation (More Controls)}\\
 \toprule\endfirsthead\midrule\endhead\midrule\endfoot\endlastfoot
                     &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}\\
-                    &\multicolumn{1}{c}{baseline}&\multicolumn{1}{c}{age control}&\multicolumn{1}{c}{age polynomial}&\multicolumn{1}{c}{IV L.a}&\multicolumn{1}{c}{IV L.a L.y}&\multicolumn{1}{c}{IV L.a L.c L.y}\\
+                    &\multicolumn{1}{c}{age dum}&\multicolumn{1}{c}{age poly}&\multicolumn{1}{c}{IV L.a}&\multicolumn{1}{c}{IV a y b s}&\multicolumn{1}{c}{IV a y b L2.c}&\multicolumn{1}{c}{IV a y b s L2.c}\\
 \midrule
-Log Liquid Assets   &     0.00430\sym{**} &     0.00766\sym{***}&     0.00755\sym{***}&     0.00476         &     0.00432         &     0.00638\sym{*}  \\
-                    &   (0.00212)         &   (0.00216)         &   (0.00216)         &   (0.00336)         &   (0.00330)         &   (0.00330)         \\
+Log Liquid Assets   &     0.00910\sym{***}&     0.00898\sym{***}&     0.00550\sym{*}  &     0.00493\sym{*}  &     0.00747\sym{**} &     0.00727\sym{**} \\
+                    &   (0.00188)         &   (0.00188)         &   (0.00286)         &   (0.00278)         &   (0.00308)         &   (0.00307)         \\
 \addlinespace
-Constant            &     0.03992\sym{*}  &     0.02140         &    -0.05555         &    -0.09961\sym{**} &    -0.09523\sym{**} &    -0.11579\sym{***}\\
-                    &   (0.02242)         &   (0.04306)         &   (0.07178)         &   (0.03955)         &   (0.03910)         &   (0.03909)         \\
+Constant            &     0.03296         &    -0.11947\sym{*}  &     0.01328         &     0.01879         &    -0.00142         &     0.00028         \\
+                    &   (0.02617)         &   (0.06622)         &   (0.03249)         &   (0.03195)         &   (0.03586)         &   (0.03577)         \\
 \addlinespace
-Age controls        &          No         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
+Age controls        &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
 \addlinespace
 Year controls       &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
 \addlinespace
 Kids controls       &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
 \midrule
-Adjusted \(R^{2}\)  &       0.023         &       0.028         &       0.028         &       0.028         &       0.028         &       0.028         \\
-Observations        &       15092         &       15092         &       15092         &       15092         &       15092         &       15092         \\
+Adjusted \(R^{2}\)  &       0.029         &       0.029         &       0.029         &       0.029         &       0.027         &       0.028         \\
+Observations        &       16592         &       16592         &       16592         &       16575         &       11872         &       11871         \\
 \bottomrule
 \multicolumn{7}{l}{\footnotesize Standard errors in parentheses}\\
-\multicolumn{7}{l}{\footnotesize Sample: Households with liq assets $>$ 1,000 at time t and t-1, ages 25 to 60, not moving homes that year}\\
+\multicolumn{7}{l}{\footnotesize Sample: Households with liq assets $>$ 500 at time t and t-1, ages 25 to 60, not moving homes that year.}\\
 \multicolumn{7}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
 \end{longtable}
 }

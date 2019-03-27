@@ -50,7 +50,6 @@ foreach var of varlist d_*_lag {
 foreach var of varlist `varlist_where_to_remove_jumps'  {
 	replace `var'=. if f2.pec_d_`var'_lag==1 	/* 	assigning missing values to the year with the jump */ 
 }
-pause 
 
 /* Check the new distribution of the interacted lag */ 
 foreach var of varlist `varlist_where_to_remove_jumps' {

@@ -1,0 +1,28 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{longtable}{l*{6}{c}}
+\caption{PSID Euler Equation (Housing Only)}\\
+\toprule\endfirsthead\midrule\endhead\midrule\endfoot\endlastfoot
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}\\
+                    &\multicolumn{1}{c}{age dum}&\multicolumn{1}{c}{age poly}&\multicolumn{1}{c}{IV L.a L.y}&\multicolumn{1}{c}{IV L.cash stock}&\multicolumn{1}{c}{IV L.a L2.c L.y}&\multicolumn{1}{c}{IV L.a L2.c L.y}\\
+\midrule
+log\_housing\_wealth\_tempt&      0.0020         &      0.0021         &      0.0083         &      0.0069         &      0.0092\sym{*}  &      0.0091\sym{*}  \\
+                    &    (0.0032)         &    (0.0032)         &    (0.0078)         &    (0.0044)         &    (0.0052)         &    (0.0052)         \\
+\addlinespace
+Constant            &      0.0835\sym{**} &     -0.0700         &     -0.0365         &     -0.0185         &     -0.0516         &     -0.0505         \\
+                    &    (0.0415)         &    (0.0878)         &    (0.0862)         &    (0.0531)         &    (0.0635)         &    (0.0635)         \\
+\addlinespace
+Age controls        &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
+\addlinespace
+Year controls       &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
+\addlinespace
+Kids controls       &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
+\midrule
+Adjusted \(R^{2}\)  &       0.029         &       0.029         &       0.029         &       0.029         &       0.026         &       0.026         \\
+Observations        &       11696         &       11696         &       11685         &       10851         &        7414         &        7414         \\
+\bottomrule
+\multicolumn{7}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{7}{l}{\footnotesize Sample: Households with liq assets $>$ 500. Ctilde is liq plus housing up to 90 \% LTV.}\\
+\multicolumn{7}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{longtable}
+}
