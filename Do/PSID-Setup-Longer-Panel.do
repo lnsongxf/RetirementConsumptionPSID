@@ -1520,7 +1520,7 @@ preserve
 	mean *expenditure [pweight = family_weight] if wave == 2005
 restore
 
-save "$folder/Data/Intermediate/Basic-Panel-1983-2015.dta", replace
+save "$folder/Data/Intermediate/Basic-Panel-1982-2015.dta", replace
 
 * TODO: add in code from psid_sample.do
 
