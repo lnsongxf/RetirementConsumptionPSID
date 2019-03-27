@@ -449,20 +449,24 @@ if $use_longer_panel == 1 {
 
 * Note that lagged liquid assets will not work back in 1980s or early 1990s
 
+if $use_longer_panel == 1 {
 
-global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 
+  * Note have to remove log liq a
+  global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 
 
-eststo clear 
-global controls
-qui eststo, title(age dum):                           reg d_c  $controls ib35.age log_a if $sample
-qui eststo, title(age poly):                          reg d_c  $controls age age2 log_a if $sample
-qui eststo, title(IV L.a):                 ivregress 2sls d_c  $controls ib35.age (log_a = L.log_a) if $sample, first
-qui eststo, title(IV a y b s):             ivregress 2sls d_c  $controls ib35.age (log_a = L.(log_a y log_bank_account_wealth log_stock_wealth) ) if $sample, first
-qui eststo, title(IV a y b L2.c):          ivregress 2sls d_c  $controls ib35.age (log_a = L(1 2).(log_a y log_bank_account_wealth) L2.log_consumption) if $sample, first
-qui eststo, title(IV a y b s L2.c):        ivregress 2sls d_c  $controls ib35.age (log_a = L(1 2).(log_a y log_bank_account_wealth log_stock) L2.log_consumption) if $sample, first
-global esttabopts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate(Age controls = *age*) star(* 0.10 ** 0.05 *** 0.01)
-esttab , $esttabopts title("Depvar: d_c. $sample")
-sfdsf
+  eststo clear 
+  global controls
+  qui eststo, title(age dum):                           reg d_c  $controls ib35.age log_a if $sample
+  qui eststo, title(age poly):                          reg d_c  $controls age age2 log_a if $sample
+  qui eststo, title(IV L.a):                 ivregress 2sls d_c  $controls ib35.age (log_a = L.log_a) if $sample, first
+  qui eststo, title(IV a y b s):             ivregress 2sls d_c  $controls ib35.age (log_a = L.(log_a y log_bank_account_wealth log_stock_wealth) ) if $sample, first
+  qui eststo, title(IV a y b L2.c):          ivregress 2sls d_c  $controls ib35.age (log_a = L(1 2).(log_a y log_bank_account_wealth) L2.log_consumption) if $sample, first
+  qui eststo, title(IV a y b s L2.c):        ivregress 2sls d_c  $controls ib35.age (log_a = L(1 2).(log_a y log_bank_account_wealth log_stock) L2.log_consumption) if $sample, first
+  global esttabopts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate(Age controls = *age*) star(* 0.10 ** 0.05 *** 0.01)
+  esttab , $esttabopts title("Depvar: d_c. $sample")
+
+}
+
 
 ****************************************************************************************************
 ** Tables with Consumption Euler Equation
@@ -738,10 +742,14 @@ if $write_tex {
 esttab using "$folder_output\EE_PSID_Ctilde.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation (ctilde)") addnotes("Sample: Households with liq assets $>$ 500. Ctilde is liq plus housing up to 90 \% LTV.")
 }
 
+gen post_1999 = wave >= 1999
+
 if $use_longer_panel == 1 {
 
   * Remove lagged a requirement
   * Also note that IVs based on assets will not work here
+
+  * NOTE: have to clean up code a bit to make sure we can get here : ie to make sure we construct all the needed variables for ctilde
 
   global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & log_ctilde > 2.5
   eststo clear 
@@ -749,14 +757,16 @@ if $use_longer_panel == 1 {
   qui eststo, title(age dum):                           reg d_c  $controls ib35.age  log_ctilde if $sample
   qui eststo, title(age poly):                          reg d_c  $controls age age2  log_ctilde if $sample
 
-  qui eststo, title(age dum):                           reg d_c  $controls ib35.age  c.log_ctilde##i.texas if $sample
-  qui eststo, title(age poly):                          reg d_c  $controls age age2  c.log_ctilde##i.texas if $sample
+  qui eststo, title(age dum):                           reg d_c  $controls ib35.age  c.log_ctilde##i.post_1999#i.texas if $sample
+  qui eststo, title(age poly):                          reg d_c  $controls age age2  c.log_ctilde##i.post_1999#i.texas if $sample
 
-  global esttabopts keep( *ctilde* *texas* _cons) ar2 label b(4) se(4) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
+  global esttabopts keep( *ctilde* *texas* *post* _cons) ar2 label b(4) se(4) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
   esttab , $esttabopts title("Depvar: d_c. Kid and Year Controls. $sample")
 
 
 }
+
+asdfsdf
 
 * I think this shows our problem pretty well
 * Liq asset coef is positive, housing asset coef is negative
