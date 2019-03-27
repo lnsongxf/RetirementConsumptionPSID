@@ -16,6 +16,7 @@
 set more off
 clear all
 set maxvar 32767
+pause on
 
 // PSID Variable Search:
 // https://simba.isr.umich.edu/VS/s.aspx
@@ -47,25 +48,23 @@ psid use
 	|| rel2head
 	// [68]ER30003 [69]ER30022 [70]ER30045 [71]ER30069 [72]ER30093 [73]ER30119
 	// [74]ER30140 [75]ER30162 [76]ER30190 [77]ER30219 [78]ER30248 [79]ER30285
-	// [80]ER30315 [81]ER30345 [82]ER30375 
-	[83]ER30401 [84]ER30431 [85]ER30465
-	[86]ER30500 [87]ER30537 [88]ER30572 [89]ER30608 [90]ER30644 [91]ER30691
-	[92]ER30735 [93]ER30808 [94]ER33103 [95]ER33203 [96]ER33303 [97]ER33403
-	[99]ER33503 [01]ER33603 [03]ER33703 [05]ER33803 [07]ER33903
-	[09]ER34003 [11]ER34103 [13]ER34203 [15]ER34303 
-	// [17]ER34503
+	// [80]ER30315 [81]ER30345 
+	[82]ER30375 [83]ER30401 [84]ER30431 [85]ER30465 [86]ER30500 [87]ER30537
+	[88]ER30572 [89]ER30608 [90]ER30644 [91]ER30691 [92]ER30735 [93]ER30808
+	[94]ER33103 [95]ER33203 [96]ER33303 [97]ER33403 [99]ER33503 [01]ER33603
+	[03]ER33703 [05]ER33803 [07]ER33903 [09]ER34003 [11]ER34103 [13]ER34203
+	[15]ER34303 // [17]ER34503
 
 	// age of individual
 	|| age
 	// [68]ER30004 [69]ER30023 [70]ER30046 [71]ER30070 [72]ER30094
 	// [73]ER30120 [74]ER30141 [75]ER30163 [76]ER30191 [77]ER30220
-	// [78]ER30249 [79]ER30286 [80]ER30316 [81]ER30346 [82]ER30376
-	[83]ER30402 [84]ER30432 [85]ER30466 [86]ER30501 [87]ER30538
-	[88]ER30573 [89]ER30609 [90]ER30645 [91]ER30692 [92]ER30736
-	[93]ER30809 [94]ER33104 [95]ER33204 [96]ER33304 [97]ER33404
-	[99]ER33504 [01]ER33604 [03]ER33704 [05]ER33804 [07]ER33904
-	[09]ER34004 [11]ER34104 [13]ER34204 [15]ER34305 
-	// [17]ER34504
+	// [78]ER30249 [79]ER30286 [80]ER30316 [81]ER30346 
+	[82]ER30376 [83]ER30402 [84]ER30432 [85]ER30466 [86]ER30501 [87]ER30538
+	[88]ER30573 [89]ER30609 [90]ER30645 [91]ER30692 [92]ER30736 [93]ER30809
+	[94]ER33104 [95]ER33204 [96]ER33304 [97]ER33404 [99]ER33504 [01]ER33604
+	[03]ER33704 [05]ER33804 [07]ER33904 [09]ER34004 [11]ER34104 [13]ER34204
+	[15]ER34305 // [17]ER34504
 
 	// year individual born
 	|| year_born
@@ -78,7 +77,7 @@ psid use
 
 	// sex of head
 	|| sex_head
-	[83]V8962 [84]V10420 [85]V11607 [86]V13012 [87]V14115 [88]V15131
+	[82]V8353 [83]V8962 [84]V10420 [85]V11607 [86]V13012 [87]V14115 [88]V15131
 	[89]V16632 [90]V18050 [91]V19350 [92]V20652 [93]V22407 [94]ER2008
 	[95]ER5007 [96]ER7007 [97]ER10010 [99]ER13011 [01]ER17014 [03]ER21018
 	[05]ER25018 [07]ER36018 [09]ER42018 [11]ER47318 [13]ER53018 [15]ER60018	
@@ -102,12 +101,11 @@ psid use
 	// Codes 2-8 have priority over codes 0 and 1, and code 8 has priority over everything else
 	|| fchg
 	// [69]V542 [70]V1109 [71]V1809 [72]V2410 [73]V3010 [74]V3410 [75]V3810
-	// [76]V4310 [77]V5210 [78]V5710 [79]V6310 [80]V6910 [81]V7510 [82]V8210
-	[83]V8810 [84]V10010 [85]V11112 [86]V12510 [87]V13710 [88]V14810
+	// [76]V4310 [77]V5210 [78]V5710 [79]V6310 [80]V6910 [81]V7510 
+	[82]V8210 [83]V8810 [84]V10010 [85]V11112 [86]V12510 [87]V13710 [88]V14810
 	[89]V16310 [90]V17710 [91]V19010 [92]V20310 [93]V21608 [94]ER2005A
-	[95]ER5004A [96]ER7004A [97]ER10004A
-	[99]ER13008A [01]ER17007 [03]ER21007 [05]ER25007 [07]ER36007 [09]ER42007
-	[11]ER47307 [13]ER53007 [15]ER60007
+	[95]ER5004A [96]ER7004A [97]ER10004A [99]ER13008A [01]ER17007 [03]ER21007
+	[05]ER25007 [07]ER36007 [09]ER42007 [11]ER47307 [13]ER53007 [15]ER60007
 
 	// Users often want to look at data from the "same" family in adjacent waves.
 	// It is important to understand that there is no absolute definition of
@@ -132,8 +130,8 @@ psid use
 	// Splitoff Indicator
 	|| splitoff_indicator
 	// [69]V909 [70]V1106 [71]V1806 [72]V2407 [73]V3007 [74]V3407 [75]V3807
-	// [76]V4307 [77]V5207 [78]V5707 [79]V6307 [80]V6907 [81]V7507 [82]V8207
-	[83]V8807 [84]V10007 [85]V11107 [86]V12507 [87]V13707 [88]V14807
+	// [76]V4307 [77]V5207 [78]V5707 [79]V6307 [80]V6907 [81]V7507 
+	[82]V8207 [83]V8807 [84]V10007 [85]V11107 [86]V12507 [87]V13707 [88]V14807
 	[89]V16307 [90]V17707 [91]V19007 [92]V20307 [93]V21606 [94]ER2005F
 	[95]ER5005F [96]ER7005F [97]ER10005F [99]ER13005E [01]ER17006 [03]ER21005
 	[05]ER25005 [07]ER36005 [09]ER42005 [11]ER47305 [13]ER53005 [15]ER60005
@@ -464,8 +462,8 @@ psid use
 	// cost of food delivered to the door. Values represent the annual food
 	// expenditure in whole dollars. All missing data were assigned. [68]V37
 	// [69]V500 [70]V1175 [71]V1876 [72]V2476 [74]V3441 [75]V3841 [76]V4354
-	// [77]V5271 [78]V5770 [79]V6376 [80]V6972 [81]V7564 [82]V8256
-	[83]V8864 [84]V10235 [85]V11375 [86]V12774 [87]V13876 [90]V17807
+	// [77]V5271 [78]V5770 [79]V6376 [80]V6972 [81]V7564 
+	[82]V8256 [83]V8864 [84]V10235 [85]V11375 [86]V12774 [87]V13876 [90]V17807
 	[91]V19107 [92]V20407 [93]V21707
 
 	|| foodhome_no_fstmp_reported
@@ -552,8 +550,8 @@ psid use
 	// school. Values for this variable represent the annual expenditure in
 	// whole dollars. All missing data were assigned.	
 	// [69]V506 [70]V1185 [71]V1886 [72]V2480 [74]V3445 [75]V3853 [76]V4368
-	// [77]V5273 [78]V5772 [79]V6378 [80]V6974 [81]V7566 [82]V8258 
-	[83]V8866 [84]V10237 [85]V11377 [86]V12776 [87]V13878 [90]V17809
+	// [77]V5273 [78]V5772 [79]V6378 [80]V6974 [81]V7566 
+	[82]V8258 [83]V8866 [84]V10237 [85]V11377 [86]V12776 [87]V13878 [90]V17809
 	[91]V19109 [92]V20409 [93]V21711
 
 	|| fooddeliveredexpenditure
@@ -586,8 +584,8 @@ psid use
 	// variable represent the actual annual value of the stamps in whole
 	// dollars. All missing data were assigned.
 	// Note that in 1993 there are two options: V21713 (which contains N/As coded as 9999) and V21727 (which has imputed values for these N/As) 
-	// [70]V1765 [80]V6976 [81]V7568 [82]V8260 
-	[83]V8868 [84]V10239 [85]V11379 [86]V12778 [87]V13880 [88]V14895
+	// [70]V1765 [80]V6976 [81]V7568 
+	[82]V8260 [83]V8868 [84]V10239 [85]V11379 [86]V12778 [87]V13880 [88]V14895
 	[89]V16395 [90]V17811 [91]V19111 [92]V20411 [93]V21727
 
 	//////////////////////////////////////////////////////////////////////////
@@ -872,13 +870,11 @@ psid use
 	// (you/they) own the lot)--I mean about how much would it bring if
 	// (you/they) sold it today?
 	// [68]V5 [69]V449 [70]V1122 [71]V1823 [72]V2423 [73]V3021 [74]V3417
-	// [75]V3817 [76]V4318 [77]V5217 [78]V5717 [79]V6319 [80]V6917 [81]V7517
-	// [82]V8217 
-	[83]V8817 [84]V10018 [85]V11125 [86]V12524 [87]V13724
-	[88]V14824 [89]V16324 [90]V17724 [91]V19024 [92]V20324 [93]V21610
-	[94]ER2033 [95]ER5032 [96]ER7032 [97]ER10036
-	[99]ER13041 [01]ER17044 [03]ER21043 [05]ER25029 [07]ER36029 [09]ER42030
-	[11]ER47330 [13]ER53030 [15]ER60031
+	// [75]V3817 [76]V4318 [77]V5217 [78]V5717 [79]V6319 [80]V6917 [81]V7517	
+	[82]V8217 [83]V8817 [84]V10018 [85]V11125 [86]V12524 [87]V13724 [88]V14824
+	[89]V16324 [90]V17724 [91]V19024 [92]V20324 [93]V21610 [94]ER2033
+	[95]ER5032 [96]ER7032 [97]ER10036 [99]ER13041 [01]ER17044 [03]ER21043
+	[05]ER25029 [07]ER36029 [09]ER42030 [11]ER47330 [13]ER53030 [15]ER60031
 
 	// IMP VALUE HOME EQUITY
 	|| homeequity
@@ -900,21 +896,18 @@ psid use
 	// Own or Rent
 	|| housingstatus
 	// [68]V103 [69]V593 [70]V1264 [71]V1967 [72]V2566 [73]V3108 [74]V3522
-	// [75]V3939 [76]V4450 [77]V5364 [78]V5864 [79]V6479 [80]V7084 [81]V7675
-	// [82]V8364 
-	[83]V8974 [84]V10437 [85]V11618 [86]V13023 [87]V14126
-	[88]V15140 [89]V16641 [90]V18072 [91]V19372 [92]V20672 [93]V22427
-	[94]ER2032 [95]ER5031 [96]ER7031 [97]ER10035
-	[99]ER13040 [01]ER17043 [03]ER21042 [05]ER25028 [07]ER36028 [09]ER42029
-	[11]ER47329 [13]ER53029 [15]ER60030
+	// [75]V3939 [76]V4450 [77]V5364 [78]V5864 [79]V6479 [80]V7084 [81]V7675	
+	[82]V8364 [83]V8974 [84]V10437 [85]V11618 [86]V13023 [87]V14126 [88]V15140
+	[89]V16641 [90]V18072 [91]V19372 [92]V20672 [93]V22427 [94]ER2032
+	[95]ER5031 [96]ER7031 [97]ER10035 [99]ER13040 [01]ER17043 [03]ER21042
+	[05]ER25028 [07]ER36028 [09]ER42029 [11]ER47329 [13]ER53029 [15]ER60030
 
 	// TYPE MORTGAGE MOR 1
 	|| type_mortgage1
 	// A23a. Is that a mortgage, a land contract, a home equity loan, or what?
-	// --FIRST MORTGAGE
-	// [96]ER7036 [97]ER10040
-	[99]ER13045 [01]ER17050 [03]ER21049 [05]ER25040 [07]ER36040 [09]ER42041
-	[11]ER47346 [13]ER53046 [15]ER60047
+	// --FIRST MORTGAGE	
+	[96]ER7036 [97]ER10040 [99]ER13045 [01]ER17050 [03]ER21049 [05]ER25040
+	[07]ER36040 [09]ER42041 [11]ER47346 [13]ER53046 [15]ER60047
 
 	|| type_mortgage2
 	// may be interesting! I notice that in 2013, 246 obs with home equity loan (2.7%)
@@ -951,9 +944,9 @@ psid use
 	|| room_count
 	// [68]V102 [69]V592 [70]V1263 [71]V1966 [72]V2565 [73]V3107 [74]V3521
 	// [75]V3937 [76]V4448 [77]V5362 [78]V5862 [79]V6477 [80]V7080 [81]V7671
-	// [82]V8360 [83]V8969 [84]V10432 [85]V11614 [86]V13019 [87]V14122
-	// [88]V15138 [89]V16639 [90]V18070 [91]V19370 [92]V20670 [93]V22425
-	// [94]ER2029 [95]ER5028 [96]ER7028 [97]ER10032
+	[82]V8360 [83]V8969 [84]V10432 [85]V11614 [86]V13019 [87]V14122
+	[88]V15138 [89]V16639 [90]V18070 [91]V19370 [92]V20670 [93]V22425
+	[94]ER2029 [95]ER5028 [96]ER7028 [97]ER10032
 	[99]ER13037 [01]ER17040 [03]ER21039 [05]ER25027 [07]ER36027 [09]ER42028
 	[11]ER47328 [13]ER53028 [15]ER60029
 
@@ -993,7 +986,7 @@ psid use
 	|| current_state_psid_code
 	// Please refer to PSID state codes here http://psidonline.isr.umich.edu/data/Documentation/PSIDStateCodes.pdf
 	// 42 = Texas
-	[83]V8803 [84]V10003 [85]V11103 [86]V12503 [87]V13703 [88]V14803
+	[82]V8203 [83]V8803 [84]V10003 [85]V11103 [86]V12503 [87]V13703 [88]V14803
 	[89]V16303 [90]V17703 [91]V19003 [92]V20303 [93]V21603 [94]ER4156
 	[95]ER6996 [96]ER9247 [97]ER12221 [99]ER13004 [01]ER17004 [03]ER21003
 	[05]ER25003 [07]ER36003 [09]ER42003 [11]ER47303 [13]ER53003 [15]ER60003
@@ -1374,8 +1367,6 @@ replace foodaway_on_fstmp_reported = . if foodaway_on_fstmp_reported >= 99998
 replace foodhome_no_fstmp_reported = . if foodhome_no_fstmp_reported >= 99998 
 
 
-
-
 * Generate annual food away from home expenditure using the reported spending
 foreach var in foodaway_no_fstmp foodaway_on_fstmp foodhome_no_fstmp fooddeliv_no_fstmp {
 	replace `var'_reported = . if `var'_reported >= 99998 | `var'_reported == 80000
@@ -1499,6 +1490,9 @@ gen texas = 0
 replace texas = 1 if current_state == 48 & wave >= 1985
 replace texas = 1 if current_state_psid_code == 42 & wave < 1985
 
+* The coding of rel2head changed between 1982 and 1983
+replace rel2head = 10 if wave == 1982 & rel2head == 1 
+
 ****************************************************************************************************
 ** Keep only heads of household
 ****************************************************************************************************
@@ -1508,6 +1502,17 @@ keep if family_id != .
 * Keep only heads (as done in "Studying Consumption with the PSID")
 keep if rel2head == 10
 format %8.0g rel2head
+
+* Note: rel2head is missing in the following situations in 1983:
+* Immigrant or Latino samples (ER30001=3001-3511,4001-4462,7001-9308); born
+* or moved in after the 1983 interview (ER30399>0 and ER30400=0); main family
+* nonresponse by 1983 or mover-out nonresponse by 1982 (ER30399=0)
+
+* And missing in the following situations in 1999
+* Inap.: from Latino sample (ER30001=7001-9308); from Immigrant 2017 sample
+* (ER30001=4001-4462); main family nonresponse by 1999 or mover-out nonresponse
+* by 1997 (ER33501=0); born or moved in after the 1999 interview (ER33501>0 and
+* ER33502=0)
 
 * Replicate Table 2 in "Studying Consumption with the PSID"
 preserve
