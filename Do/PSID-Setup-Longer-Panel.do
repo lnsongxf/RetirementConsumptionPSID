@@ -984,10 +984,20 @@ psid use
 	|| current_state
 	// Current State (FIPS Code)
 	// Please refer to FIPS state codes here http://psidonline.isr.umich.edu/data/Documentation/FIPSStateCodes.pdf
+	// 48 = Texas
 	[85]V12380 [86]V13632 [87]V14679 [88]V16153 [89]V17539 [90]V18890 [91]V20190
 	[92]V21496 [93]V23328 [94]ER4157 [95]ER6997 [96]ER9248 [97]ER10004
 	[99]ER13005 [01]ER17005 [03]ER21004 [05]ER25004 [07]ER36004 [09]ER42004
 	[11]ER47304 [13]ER53004 [15]ER60004
+
+	|| current_state_psid_code
+	// Please refer to PSID state codes here http://psidonline.isr.umich.edu/data/Documentation/PSIDStateCodes.pdf
+	// 42 = Texas
+	[83]V8803 [84]V10003 [85]V11103 [86]V12503 [87]V13703 [88]V14803
+	[89]V16303 [90]V17703 [91]V19003 [92]V20303 [93]V21603 [94]ER4156
+	[95]ER6996 [96]ER9247 [97]ER12221 [99]ER13004 [01]ER17004 [03]ER21003
+	[05]ER25003 [07]ER36003 [09]ER42003 [11]ER47303 [13]ER53003 [15]ER60003
+	// [17]ER66003
 
 	//////////////////////////////////////////////////////////////////////////
 	// INHERITANCE
@@ -1402,30 +1412,54 @@ sum pid wave foodaway_no_fstmp_annual foodaway_on_fstmp_annual foodaway_computed
 drop dif_foodaway
 drop looksgood
 
-* Total food expenditure (not including foodstamps) plus foodstamps
-egen foodexpenditure_post1993 = rowtotal(foodhome_no_fstmp foodaway_no_fstmp_annual fooddeliv_no_fstmp foodstamp), missing
-egen foodexpenditure_early    = rowtotal(foodstamp_early foodaway_early foodhome_early), missing // this data is already annual
+* Total food expenditure (not including foodstamps)
+egen foodexpenditure_post1993    = rowtotal(foodhome_no_fstmp_annual foodaway_no_fstmp_annual fooddeliv_no_fstmp_annual), missing
+egen foodexpenditure_early       = rowtotal(foodstamp_early foodaway_early foodhome_early), missing // this data is already annual
+
+* Sometimes we get someone who allegedly reports weekly expenditure of 20k, therefore it gives a crazy value
+replace foodexpenditure_post1993 = . if foodexpenditure_post1993 > 100000
+replace foodaway_computed        = . if foodaway_computed        > 100000
 
 * compare food expenditure after 1999
-
+cap drop looksgood
 gen looksgood = "bad"
-replace looksgood = "match" if foodexpenditure_post1993 == fooedexpenditure
+replace looksgood = "match" if foodexpenditure_post1993 == foodexpenditure
 replace looksgood = "missing" if looksgood == "bad" & foodexpenditure_post1993 == . 
-replace looksgood = "zero" if looksgood == 0 & fooedexpenditure == 0
-
-gen dif_food = foodexpenditure_post1993 - fooedexpenditure if looksgood == 0
+replace looksgood = "zero" if looksgood == "bad" & foodexpenditure == 0
 tab wave looksgood if wave >= 1999
+* Pretty good!
+
+gen dif_food = foodexpenditure_post1993 - foodexpenditure if looksgood == "bad"
 sum dif_food
 
-
-
-
 * Food expenditure has 3 different periods: pre 1993, 1993 to 1999, and 1999 onward
-replace fooedexpenditure = foodexpenditure_post1993 if wave >= 1993 & wave < 1999
-replace fooedexpenditure = foodexpenditure_early    if wave < 1993
+replace foodexpenditure = foodexpenditure_post1993 if wave >= 1993 & wave < 1999
+replace foodexpenditure = foodexpenditure_early    if wave < 1993
+
+replace foodawayfromhomeexpenditure = foodaway_computed if wave > 1993 & wave < 1999
+replace foodawayfromhomeexpenditure = foodaway_early if wave <= 1993
+
+* TODO: if we want to use foodathome pre 1999, will still have to collect info on foodathome coming from food stamps
+
+
+
+* TODO: am i right in thinking that foodawayfromhome includes foodstamps? whereas food expenditure does not include foodstamps?
+
 
 * Look for other variables with error codes
 summ *
+
+
+* TODO looks like i need to deal with top coding in income
+*      inc_fam |    948,196    182814.5     1167665    -971399    9999999
+*     inc_head |    948,196    164150.5     1169159          0    9999999
+* -------------+---------------------------------------------------------
+*   inc_spouse |    277,180    13794.31    24840.72          0     923392
+* inc_transfer |    948,196      141874     1170949          0    9999999
+
+replace inc_fam = .      if inc_fam >= 9999998
+replace inc_head = .     if inc_head >= 9999998
+replace inc_transfer = . if inc_transfer >= 9999998
 
 ****************************************************************************************************
 ** Count kids by age in each household (needed for Aguiar and Hurst regressions)
@@ -1460,6 +1494,10 @@ drop `kid' `counted_children' `kid0_17' `kid0_2' `kid3_5' `kid6_13' `kid14_17m' 
 
 // sort family_id wave pid
 // edit family_id wave pid age rel2head children counted_children kid sequence if DIF != 0
+
+gen texas = 0
+replace texas = 1 if current_state == 48 & wave >= 1985
+replace texas = 1 if current_state_psid_code == 42 & wave < 1985
 
 ****************************************************************************************************
 ** Keep only heads of household

@@ -9,8 +9,32 @@ pause on
 
 global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 global folder_output "$folder\Results\EulerEquation"
+global use_longer_panel 0
 
-use "$folder\Data\Intermediate\Basic-Panel.dta", clear
+if $use_longer_panel == 0 {
+  use "$folder\Data\Intermediate\Basic-Panel.dta", clear
+}
+
+if $use_longer_panel == 1 {
+  use "$folder/Data/Intermediate/Basic-Panel-1983-2015.dta", clear
+
+*   * TODO: will need 1982 wave if we want a two year EE
+*   gen fake_wave = 1 if wave == 1982
+*   gen fake_wave = 2 if wave == 1984
+
+*   gen fake_wave = 3 if wave == 1992
+*   gen fake_wave = 4 if wave == 1994
+
+*   gen fake_wave = 5 if wave == 1997
+*   gen fake_wave = 6 if wave == 1999
+
+*   gen fake_wave = 7 if wave == 2001
+*   gen fake_wave = 8 if wave == 2003
+
+* ...
+*   keep if fake wave != .
+*   xtset pid fake_wave
+}
 
 cap mkdir "$folder/Results/Aux_Model_Estimates/AuxModelLatex/"
 
@@ -466,6 +490,7 @@ esttab , $esttab_opts title("Depvar: d_c. $sample")
 esttab using "$folder_output\EE_PSID.tex", $esttab_opts longtable booktabs obslast replace title("PSID Euler Equation (Baseline)") addnotes("Sample: Households with liq assets $>$ 1,000 at time t and t-1, ages 25 to 60, not moving homes that year")
 esttab using "$folder_output\EE_PSID.csv", $esttab_opts csv obslast replace
 
+* BASLELINE - Contains good controls. IV results "robust"
 * This looks pretty good!
 global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 500
 * Also looks good!
@@ -486,9 +511,8 @@ esttab using "$folder_output\EE_PSID_Control_for_kids_and_year.tex", $esttab_opt
 esttab using "$folder_output\EE_PSID_Control_for_kids_and_year.csv", $esttab_opts csv obslast replace
 pause
 
-* Looking at bank account wealth makes nicer IV results!
+* Maybe no longer true - Looking at bank account wealth makes nicer IV results!
 * IV results also work for texas!
-
 eststo clear 
 global controls i.wave D.fsize 
 qui eststo, title(age dum):                       reg d_c i.age     log_bank_account_wealth                                                    $controls if $sample
@@ -554,14 +578,52 @@ preserve
 restore
 
 ****************************************************************************************************
-** Add Housing to EE
+** Euler equation with LAGGED assets
 ****************************************************************************************************
 
-drop *_tempt
+
+
+global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 500
+eststo clear 
+global controls i.wave D.fsize
+* robust to including seasonality fixed effects
+* global controls i.wave D.fsize quarter#l_quarter
+qui eststo, title(age dum):                           reg d_c  $controls ib35.age L.log_a if $sample
+qui eststo, title(age poly):                          reg d_c  $controls age age2 L.log_a if $sample
+global esttab_opts keep(*log_a _cons) ar2 label b(5) se(5) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
+esttab , $esttab_opts title("Depvar: d_c. Kid and Year Controls. $sample")
+
+
+
+****************************************************************************************************
+** Euler equation with LAGGED liquid assets and housing
+****************************************************************************************************
+
 gen housing_wealth_tempt = 1 * (0.9 * house_price - mortgage) if 1 * (0.9 * house_price - mortgage  > 1000)
 sum housing_wealth_tempt, det
 gen log_housing_wealth_tempt = log(housing_wealth_tempt)
 * hist log_housing_wealth_tempt
+
+
+global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 500
+eststo clear 
+global controls i.wave D.fsize
+* global controls i.wave D.fsize quarter#l_quarter
+qui eststo, title(age dum):                           reg d_c  $controls ib35.age L.log_a L.log_housing_wealth_tempt if $sample
+qui eststo, title(age poly):                          reg d_c  $controls age age2 L.log_a L.log_housing_wealth_tempt if $sample
+global esttab_opts keep(*log_* _cons) ar2 label b(5) se(5) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
+esttab , $esttab_opts title("Depvar: d_c. Kid and Year Controls. $sample")
+
+
+* Question: how to account for ppl who extract home equity and convert it to liquid? Then liquid assets will pick up the consumption growth of ppl who give in to temptation
+* Question: is housing wealth more tempting if you have a HELOC?
+* Question: put only housing on the RHS? put only liquid on the RHS? put total wealth on RHS?
+
+
+****************************************************************************************************
+** Add Housing to EE
+****************************************************************************************************
+
 
 cap drop *ctilde*
 replace housing_wealth_tempt  = 0 if housing_wealth_tempt == .

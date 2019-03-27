@@ -42,7 +42,7 @@ sum d_log_consumption d_log_income, det
 
 /* Generate percentiles of the interacted difference by year */ 
 foreach var of varlist d_*_lag {
-	di "`var'"
+	di "Look for jumps in `var'"
 	egen pec_`var'=  xtile(`var'), by(wave) n(`npec') 
 }
 
