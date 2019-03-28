@@ -1,0 +1,43 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{longtable}{l*{4}{c}}
+\caption{PSID Euler Equation (Texas DID with Liquid Assets)}\\
+\toprule\endfirsthead\midrule\endhead\midrule\endfoot\endlastfoot
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
+                    &\multicolumn{1}{c}{age dum}&\multicolumn{1}{c}{age poly}&\multicolumn{1}{c}{age dum}&\multicolumn{1}{c}{age poly}\\
+\midrule
+Log Liquid Assets   &      0.0065\sym{***}&      0.0065\sym{***}&      0.0027         &      0.0027         \\
+                    &    (0.0016)         &    (0.0016)         &    (0.0038)         &    (0.0038)         \\
+\addlinespace
+Treatment (Liq Assets x Post 1999 x Texas)&                     &                     &      0.0050         &      0.0051         \\
+                    &                     &                     &    (0.0178)         &    (0.0178)         \\
+\addlinespace
+Liq Assets x Post 1999&                     &                     &      0.0044         &      0.0043         \\
+                    &                     &                     &    (0.0042)         &    (0.0042)         \\
+\addlinespace
+Liq Assets x Texas  &                     &                     &      0.0004         &      0.0008         \\
+                    &                     &                     &    (0.0160)         &    (0.0160)         \\
+\addlinespace
+Post 1999 x Texas   &                     &                     &     -0.0813         &     -0.0824         \\
+                    &                     &                     &    (0.1682)         &    (0.1681)         \\
+\addlinespace
+Texas               &                     &                     &      0.0438         &      0.0407         \\
+                    &                     &                     &    (0.1516)         &    (0.1514)         \\
+\addlinespace
+Constant            &     -0.0314         &      0.0190         &      0.0016         &      0.0474         \\
+                    &    (0.0223)         &    (0.0553)         &    (0.0391)         &    (0.0624)         \\
+\addlinespace
+Age controls        &         Yes         &         Yes         &         Yes         &         Yes         \\
+\addlinespace
+Year controls       &         Yes         &         Yes         &         Yes         &         Yes         \\
+\addlinespace
+Kids controls       &         Yes         &         Yes         &         Yes         &         Yes         \\
+\midrule
+Adjusted \(R^{2}\)  &       0.034         &       0.035         &       0.034         &       0.035         \\
+Observations        &       26377         &       26377         &       26377         &       26377         \\
+\bottomrule
+\multicolumn{5}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{5}{l}{\footnotesize Sample: Households with liq assets $>$ 500.}\\
+\multicolumn{5}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{longtable}
+}

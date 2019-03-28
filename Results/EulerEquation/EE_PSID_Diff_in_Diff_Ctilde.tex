@@ -1,0 +1,43 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{longtable}{l*{4}{c}}
+\caption{PSID Euler Equation (Texas DID with Ctilde)}\\
+\toprule\endfirsthead\midrule\endhead\midrule\endfoot\endlastfoot
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
+                    &\multicolumn{1}{c}{age dum}&\multicolumn{1}{c}{age poly}&\multicolumn{1}{c}{age dum}&\multicolumn{1}{c}{age poly}\\
+\midrule
+Ctilde              &      0.0045\sym{***}&      0.0045\sym{***}&      0.0033         &      0.0031         \\
+                    &    (0.0016)         &    (0.0015)         &    (0.0037)         &    (0.0037)         \\
+\addlinespace
+Treatment (Ctilde x Post 1999 x Texas)&                     &                     &      0.0282\sym{*}  &      0.0286\sym{*}  \\
+                    &                     &                     &    (0.0168)         &    (0.0168)         \\
+\addlinespace
+Ctilde x Post 1999  &                     &                     &      0.0011         &      0.0013         \\
+                    &                     &                     &    (0.0040)         &    (0.0039)         \\
+\addlinespace
+Ctilde x Texas      &                     &                     &     -0.0160         &     -0.0161         \\
+                    &                     &                     &    (0.0150)         &    (0.0150)         \\
+\addlinespace
+Post 1999 x Texas   &                     &                     &     -0.3282\sym{*}  &     -0.3324\sym{*}  \\
+                    &                     &                     &    (0.1765)         &    (0.1764)         \\
+\addlinespace
+Texas               &                     &                     &      0.2131         &      0.2146         \\
+                    &                     &                     &    (0.1568)         &    (0.1567)         \\
+\addlinespace
+Constant            &     -0.0183         &      0.0384         &     -0.0082         &      0.0466         \\
+                    &    (0.0232)         &    (0.0549)         &    (0.0421)         &    (0.0627)         \\
+\addlinespace
+Age controls        &         Yes         &         Yes         &         Yes         &         Yes         \\
+\addlinespace
+Year controls       &         Yes         &         Yes         &         Yes         &         Yes         \\
+\addlinespace
+Kids controls       &         Yes         &         Yes         &         Yes         &         Yes         \\
+\midrule
+Adjusted \(R^{2}\)  &       0.034         &       0.034         &       0.034         &       0.034         \\
+Observations        &       26377         &       26377         &       26377         &       26377         \\
+\bottomrule
+\multicolumn{5}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{5}{l}{\footnotesize Sample: Households with liq assets $>$ 500. Ctilde is liq assets plus housing up to 90 \% LTV.}\\
+\multicolumn{5}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{longtable}
+}

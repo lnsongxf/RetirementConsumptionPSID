@@ -179,12 +179,12 @@ psid use
 	// # in FU
 	|| fsize
 	// [68]V115 [69]V549 [70]V1238 [71]V1941 [72]V2541 [73]V3094 [74]V3507
-	// [75]V3920 [76]V4435 [77]V5349 [78]V5849 [79]V6461 [80]V7066 [81]V7657
-	// [82]V8351 
-	[83]V8960 [84]V10418 [85]V11605 [86]V13010 [87]V14113 [88]V15129
-	[89]V16630 [90]V18048 [91]V19348 [92]V20650 [93]V22405 [94]ER2006
-	[95]ER5005 [96]ER7005 [97]ER10008 [99]ER13009 [01]ER17012 [03]ER21016
-	[05]ER25016 [07]ER36016 [09]ER42016 [11]ER47316 [13]ER53016 [15]ER60016
+	// [75]V3920 [76]V4435 [77]V5349 [78]V5849 [79]V6461 [80]V7066 [81]V7657 
+	[82]V8351 [83]V8960 [84]V10418 [85]V11605 [86]V13010 [87]V14113
+	[88]V15129 [89]V16630 [90]V18048 [91]V19348 [92]V20650 [93]V22405
+	[94]ER2006 [95]ER5005 [96]ER7005 [97]ER10008 [99]ER13009 [01]ER17012
+	[03]ER21016 [05]ER25016 [07]ER36016 [09]ER42016 [11]ER47316 [13]ER53016
+	[15]ER60016
 
 	// Geographical Region of the 2015 Interview
 	|| region
@@ -346,9 +346,8 @@ psid use
 	// ER24104 Social Security Income of All FU Members
 
 	// [68]V81 [69]V529 [70]V1514 [71]V2226 [72]V2852 [73]V3256 [74]V3676
-	// [75]V4154 [76]V5029 [77]V5626 [78]V6173 [79]V6766 [80]V7412 [81]V8065
-	// [82]V8689 
-	[83]V9375 [84]V11022 [85]V12371 [86]V13623 [87]V14670 [88]V16144
+	// [75]V4154 [76]V5029 [77]V5626 [78]V6173 [79]V6766 [80]V7412 [81]V8065	
+	[82]V8689 [83]V9375 [84]V11022 [85]V12371 [86]V13623 [87]V14670 [88]V16144
 	[89]V17533 [90]V18875 [91]V20175 [92]V21481 [93]V23322 [94]ER4153
 	[95]ER6993 [96]ER9244 [97]ER12079 [99]ER16462 [01]ER20456 [03]ER24099
 	[05]ER28037 [07]ER41027 [09]ER46935 [11]ER52343 [13]ER58152 [15]ER65349
@@ -366,9 +365,8 @@ psid use
 	// business income (ER46808) are NOT included here. All missing data were
 	// assigned.
 	// [68]V74 [69]V514 [70]V1196 [71]V1897 [72]V2498 [73]V3051 [74]V3463
-	// [75]V3863 [76]V5031 [77]V5627 [78]V6174 [79]V6767 [80]V7413 [81]V8066
-	// [82]V8690 
-	[83]V9376 [84]V11023 [85]V12372 [86]V13624 [87]V14671 [88]V16145
+	// [75]V3863 [76]V5031 [77]V5627 [78]V6174 [79]V6767 [80]V7413 [81]V8066	
+	[82]V8690 [83]V9376 [84]V11023 [85]V12372 [86]V13624 [87]V14671 [88]V16145
 	[89]V17534 [90]V18878 [91]V20178 [92]V21484 [93]V23323 [94]ER4140
 	[95]ER6980 [96]ER9231 [97]ER12080 [99]ER16463 [01]ER20443 [03]ER24116
 	[05]ER27931 [07]ER40921 [09]ER46829 [11]ER52237 [13]ER58038 [15]ER65216
@@ -393,8 +391,8 @@ psid use
 	// Head and spouse's transfer income (except social security)
 	|| inc_transfer
 	// [70]V1220 [71]V1922 [72]V2523 [73]V3076 [74]V3488 [75]V3889 [76]V4404
-	// [77]V5316 [78]V5815 [79]V6426 [80]V7016 [81]V7608 [82]V8301 
-	[83]V8909 [84]V10305 [85]V11461 [86]V12868 [87]V13970 [88]V14985
+	// [77]V5316 [78]V5815 [79]V6426 [80]V7016 [81]V7608 
+	[82]V8301 [83]V8909 [84]V10305 [85]V11461 [86]V12868 [87]V13970 [88]V14985
 	[89]V16485 [90]V17901 [91]V19201 [92]V20501 [93]V22366 [94]ER4147
 	[95]ER6987 [96]ER9238 [97]ER12071 [99]ER16454 [01]ER20450 [03]ER24101
 	[05]ER28002 [07]ER40992 [09]ER46900 [11]ER52308 [13]ER58117 [15]ER65314
@@ -1422,16 +1420,17 @@ tab wave looksgood if wave >= 1999
 
 gen dif_food = foodexpenditure_post1993 - foodexpenditure if looksgood == "bad"
 sum dif_food
+drop dif_food
 
 * Food expenditure has 3 different periods: pre 1993, 1993 to 1999, and 1999 onward
 replace foodexpenditure = foodexpenditure_post1993 if wave >= 1993 & wave < 1999
 replace foodexpenditure = foodexpenditure_early    if wave < 1993
+lab var foodexpenditure "Food Expenditure (Excluding Food Stamps)"
 
 replace foodawayfromhomeexpenditure = foodaway_computed if wave > 1993 & wave < 1999
 replace foodawayfromhomeexpenditure = foodaway_early if wave <= 1993
 
 * TODO: if we want to use foodathome pre 1999, will still have to collect info on foodathome coming from food stamps
-
 
 
 * TODO: am i right in thinking that foodawayfromhome includes foodstamps? whereas food expenditure does not include foodstamps?

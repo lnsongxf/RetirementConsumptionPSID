@@ -5,7 +5,7 @@
 set more off
 graph close
 set autotabgraphs on
-pause on 
+pause on
 
 global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 global folder_output "$folder\Results\EulerEquation"
@@ -36,9 +36,9 @@ if $use_longer_panel == 1 {
 * ...
 *   keep if fake wave != .
 *   xtset pid fake_wave
-
+tab wave
 keep if wave == 1982 | wave == 1984 | wave == 1992 | wave == 1994 | wave == 1997 | wave > 1998
-replace wave = wave - 1 if wave < 1994
+replace wave = wave - 1 if wave <= 1994
 }
 
 cap mkdir "$folder/Results/Aux_Model_Estimates/AuxModelLatex/"
@@ -78,9 +78,11 @@ global EE_Food_Consumption 0
 
 * Sample selection: households with same husband-wife over time
 qui do "$folder\Do\Sample-Selection.do"
+tab wave
 
 * Generate aggregate consumption (following Blundell et al)
 qui do "$folder\Do\Consumption-Measures.do"
+tab wave
 
 * Todo: try before or after sample selection
 
@@ -102,6 +104,7 @@ drop if fam_wealth_real - L.fam_wealth_real > 100 * inc_fam_real & fam_wealth !=
 
 * Find first home purcahses (two alternative definitions)
 qui do "$folder\Do\Housing\Find-First-Home-Purchase.do"
+tab wave
 
 ****************************************************************************************************
 ** Find housing upgrades/downgrades (owner to owner transitions)
@@ -316,11 +319,38 @@ local control_vars age age2 age3 bought
 ** Drop renters with home equity
 ****************************************************************************************************
 
-drop if housing == 0 & housing_wealth != 0
+drop if housing == 0 & housing_wealth != 0 & housing_wealth != . // renters who have non zero housing wealth -- weird 
 drop if housing == 0 & mortgage != 0 // no such people anyway :)
 
 /*sum housing_wealth if housing == 1
 sum housing_wealth if housing == 0*/
+
+****************************************************************************************************
+** ALTERNATIVE: Try euler equation with food consumption
+****************************************************************************************************
+
+if $EE_Food_Consumption | $use_longer_panel {
+    drop consumption log_consumption
+    
+    * gen consumption = foodawayfromhomeexpenditure // TODO: should the 1993-1999 data include foodstamps????
+    * gen consumption = foodathomeexpenditure // TODO: if we want to use foodathome pre 1999, will still have to collect info on foodathome coming from food stamps
+    * gen consumption = foodathomeexpenditure + foodawayfromhomeexpenditure + foodstamp // I think this is wrong because it seems foodathomeexpenditure and foodawayfromhomeexpenditure both already include foodstamps. But not totally sure
+
+    egen consumption   = rowtotal(foodexpenditure foodstamp), missing
+    lab var consumption "Food Expenditure"
+
+    sum consumption, det
+    replace consumption = . if consumption < 100 // drop bottom percentile
+    sum consumption, det
+    
+    gen log_consumption = log(consumption)
+}
+
+* TODO: why have we dropped so many observations in the first wave(s)?
+* aka 1982 1991 and 1997? Seems like we drop lots if there's no lagged term
+tab wave
+
+pause
 
 ****************************************************************************************************
 ** Generate variables
@@ -332,14 +362,19 @@ do "$folder\Do\Scripts\Extra-Sample-Selection.do"
 replace consumption     = . if consumption == 0 | L.consumption == 0
 replace log_consumption = . if consumption == 0 | L.consumption == 0 // this changes nothing because we've already dropped such people
 
+pause
+
+* TODO 
+* WAIT, WHATS THE POINT OF THIS? We've already defined log_consumption by now.
 * Drop bottom 1% of consumption (it's a bit weird for households to have consumption < 2,000)
 * Meanwhile we have one household that consumes 500k
 sum consumption, det
 xtile p_c = consumption, nquantiles(100)
 drop if p_c == 1 
 drop p_c
-* drop if consumption < 1000
 sum consumption, det
+
+pause 
 
 gen y     = log_income 
 gen d_y   = D.y
@@ -349,25 +384,6 @@ gen a     = liq_wealth
 
 lab var log_a "Log Liquid Assets"
 lab var a "Liquid Assets"
-
-****************************************************************************************************
-** ALTERNATIVE: Try euler equation with food consumption
-****************************************************************************************************
-
-if $EE_Food_Consumption {
-    drop d_c consumption log_consumption
-    
-    * gen consumption = foodawayfromhomeexpenditure
-    * gen consumption = foodathomeexpenditure
-    gen consumption = foodathomeexpenditure + foodawayfromhomeexpenditure + foodstamp
-    
-    sum consumption, det
-    replace consumption = . if consumption < 1000
-    sum consumption, det
-    
-    gen log_consumption = log(consumption)
-    gen d_c = D.log_consumption
-}
 
 ****************************************************************************************************
 ** Consumption Euler Equation -- first look
@@ -416,6 +432,7 @@ drop if p_d_c == 1 | p_d_c == 100 // results seem robust to doing this... magnit
 * drop if p_d_c <= 5 | p_d_c >= 95 // much better IV results from this
 * drop if p_d_c <= 10 | p_d_c >= 90 
 sum d_c, det
+pause
 
 
 * TODO: should we drop those with 700% change in income?
@@ -439,32 +456,56 @@ sum d_c, det
 
 * Look into data quality
 if $use_longer_panel == 1 {
+  * TODO
   preserve
-  collapse liq_wealth housing_wealth house_price mortgage , by(wave)
-  scatter mor wave
-  scatter house_p wave
-  list
+    collapse liq_wealth housing_wealth house_price mortgage , by(wave)
+    scatter mor wave
+    scatter house_p wave
+    list
   restore
 }
 
 * Note that lagged liquid assets will not work back in 1980s or early 1990s
 
 if $use_longer_panel == 1 {
+  gen lag_consumption = L.consumption
+  missings report d_c consumption lag_consumption liq_wealth age log_a wave if wave == 1983 | wave == 1994
+  count  if wave == 1983 | wave == 1994
+
+
+}
+
+if $use_longer_panel == 1 {
 
   * Note have to remove log liq a
   global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 
+
+  * TODO: this suggests we might be dropping too many in the early waves
+  qui reg d_c  $controls ib35.age log_a if $sample
+  gen in_sample = e(sample)
+  tab wave in_sample
+  tab wave in_sample , row nofreq
+  drop in_sample
+
+  * NOTE: the IVS wont work for historic data
 
   eststo clear 
   global controls
   qui eststo, title(age dum):                           reg d_c  $controls ib35.age log_a if $sample
   qui eststo, title(age poly):                          reg d_c  $controls age age2 log_a if $sample
-  qui eststo, title(IV L.a):                 ivregress 2sls d_c  $controls ib35.age (log_a = L.log_a) if $sample, first
-  qui eststo, title(IV a y b s):             ivregress 2sls d_c  $controls ib35.age (log_a = L.(log_a y log_bank_account_wealth log_stock_wealth) ) if $sample, first
-  qui eststo, title(IV a y b L2.c):          ivregress 2sls d_c  $controls ib35.age (log_a = L(1 2).(log_a y log_bank_account_wealth) L2.log_consumption) if $sample, first
-  qui eststo, title(IV a y b s L2.c):        ivregress 2sls d_c  $controls ib35.age (log_a = L(1 2).(log_a y log_bank_account_wealth log_stock) L2.log_consumption) if $sample, first
-  global esttabopts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate(Age controls = *age*) star(* 0.10 ** 0.05 *** 0.01)
-  esttab , $esttabopts title("Depvar: d_c. $sample")
+  global controls i.wave D.fsize
+  qui eststo, title(age dum):                           reg d_c  $controls ib35.age log_a if $sample
+  qui eststo, title(age poly):                          reg d_c  $controls age age2 log_a if $sample
+  
+  gen in_sample = e(sample)
+  tab wave in_s
+  drop in_sample
 
+  global esttabopts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
+  esttab , $esttabopts title("Depvar: Change in Food Expenditure. $sample")
+  esttab using "$folder_output\EE_PSID_Food_Expenditure_Longer_Sample.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation (Food Expenditure - Longer Sample)") addnotes("Sample: Households with liq assets $>$ 500 at time t, ages 25 to 60, not moving homes that year")
+
+  pause
 }
 
 
@@ -685,7 +726,6 @@ if $write_tex {
 esttab using "$folder_output\EE_PSID_Lagged_Liquid_Assets_Full.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation (Log Lagged Assets)") addnotes("Sample: Households with liq assets $>$ 500 at time t and t-1, ages 25 to 60, not moving homes that year")
 }
 
-pause
 
 ****************************************************************************************************
 ** Euler equation with LAGGED liquid assets and housing
@@ -744,7 +784,29 @@ esttab using "$folder_output\EE_PSID_Ctilde.tex", $esttabopts longtable booktabs
 
 gen post_1999 = wave >= 1999
 
+****************************************************************************************************
+** Texas Diff in Diff using log ctilde
+****************************************************************************************************
+
 if $use_longer_panel == 1 {
+
+  * Generate variables needed for diff in diff
+  gen treatment = post_1999 * texas
+
+  gen ctilde_post_1999 = log_ctilde * post_1999
+  gen ctilde_texas     = log_ctilde * texas
+  gen ctilde_treatment = log_ctilde * treatment
+
+  lab var log_ctilde "Ctilde"
+  lab var ctilde_treatment "Treatment (Ctilde x Post 1999 x Texas)"
+  lab var ctilde_post_1999 "Ctilde x Post 1999"
+  lab var ctilde_texas "Ctilde x Texas"
+  lab var treatment "Post 1999 x Texas" 
+  lab var texas "Texas"
+
+  * we can exclude post_1999 because we've got the year fixed effects
+  global diff_in_diff log_ctilde ctilde_treatment ctilde_post_1999 ctilde_texas treatment texas  
+  reg d_c $diff_in_diff
 
   * Remove lagged a requirement
   * Also note that IVs based on assets will not work here
@@ -757,14 +819,68 @@ if $use_longer_panel == 1 {
   qui eststo, title(age dum):                           reg d_c  $controls ib35.age  log_ctilde if $sample
   qui eststo, title(age poly):                          reg d_c  $controls age age2  log_ctilde if $sample
 
-  qui eststo, title(age dum):                           reg d_c  $controls ib35.age  c.log_ctilde##i.post_1999#i.texas if $sample
-  qui eststo, title(age poly):                          reg d_c  $controls age age2  c.log_ctilde##i.post_1999#i.texas if $sample
+  qui eststo, title(age dum):                           reg d_c  $controls ib35.age $diff_in_diff if $sample
+  qui eststo, title(age poly):                          reg d_c  $controls age age2 $diff_in_diff if $sample
 
-  global esttabopts keep( *ctilde* *texas* *post* _cons) ar2 label b(4) se(4) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
-  esttab , $esttabopts title("Depvar: d_c. Kid and Year Controls. $sample")
+  cap drop in_sample
+  gen in_sample = e(sample)
+  tab wave in_s
+
+  global esttabopts keep( *ctilde* *texas* *post* *treat* _cons) ar2 label b(4) se(4) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
+  esttab , $esttabopts title("Depvar: Change in Food Expenditure. Kid and Year Controls. $sample")
+  esttab using "$folder_output\EE_PSID_Diff_in_Diff_Ctilde.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation (Texas DID with Ctilde)") addnotes("Sample: Households with liq assets $>$ 500. Ctilde is liq assets plus housing up to 90 \% LTV.")
+
+  * Summary stats about d_c
+  * todo: look at mean d_y too
+  table wave if in_sample, c(mean d_c median d_c sd d_c ) by(texas) format(%9.2fc) center row col
+  table wave if in_sample, c(n d_c mean ctilde mean liq_wealth) by(texas) format(%9.0fc) center row col
+  * TODO: how to export to latex?
+}
+
+****************************************************************************************************
+** Texas Diff in Diff using log liq assets -- PLEEEEASE NO EFFECT
+****************************************************************************************************
+
+if $use_longer_panel == 1 {
+
+  gen log_a_post_1999 = log_a * post_1999
+  gen log_a_texas     = log_a * texas
+  gen log_a_treatment = log_a * treatment
+
+  * we can exclude post_1999 because we've got the year fixed effects
+  global diff_in_diff log_a log_a_treatment log_a_post_1999 log_a_texas treatment texas 
+
+  lab var log_a_treatment "Treatment (Liq Assets x Post 1999 x Texas)"
+  lab var log_a_post_1999 "Liq Assets x Post 1999"
+  lab var log_a_texas "Liq Assets x Texas"
+  lab var treatment "Post 1999 x Texas" 
+  lab var texas "Texas"
+
+  * Remove lagged a requirement
+  * Also note that IVs based on assets will not work here
+
+  * NOTE: have to clean up code a bit to make sure we can get here : ie to make sure we construct all the needed variables for ctilde
+
+  global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & log_a > 2.5
+  eststo clear 
+  global controls i.wave D.fsize
+  qui eststo, title(age dum):                           reg d_c  $controls ib35.age  log_a if $sample
+  qui eststo, title(age poly):                          reg d_c  $controls age age2  log_a if $sample
+
+  qui eststo, title(age dum):                           reg d_c  $controls ib35.age $diff_in_diff if $sample
+  qui eststo, title(age poly):                          reg d_c  $controls age age2 $diff_in_diff if $sample
+
+  cap drop in_sample
+  gen in_sample = e(sample)
+  tab wave in_s
+
+  global esttabopts keep( *log_a* *texas* *post* *treat* _cons) ar2 label b(4) se(4) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
+  esttab , $esttabopts title("Depvar: Change in Food Expenditure. Kid and Year Controls. $sample")
+  esttab using "$folder_output\EE_PSID_Diff_in_Diff_Liquid_Assets.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation (Texas DID with Liquid Assets)") addnotes("Sample: Households with liq assets $>$ 500.")
 
 
 }
+
 
 asdfsdf
 

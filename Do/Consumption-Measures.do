@@ -2,10 +2,20 @@
 ** Merge in CPI
 ****************************************************************************************************
 
+* This is a work around for when we're running the euler equation using historic data. We want to have the old data at a two year frequency that matches the more recent data
+* But we need to ignore this when merging in CPI 
+if $use_longer_panel == 1 {
+	replace wave = wave + 1 if wave <= 1994
+}
+
 gen year = wave - 1 // note that expenditure data is for year prior to interview
 merge m:1 year using "$folder/Data/Intermediate/CPI.dta"
 drop if _m == 2
 drop year _m
+
+if $use_longer_panel == 1 {
+	replace wave = wave - 1 if wave <= 1994
+}
 
 ****************************************************************************************************
 ** Generate aggregate consumption (following Blundell et al)
@@ -336,11 +346,6 @@ edit pid wave transportationexpenditure vehicleloanexpenditure vehicledpexpendit
 * Can see base year in xlsx file with CPI data
 * (do not add/subtract real series without accounting for this)
 replace gasolineexpenditure         = 100 * gasolineexpenditure / CPI_gasoline
-replace foodexpenditure             = 100 * foodexpenditure / CPI_food
-replace foodstamp                   = 100 * foodstamp / CPI_food
-replace foodathomeexpenditure       = 100 * foodathomeexpenditure / CPI_foodathome
-replace foodawayfromhomeexpenditure = 100 * foodawayfromhomeexpenditure / CPI_foodawayfromhome
-replace fooddeliveredexpenditure    = 100 * fooddeliveredexpenditure / CPI_food
 replace transportationexpenditure   = 100 * transportationexpenditure / CPI_transportation
 replace transportation_blundell     = 100 * transportation_blundell / CPI_transportation
 replace healthcareexpenditure       = 100 * healthcareexpenditure / CPI_health
@@ -348,6 +353,23 @@ replace healthinsuranceexpenditure  = 100 * healthinsuranceexpenditure / CPI_hea
 replace healthservicesexpenditure   = 100 * healthservicesexpenditure / CPI_health
 replace clothingexpenditure         = 100 * clothingexpenditure / CPI_apparel
 replace recreationexpenditure       = 100 * recreationexpenditure / CPI_recreation
+
+if $use_longer_panel == 0 {
+	replace foodexpenditure             = 100 * foodexpenditure / CPI_food
+	replace foodstamp                   = 100 * foodstamp / CPI_food
+	replace foodathomeexpenditure       = 100 * foodathomeexpenditure / CPI_foodathome
+	replace foodawayfromhomeexpenditure = 100 * foodawayfromhomeexpenditure / CPI_foodawayfromhome
+	replace fooddeliveredexpenditure    = 100 * fooddeliveredexpenditure / CPI_food
+}
+
+if $use_longer_panel == 1 {
+	* TODO: might be good to use CPI_food: will just have to update CPI food back to 1981
+	replace foodexpenditure             = 100 * foodexpenditure / CPI_all_base_2015
+	replace foodstamp                   = 100 * foodstamp / CPI_all_base_2015
+	replace foodathomeexpenditure       = 100 * foodathomeexpenditure / CPI_all_base_2015
+	replace foodawayfromhomeexpenditure = 100 * foodawayfromhomeexpenditure / CPI_all_base_2015
+	replace fooddeliveredexpenditure    = 100 * fooddeliveredexpenditure / CPI_all_base_2015
+}
 
 * Convert to 2015 real dollars
 gen expenditure_exH_real_2015       = 100 * expenditure_blundell_exhous / CPI_all_base_2015

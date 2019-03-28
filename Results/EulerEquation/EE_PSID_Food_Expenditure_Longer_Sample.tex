@@ -1,0 +1,28 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{longtable}{l*{4}{c}}
+\caption{PSID Euler Equation (Food Expenditure - Longer Sample)}\\
+\toprule\endfirsthead\midrule\endhead\midrule\endfoot\endlastfoot
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
+                    &\multicolumn{1}{c}{age dum}&\multicolumn{1}{c}{age poly}&\multicolumn{1}{c}{age dum}&\multicolumn{1}{c}{age poly}\\
+\midrule
+Log Liquid Assets   &     0.00739\sym{***}&     0.00746\sym{***}&     0.00652\sym{***}&     0.00654\sym{***}\\
+                    &   (0.00165)         &   (0.00164)         &   (0.00163)         &   (0.00163)         \\
+\addlinespace
+Constant            &    -0.00269         &     0.18443\sym{***}&    -0.03143         &     0.01899         \\
+                    &   (0.02108)         &   (0.05535)         &   (0.02234)         &   (0.05533)         \\
+\addlinespace
+Age controls        &         Yes         &         Yes         &         Yes         &         Yes         \\
+\addlinespace
+Year controls       &          No         &          No         &         Yes         &         Yes         \\
+\addlinespace
+Kids controls       &          No         &          No         &         Yes         &         Yes         \\
+\midrule
+Adjusted \(R^{2}\)  &       0.009         &       0.009         &       0.034         &       0.035         \\
+Observations        &       26460         &       26460         &       26377         &       26377         \\
+\bottomrule
+\multicolumn{5}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{5}{l}{\footnotesize Sample: Households with liq assets $>$ 500 at time t, ages 25 to 60, not moving homes that year}\\
+\multicolumn{5}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{longtable}
+}
