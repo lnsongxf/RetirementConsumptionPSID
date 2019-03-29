@@ -900,6 +900,43 @@ psid use
 	[95]ER5031 [96]ER7031 [97]ER10035 [99]ER13040 [01]ER17043 [03]ER21042
 	[05]ER25028 [07]ER36028 [09]ER42029 [11]ER47329 [13]ER53029 [15]ER60030
 
+	// B8. Do you have a mortgage on this property?
+	|| have_mortgage
+	// [68]V104 [69]V594 [70]V1265 [71]V1968 [72]V2567 [79]V6480 [80]V7085 [81]V7676 
+	[83]V8975 [84]V10438 [85]V11619 [86]V13024 [87]V14127 [88]V15141
+	[89]V16642 [90]V18073 [91]V19373 [92]V20673 [93]V22428 [94]ER2036
+	[95]ER5035 [96]ER7035 [97]ER10039 [99]ER13044 [01]ER17049 [03]ER21048
+	[05]ER25039 [07]ER36039 [09]ER42040 [11]ER47345 [13]ER53045 [15]ER60046
+	// [17]ER66048
+	// 1 	Yes
+	// 5 	No
+	// 9 	NA; DK
+	// 0 	Inap. (ie if not homeowner)
+
+	// B12. Do you also have a second mortgage?
+	|| have_second_mortgage
+	// [69]V595 [70]V1266 [71]V1971 [72]V2570 [79]V6482 [80]V7087 [81]V7678
+	[83]V8977 [84]V10440 [85]V11621 [86]V13026 [87]V14129 [88]V15142
+	[89]V16643 [90]V18075 [91]V19375 [92]V20675 [93]V22430 [94]ER2045
+	[95]ER5044 [96]ER7110 [97]ER10056 [99]ER13053 [01]ER17060 [03]ER21059
+	[05]ER25050 [07]ER36051 [09]ER42059 [11]ER47366 [13]ER53066 [15]ER60067
+	// [17]ER66069
+	// 1 	Yes
+	// 5 	No
+	// 9 	NA; DK
+
+	// About how many more years will you have to pay on it? The values for
+	// this variable in the range 01-97 represent the number of years left on
+	// the longest-term mortgage that the FU has. Note that missing data are
+	// allowed.
+	|| years_remaining_on_mortgage
+	// [79]V6481 [80]V7086 [81]V7677 
+	[83]V8976 [84]V10439 [85]V11620 [86]V13025
+	[87]V14128 [90]V18074 [91]V19374 [92]V20674 [93]V22429 [94]ER2043
+	[95]ER5042 [96]ER7054 [97]ER10054 [99]ER13052 [01]ER17059 [03]ER21058
+	[05]ER25049 [07]ER36050 [09]ER42051 [11]ER47358 [13]ER53058 [15]ER60059
+	// [17]ER66061
+
 	// TYPE MORTGAGE MOR 1
 	|| type_mortgage1
 	// A23a. Is that a mortgage, a land contract, a home equity loan, or what?
@@ -926,6 +963,12 @@ psid use
 	[92]V20326 [93]V21612 [94]ER2037 [95]ER5036 [96]ER7042 [97]ER10044
 	[99]ER13047 [01]ER17052 [03]ER21051 [05]ER25042 [07]ER36042 [09]ER42043
 	[11]ER47348 [13]ER53048 [15]ER60049
+	// Note a slight change in definition for this variable:
+	// 1983: The values for this variable in the range 000001-999998 represent
+	// the principal currently owed from all mortgages or land contracts on
+	// the home in whole dollars; all missing data were assigned.
+	// 2015: The values for this variable represent the principal currently
+	// owed on the first mortgage, land contract, or loan, in whole dollars.
 
 	// REM PRINCIPAL MOR 2
 	|| mortgage2
@@ -1450,6 +1493,7 @@ summ *
 replace inc_fam = .      if inc_fam >= 9999998
 replace inc_head = .     if inc_head >= 9999998
 replace inc_transfer = . if inc_transfer >= 9999998
+replace years_remaining_on_mortgage = . if years_remaining_on_mortgage == 99
 
 ****************************************************************************************************
 ** Count kids by age in each household (needed for Aguiar and Hurst regressions)
