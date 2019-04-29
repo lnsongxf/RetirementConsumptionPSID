@@ -34,7 +34,6 @@ global house_price_by_age 0 // plot distribution of house price by age?
 global compute_htm_persistence 0
 global makeplots 0
 
-
 cap net install xtserial.pkg
 
 * TODO: add in mortgage debt vs house value

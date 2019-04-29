@@ -8,6 +8,8 @@ clear all
  global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 * global folder "/Users/bibekbasnet/Documents/GitHub/RetirementConsumptionPSID"
 
+* Note: theres a chance the panel will change slightly, as the data directory now contains ind2017er.dta in addition to ind2015er.dta
+
 ****************************************************************************************************
 ** Convert year level zip files to dta files
 ****************************************************************************************************

@@ -1,0 +1,47 @@
+drop top 5% by income
+
+
+* Sample selection: households with same husband-wife over time
+qui do "$folder\Do\Sample-Selection.do"
+
+* Generate aggregate consumption (following Blundell et al)
+qui do "$folder\Do\Consumption-Measures.do"
+
+
+consumption includes 70% according to ....
+
+time consistent households
+
+
+which sample? SEO? Nah I think we use the full sample
+
+
+
+
+
+We estimate the model using the 1999-2015 Panel Study of Income Dynamics (PSID). While the PSID has been collecting information on income and demographics ever since the study began in 1968, the survey received a large overhaul in 1999 when they added detailed questions on asset holdings and consumption expenditure. We therefore focus our analysis on the modern PSID, which to the best of our knowledge is the only large scale U.S. panel to contain information on income, consumption, and wealth accumulation.
+
+For our baseline specification we focus on households with a head between 22 and 65 years old, and with non missing information on key demographics such as age, education, and state. We do not select our sample based on the working status of the household head or spouse. To reduce the influence of measurement error, we drop observations with extremely high income or assets, for instance, observations with total net worth higher than 20M$, following the criteria of Blundell, Pistaferri, and Saporta-Eksten (2016). In addition, whenever there is a change in family composition we drop that observation and and treat the household as a new unit starting with the subsequent observation. We include the full sample of households surveyed in the PSID, which purposefully includes an oversample of low-income families in the Survey of Economic Opportunity (SEO) sample. Therefore the share of homeowners with low liquid assets is higher in our sample than in the Survey of Consumer Finances.
+
+We compute real nondurable consumption following the classification in Blundell, Pistaferri, and Saporta-Eksten (2016). Prior to 1999, the PSID collected data on very few components of consumption, namely food, rent, and child care. The coverage was greatly increased starting in 1999 to include many other components of nondurable consumption and services including transportation, utilities, gasoline, car maintenance, health expenditures, education, and child care. In total, this allows the PSID to cover approximately 70 percent of consumption expenditure on nondurable goods and services. While additional categories such as clothing and entertainment were added to the survey in 2005, we exclude these categories to keep the consumption series consistent over time. 
+
+
+
+Question: do we include any of the other categories?
+
+We include:
+* SRC sample families have 1968 ID values less than 3000.
+* Immigrant sample families have 1968 ID values greater than 3000 and less than 5000.
+* SEO sample families have 1968 ID values greater than 5000 and less than 7000.
+* Latino sample families have values greater than 7000 and less than 9309.
+
+	
+
+
+
+
+
+%Possible Todos:
+%-description of how we measure wealth
+%-double check that we use the full sample (ie SRC vs SEO vs immigrant vs latino)
+%-who can we cite about the 70\% statistic?
