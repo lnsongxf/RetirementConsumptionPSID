@@ -5,11 +5,12 @@
 set more off
 graph close
 set autotabgraphs on
-pause on
+pause off
 
 global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 global folder_output "$folder\Results\EulerEquation"
-global use_longer_panel 1
+global folder_output_presentation "C:\Users\pedm\Documents\GitHub\HousingAndCommitment\Graphs\Presentation_Graphs\Feb2019_Results"
+global use_longer_panel 0
 global write_tex 0
 
 if $use_longer_panel == 0 {
@@ -350,8 +351,6 @@ if $EE_Food_Consumption | $use_longer_panel {
 * aka 1982 1991 and 1997? Seems like we drop lots if there's no lagged term
 tab wave
 
-pause
-
 ****************************************************************************************************
 ** Generate variables
 ****************************************************************************************************
@@ -361,8 +360,6 @@ do "$folder\Do\Scripts\Extra-Sample-Selection.do"
 
 replace consumption     = . if consumption == 0 | L.consumption == 0
 replace log_consumption = . if consumption == 0 | L.consumption == 0 // this changes nothing because we've already dropped such people
-
-pause
 
 * TODO 
 * WAIT, WHATS THE POINT OF THIS? We've already defined log_consumption by now.
@@ -590,10 +587,112 @@ qui eststo, title(IV a y b s L2.c):        ivregress 2sls d_c  $controls ib35.ag
 global esttabopts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
 esttab , $esttabopts title("Depvar: d_c. Kid and Year Controls. $sample")
 if $write_tex {
-esttab using "$folder_output\EE_PSID_Control_for_kids_and_year.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation (More Controls)") addnotes("Sample: Households with liq assets $>$ 500 at time t and t-1, ages 25 to 60, not moving homes that year.")
+esttab using "$folder_output\EE_PSID_Control_for_kids_and_year.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation (More Controls)") addnotes("Sample: Households with liq assets $>$ 500 at time t, ages 25 to 60, not moving homes that year.")
 esttab using "$folder_output\EE_PSID_Control_for_kids_and_year.csv", $esttabopts csv obslast replace
 }
 
+* Taha suggestion: what about heterogeneity in beta? Try with fixed effect
+* OLS: Good news! Get same results with indiv-level fixed effect
+xtreg d_c $controls age age2 log_a if $sample, fe
+
+* OLS with lagged assets: Bad news. Loses significance
+xtreg d_c $controls age age2 L.log_a if $sample, fe
+
+* IV with liq assets: bad news. loses significance
+xtivreg d_c $controls ib35.age (log_a = L.(log_a y log_bank_account_wealth log_stock_wealth) ) if $sample, fe
+xtivreg d_c $controls ib35.age (log_a = L(1 2).(log_a y log_bank_account_wealth log_stock) L2.log_consumption) if $sample, fe
+
+
+* OR try fixed effects with IV reg
+* it's a bit more complicated
+* https://www.stata.com/support/faqs/statistics/fixed-effects-regression/
+* gen d_fsize = D.fsize
+
+* gen l_log_a = L.log_a
+* gen l_y = L.y 
+* gen l_log_bank_account_wealth = L.log_bank_account_wealth
+* gen l_log_stock_wealth = L.log_stock_wealth
+
+* xi i.wave
+* xtdata d_c log_a l_log_a l_y l_log_bank_account_wealth l_log_stock_wealth if $sample, i(pid) fe clear
+* ivreg d_c (log_a = l_log_a l_y l_log_bank_account_wealth l_log_stock_wealth )
+
+
+pause
+
+*******************************************************************************************************
+** Publication Quality
+*******************************************************************************************************
+** Now same thing but clean it up a bit for my presentation slides
+eststo clear 
+global controls i.wave D.fsize
+* global controls i.wave D.fsize quarter#l_quarter
+qui eststo, title(OLS):                           reg d_c  $controls ib35.age log_a if $sample
+qui eststo, title(IV1):                 ivregress 2sls d_c  $controls ib35.age (log_a = L.log_a) if $sample, first
+qui eststo, title(IV2):          ivregress 2sls d_c  $controls ib35.age (log_a = L(1 2).(log_a y log_bank_account_wealth) L2.log_consumption) if $sample, first
+global esttabopts keep(log_a _cons) ar2 label b(4) se(4) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
+esttab , $esttabopts title("Depvar: d_c. Kid and Year Controls. $sample")
+if $write_tex == 1 & $use_longer_panel == 0 {
+  *  IV1 includes lagged assets and income as instruments. IV2 includes assets, income, bank balances, and the second lag of consumption as instruments.
+  esttab using "$folder_output_presentation\EE_PSID_Full_Controls.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation") addnotes("Sample: Households with liq assets $>$ 500 at time t, ages 25 to 60," "not moving homes that year.")
+}
+
+// Aux Model
+// Get VCV of coefs - to use in estimation
+global sample a > 1000 & a < 50000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 // a> 500 & L.a > 500 & a < 500000
+// reg d_c  $controls log_a age age2 if $sample
+// mat list e(V)
+reg d_c  log_a age age2 if $sample
+mat list e(V)
+
+
+* 
+* Non parameteric regression - SUPER slow! but looks great!!!!
+// Previously we were using this -- not good for comparison
+// global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 500
+
+global sample a > 1000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 // a> 500 & L.a > 500 & a < 500000
+
+
+gen L_log_a = L.log_a
+npregress kernel d_c L_log_a age age2 if $sample //, vce(bootstrap, reps(100) seed(123))
+margins, at(L_log_a = (6.214608098 6.907755279 8.006367568 8.517193191 9.210340372 9.903487553 10.30895266 10.59663473 10.81977828 11.51292546 11.91839057 12.20607265 12.4292162 12.61153775 12.76568843 12.89921983 ))
+
+beep
+beep
+beep
+beep
+beep
+
+npregress kernel d_c log_a age age2 if $sample, vce(bootstrap, reps(100) seed(123))
+// margins, at(log_a=( 5 6 7 8 9 10 11 12 13 14 ))
+margins, at(log_a = (6.214608098 6.907755279 8.006367568 8.517193191 9.210340372 9.903487553 10.30895266 10.59663473 10.81977828 11.51292546 11.91839057 12.20607265 12.4292162 12.61153775 12.76568843 12.89921983 ))
+
+beep
+
+sdfdsf
+*******************************************************************************************************
+* Now play around with removing the L.a > 1000 restriction
+* OLS results still work really well. IV stops being significant
+* IV2 becomes significant once I add HtM to the list of IVs
+
+global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 100
+
+eststo clear 
+global controls i.wave D.fsize
+* global controls i.wave D.fsize quarter#l_quarter
+qui eststo, title(age dum):                           reg d_c  $controls ib35.age log_a if $sample
+qui eststo, title(age poly):                          reg d_c  $controls age age2 log_a if $sample
+qui eststo, title(IV L.a):                 ivregress 2sls d_c  $controls ib35.age (log_a = L.(log_a HtM )) if $sample, first
+qui eststo, title(IV a y b s):             ivregress 2sls d_c  $controls ib35.age (log_a = L.(log_a y log_bank_account_wealth log_stock_wealth HtM ) ) if $sample, first
+qui eststo, title(IV a y b L2.c):          ivregress 2sls d_c  $controls ib35.age (log_a = L(1 2).(log_a y log_bank_account_wealth HtM ) L2.log_consumption) if $sample, first
+qui eststo, title(IV a y b s L2.c):        ivregress 2sls d_c  $controls ib35.age (log_a = L(1 2).(log_a y log_bank_account_wealth log_stock HtM ) L2.log_consumption) if $sample, first
+global esttabopts keep(log_a _cons) ar2 label b(5) se(5) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*") star(* 0.10 ** 0.05 *** 0.01)
+esttab , $esttabopts title("Depvar: d_c. Play around with removing L.a > 1000 restriction. $sample")
+
+pause
+
+*******************************************************************************************************
 * Maybe no longer true - Looking at bank account wealth makes nicer IV results!
 * IV results also work for texas!
 * global sample a > 1000 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 1000
@@ -831,14 +930,16 @@ if $use_longer_panel == 1 {
   esttab using "$folder_output\EE_PSID_Diff_in_Diff_Ctilde.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation (Texas DID with Ctilde)") addnotes("Sample: Households with liq assets $>$ 500. Ctilde is liq assets plus housing up to 90 \% LTV.")
 
   * Summary stats about d_c
-  * todo: look at mean d_y too
-  table wave if in_sample, c(mean d_c median d_c sd d_c ) by(texas) format(%9.2fc) center row col
-  table wave if in_sample, c(n d_c mean ctilde mean liq_wealth) by(texas) format(%9.0fc) center row col
+  table wave if in_sample, c(mean d_c mean d_y median d_c sd d_c ) by(texas) format(%9.2fc) center row col
+  table wave if in_sample, c(n d_c mean ctilde mean net_wealth mean liq_wealth mean mortgage) by(texas) format(%9.0fc) center row col
   * TODO: how to export to latex?
+
+  corr net_wealth liq_wealth     if $sample
+  corr housing_wealth liq_wealth if $sample
 }
 
 ****************************************************************************************************
-** Texas Diff in Diff using log liq assets -- PLEEEEASE NO EFFECT
+** Texas Diff in Diff using log liq assets
 ****************************************************************************************************
 
 if $use_longer_panel == 1 {
@@ -881,8 +982,50 @@ if $use_longer_panel == 1 {
 
 }
 
+****************************************************************************************************
+** Texas Diff in Diff on mortgage balances
+** should also account for homeowners who do not have a mortgage
+****************************************************************************************************
+
+if $use_longer_panel == 1 {
+
+  global diff_in_diff treatment texas 
+  lab var treatment "Post 1999 x Texas" 
+  lab var texas "Texas"
+
+  * Remove lagged a requirement
+  * Also note that IVs based on assets will not work here
+
+  * NOTE: have to clean up code a bit to make sure we can get here : ie to make sure we construct all the needed variables for ctilde
+
+  global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & log_a > 2.5
+  eststo clear 
+  global controls i.wave i.current_state_psid_code
+  qui eststo, title(age dum):                           reg log_mortgage $controls ib35.age  log_a if $sample
+  qui eststo, title(age poly):                          reg log_mortgage $controls age age2  log_a if $sample
+  qui eststo, title(age dum):                           reg log_mortgage $controls ib35.age $diff_in_diff if $sample
+  qui eststo, title(age poly):                          reg log_mortgage $controls age age2 $diff_in_diff if $sample
+
+  cap drop in_sample
+  gen in_sample = e(sample)
+  tab wave in_s
+
+  global esttabopts keep( *texas* *treat* _cons) ar2 label b(4) se(4) mtitles indicate("Age controls = *age*" "Year controls = *wave*" "State controls = *state*") star(* 0.10 ** 0.05 *** 0.01)
+  esttab , $esttabopts title("Depvar: Real Mortgage Balances. Year and State Controls. $sample")
+
+  table wave if in_sample, c(n mortgage mean mortgage median mortgage min mortgage max mortgage) by(texas) format(%9.0fc) center row col
+
+}
+
+
+
 
 asdfsdf
+
+****************************************************************************************************
+** Other stuff
+****************************************************************************************************
+
 
 * I think this shows our problem pretty well
 * Liq asset coef is positive, housing asset coef is negative
