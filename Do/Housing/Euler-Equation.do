@@ -666,10 +666,31 @@ beep
 
 npregress kernel d_c log_a age age2 if $sample, vce(bootstrap, reps(100) seed(123))
 // margins, at(log_a=( 5 6 7 8 9 10 11 12 13 14 ))
-margins, at(log_a = (6.214608098 6.907755279 8.006367568 8.517193191 9.210340372 9.903487553 10.30895266 10.59663473 10.81977828 11.51292546 11.91839057 12.20607265 12.4292162 12.61153775 12.76568843 12.89921983 ))
+margins, at(log_a = (6.214608098 6.907755279 8.006367568 8.517193191 9.210340372 9.903487553 10.30895266 10.59663473 10.81977828 11.51292546 11.91839057 12.20607265 12.4292162 12.61153775 12.76568843 12.89921983 )) reps(100)
 
 beep
 
+// Now try the lagged regression with different sample selection criteria
+// Dont restrict based on assets
+npregress kernel d_c L_log_a age age2 if a != . & age >= 25 & age <= 60 & housing_transition == 0
+margins, at(L_log_a = (6.214608098 6.907755279 8.006367568 8.517193191 9.210340372 9.903487553 10.30895266 10.59663473 10.81977828 11.51292546 11.91839057 12.20607265 12.4292162 12.61153775 12.76568843 12.89921983 ))
+
+
+
+// Now try the lagged regression with different sample selection criteria
+// Restrict based on lagged assets
+npregress kernel d_c L_log_a age age2 if $sample & L.a > 1000
+margins, at(L_log_a = (6.214608098 6.907755279 8.006367568 8.517193191 9.210340372 9.903487553 10.30895266 10.59663473 10.81977828 11.51292546 11.91839057 12.20607265 12.4292162 12.61153775 12.76568843 12.89921983 ))
+
+
+// Now try the lagged a regression but using the bandwidth from the contemporaneous a regression
+npregress kernel d_c L_log_a age age2 if $sample, bwidth(Mean:L_log_a=0.439 Effect:L_log_a=4.652 Mean:age=2.355 Effect:age=24.93 Mean:age2=206 Effect:age2=2181 )
+margins, at(L_log_a = (6.214608098 6.907755279 8.006367568 8.517193191 9.210340372 9.903487553 10.30895266 10.59663473 10.81977828 11.51292546 11.91839057 12.20607265 12.4292162 12.61153775 12.76568843 12.89921983 ))
+
+
+// Notes on this stuff
+// might be interesting to look into the generalized additive model (gam)
+// http://cameron.econ.ucdavis.edu/nhh2017/norway04_nonparametric.pdf
 sdfdsf
 *******************************************************************************************************
 * Now play around with removing the L.a > 1000 restriction
