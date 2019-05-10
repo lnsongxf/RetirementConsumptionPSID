@@ -637,17 +637,48 @@ if $write_tex == 1 & $use_longer_panel == 0 {
   esttab using "$folder_output_presentation\EE_PSID_Full_Controls.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation") addnotes("Sample: Households with liq assets $>$ 500 at time t, ages 25 to 60," "not moving homes that year.")
 }
 
-// Aux Model
-// Get VCV of coefs - to use in estimation
-global sample a > 1000 & a < 50000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 // a> 500 & L.a > 500 & a < 500000
-// reg d_c  $controls log_a age age2 if $sample
-// mat list e(V)
-reg d_c  log_a age age2 if $sample
-mat list e(V)
+*******************************************************************************************************
+** Non linear Euler Equation 
+*******************************************************************************************************
+
+// Allow people with any liquid assets to be in the sample
+global sample a != . & age >= 25 & age <= 60 & housing_transition == 0 & a >= 0 & a < 150000
+
+cap drop a_group lag_a_group
+// egen a_group = cut(a), at(0, 1000, 3000, 10000, 150000) label
+egen a_group = cut(a), at(0, 1000, 10000, 50000, 10000000000) label
+
+gen lag_a = L.a
+// egen lag_a_group = cut(lag_a), at(0, 1000, 3000, 10000, 150000) label
+egen lag_a_group = cut(lag_a), at(0, 1000, 10000, 50000, 10000000000) label
+tab a_group if $sample
+
+cap drop age_group
+egen age_group = cut(age), at(24, 30, 40, 50, 61) label
+
+eststo clear 
+qui eststo, title(Age dummies):                  reg d_c ib45.age     i.a_group c.log_a#i.a_group $controls if $sample
+qui eststo, title(age poly):                     reg d_c age age2     i.a_group c.log_a#i.a_group $controls if $sample
+qui eststo, title(age groups):                reg d_c i.age_group     i.a_group c.log_a#i.a_group $controls if $sample
+eststo, title(age groups no controls):                  reg d_c i.age_group     i.a_group c.log_a#i.a_group if $sample
+eststo, title(age groups no controls):              reg d_c i.age_group     i.lag_a_group c.log_a#i.a_group if $sample
+
+global esttab_opts keep(*log_a* *a_group _cons *age*) order(*#* _cons *a_group) ar2 label b(4) se(4) mtitles ///
+  // coeflabels(0.a_group#c.log_a "Log Liq Assets (a $<$ 1k)" 1.a_group#c.log_a "Log Liq Assets (1k $<$ a $<$ 10k)" ///
+  //            2.a_group#c.log_a "Log Liq Assets (10k $<$ a $<$ 50k)" ///
+  //        _cons "Constant" 1.a_group "Dummy (1k $<$ a $<$ 10k)" 2.a_group "Dummy (10k $<$ a $<$ 50k)"  ///
+         // )
+esttab , $esttab_opts title("$model_name: No constraint on liq assets. $controls. With Interactions")
+
+if $output_tables ==1{
+  // esttab using "$folder_output\EE Nonlinear Effect of Asset $model_name.tex", $esttab_opts longtable booktabs obslast replace title("$model_name: Non Linear Effect of Assets") addnotes("No constraint on liq assets")
+}
 
 
-* 
-* Non parameteric regression - SUPER slow! but looks great!!!!
+*******************************************************************************************************
+** Non parameteric regression - SUPER slow! but looks great!!!!
+*******************************************************************************************************
+sdfsdf
 // Previously we were using this -- not good for comparison
 // global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 500
 
@@ -684,7 +715,7 @@ margins, at(L_log_a = (6.214608098 6.907755279 8.006367568 8.517193191 9.2103403
 
 
 // Now try the lagged a regression but using the bandwidth from the contemporaneous a regression
-npregress kernel d_c L_log_a age age2 if $sample, bwidth(Mean:L_log_a=0.439 Effect:L_log_a=4.652 Mean:age=2.355 Effect:age=24.93 Mean:age2=206 Effect:age2=2181 )
+npregress kernel d_c L_log_a age if $sample, bwidth(Mean:L_log_a=0.65 Effect:L_log_a=4.652 Mean:age=2.355 Effect:age=24.93 )
 margins, at(L_log_a = (6.214608098 6.907755279 8.006367568 8.517193191 9.210340372 9.903487553 10.30895266 10.59663473 10.81977828 11.51292546 11.91839057 12.20607265 12.4292162 12.61153775 12.76568843 12.89921983 ))
 
 
