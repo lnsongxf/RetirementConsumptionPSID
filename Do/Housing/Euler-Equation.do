@@ -595,8 +595,16 @@ esttab using "$folder_output\EE_PSID_Control_for_kids_and_year.csv", $esttabopts
 * OLS: Good news! Get same results with indiv-level fixed effect
 xtreg d_c $controls age age2 log_a if $sample, fe
 
+
+xtreg d_c $controls age age2 log_a if $sample, fe
+
+
+
 * OLS with lagged assets: Bad news. Loses significance
 xtreg d_c $controls age age2 L.log_a if $sample, fe
+
+
+
 
 * IV with liq assets: bad news. loses significance
 xtivreg d_c $controls ib35.age (log_a = L.(log_a y log_bank_account_wealth log_stock_wealth) ) if $sample, fe
@@ -644,11 +652,14 @@ if $write_tex == 1 & $use_longer_panel == 0 {
 // Allow people with any liquid assets to be in the sample
 global sample a != . & age >= 25 & age <= 60 & housing_transition == 0 & a >= 0 & a < 150000
 
-cap drop a_group lag_a_group
+cap drop a_group 
+cap drop lag_a_group 
+cap drop lag_a
 // egen a_group = cut(a), at(0, 1000, 3000, 10000, 150000) label
 egen a_group = cut(a), at(0, 1000, 10000, 50000, 10000000000) label
 
 gen lag_a = L.a
+gen lag_log_a = L.log_a
 // egen lag_a_group = cut(lag_a), at(0, 1000, 3000, 10000, 150000) label
 egen lag_a_group = cut(lag_a), at(0, 1000, 10000, 50000, 10000000000) label
 tab a_group if $sample
@@ -661,33 +672,165 @@ qui eststo, title(Age dummies):                  reg d_c ib45.age     i.a_group 
 qui eststo, title(age poly):                     reg d_c age age2     i.a_group c.log_a#i.a_group $controls if $sample
 qui eststo, title(age groups):                reg d_c i.age_group     i.a_group c.log_a#i.a_group $controls if $sample
 eststo, title(age groups no controls):                  reg d_c i.age_group     i.a_group c.log_a#i.a_group if $sample
-eststo, title(age groups no controls):              reg d_c i.age_group     i.lag_a_group c.log_a#i.a_group if $sample
+eststo, title(age groups no controls):              reg d_c i.age_group     i.lag_a_group c.lag_log_a#i.lag_a_group if $sample
 
-global esttab_opts keep(*log_a* *a_group _cons *age*) order(*#* _cons *a_group) ar2 label b(4) se(4) mtitles ///
+global esttab_opts keep(*log_a* *a_group _cons ) order(*#* _cons *a_group) ar2 label b(4) se(4) mtitles ///
   // coeflabels(0.a_group#c.log_a "Log Liq Assets (a $<$ 1k)" 1.a_group#c.log_a "Log Liq Assets (1k $<$ a $<$ 10k)" ///
   //            2.a_group#c.log_a "Log Liq Assets (10k $<$ a $<$ 50k)" ///
   //        _cons "Constant" 1.a_group "Dummy (1k $<$ a $<$ 10k)" 2.a_group "Dummy (10k $<$ a $<$ 50k)"  ///
          // )
 esttab , $esttab_opts title("$model_name: No constraint on liq assets. $controls. With Interactions")
 
-if $output_tables ==1{
-  // esttab using "$folder_output\EE Nonlinear Effect of Asset $model_name.tex", $esttab_opts longtable booktabs obslast replace title("$model_name: Non Linear Effect of Assets") addnotes("No constraint on liq assets")
+// if $output_tables ==1{
+//   // esttab using "$folder_output\EE Nonlinear Effect of Asset $model_name.tex", $esttab_opts longtable booktabs obslast replace title("$model_name: Non Linear Effect of Assets") addnotes("No constraint on liq assets")
+// }
+
+*******************************************************************************************************
+** Simple aux model with LAGGED assets - with age bins 
+*******************************************************************************************************
+
+lab var lag_log_a "Liquid Assets"
+eststo clear 
+global sample a != . & age >= 25 & age <= 60 & housing_transition == 0 & lag_a > 1000 // & a < 150000
+eststo, title(Over1000): reg d_c i.age_group lag_log_a                     if $sample, noomit
+eststo, title(Over1000): reg d_c i.age_group lag_log_a ib2015.wave D.fsize if $sample, noomit
+
+global sample2 a != . & age >= 25 & age <= 60 & housing_transition == 0 & lag_a > (L.income / 24)
+eststo, title(Non HtM): reg d_c i.age_group lag_log_a                     if $sample2, noomit
+eststo, title(Non HtM): reg d_c i.age_group lag_log_a ib2015.wave D.fsize if $sample2, noomit
+
+global esttabopts keep(lag_log_* _cons) ar2 label b(4) se(4) mtitles star(* 0.10 ** 0.05 *** 0.01) indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*")
+esttab using "$folder_output_presentation\EE_PSID_Lagged.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation") addnotes("Sample: Households with liq assets $>$ 1,000 at time t, ages 25 to 60," "not moving homes that year.")
+
+// eststo, title(Add L.y): reg d_c i.age_group lag_log_a L.log_income                     if $sample2, noomit
+// eststo, title(Add L.y): reg d_c i.age_group lag_log_a L.log_income ib2015.wave D.fsize if $sample2, noomit
+
+// Residualzie this variable (with respect to year fixed effects)
+foreach var of varlist d_c lag_log_a{
+  cap drop `var'_resid
+  reg `var' ib2015.wave if $sample2
+  predict `var'_resid, residuals
+  // replace `var'_resid = `var'_resid + _b[_cons]
+  preserve
+    collapse `var' `var'_resid if $sample2, by(age)
+    tsset age
+    replace `var'_resid = `var'_resid 
+    tsline `var' `var'_resid, name(`var', replace)
+  restore
 }
+eststo clear 
+eststo, title(Resid): reg d_c_resid i.age_group lag_log_a_resid                     if $sample2, noomit
+eststo, title(Resid): reg d_c_resid i.age_group lag_log_a_resid ib2015.wave D.fsize if $sample2, noomit
+lab var lag_log_a_resid "Liquid Assets (Resid)"
+
+// TRY AGAIN: NOW ADD CONSTANT TERM BACK IN
+foreach var of varlist d_c lag_log_a{
+  cap drop `var'_resid
+  reg `var' ib2015.wave if $sample2
+  predict `var'_resid, residuals
+  replace `var'_resid = `var'_resid + _b[_cons] // THIS THE ONE DIFFERENCE
+  preserve
+    collapse `var' `var'_resid if $sample2, by(age)
+    tsset age
+    replace `var'_resid = `var'_resid 
+    tsline `var' `var'_resid, name(`var', replace)
+  restore
+}
+lab var lag_log_a_resid "Liquid Assets (Resid)"
+
+eststo, title("Resid w cons"): reg d_c_resid i.age_group lag_log_a_resid                     if $sample2, noomit
+eststo, title("Resid w cons"): reg d_c_resid i.age_group lag_log_a_resid ib2015.wave D.fsize if $sample2, noomit
+
+esttab, keep(lag_log_* _cons) ar2 label b(4) se(4) indicate("Age controls = *age*" "Kids controls = *fsize*" "Year controls = *wave*") mtitles
+esttab using "$folder_output_presentation\EE_PSID_Lagged_More_Details.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation") addnotes("Sample: Households with liq assets $>$ 1,000 at time t, ages 25 to 60," "not moving homes that year.")
 
 
+* LOOK INTO AUX MODEL WITH LAGGED CASH ON HAND -- TODO: will need to look at monte carlo exercise with this!
+
+cap gen x          = liq_wealth + income
+cap gen log_x      = log(x)
+cap gen log_xc     = log(x/consumption)
+cap gen lag_log_x  = L.log_x
+cap gen lag_log_xc = L.log_xc
+cap gen lag_log_c  = L.log_c
+lab var lag_log_c    "Lag Log(c)"
+lab var lag_log_x    "Lag Log(a+y)"
+lab var lag_log_xc   "Lag Log(a+y/c)"
+
+* MIGHT BE GOOD TO TRY LAG_LOG_XC ! BETTER INTERPRETATION. LARGER COEFS. CLOSER LINK WITH ANALYTICAL RESULTS
+eststo clear 
+eststo, title(PSID 1): reg d_c i.age_group lag_log_xc if $sample2, noomit // NOTE: necessary to put in fsize control
+eststo, title(PSID 1): reg d_c i.age_group lag_log_xc D.fsize if $sample2, noomit // NOTE: necessary to put in fsize control
+eststo, title(PSID 1): reg d_c i.age_group lag_log_xc D.fsize ib2015.wave if $sample2, noomit // NOTE: necessary to put in fsize control
+
+eststo, title(PSID 2): reg d_c i.age       lag_log_x if $sample2, noomit // NOTE: necessary to put in fsize control
+eststo, title(PSID 2): reg d_c i.age_group lag_log_x D.fsize if $sample2, noomit // NOTE: necessary to put in fsize control
+eststo, title(PSID 2): reg d_c i.age_group lag_log_x lag_log_c D.fsize if $sample2, noomit // NOTE: necessary to put in fsize control
+eststo, title(PSID 2): reg d_c i.age_group lag_log_x lag_log_c ib2015.wave D.fsize if $sample2, noomit
+
+esttab, keep(lag_log_* _cons) ar2 label b(4) se(4) indicate("Age controls = *age*" "Kids controls = *fsize*" "Year controls = *wave*") mtitles
+global esttabopts keep(lag_log_* _cons) ar2 label b(4) se(4) mtitles star(* 0.10 ** 0.05 *** 0.01) indicate("Age controls = *age*" "Kids controls = *fsize*" "Year controls = *wave*" )
+esttab using "$folder_output_presentation\EE_PSID_Cash_on_Hand.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation") addnotes("Sample: Non HtM households at time t-1, ages 25 to 60," "not moving homes that year.")
+
+
+
+
+// eststo, title(FE): xtreg d_c_resid i.age_group lag_log_a_resid                     if $sample2, fe
+// eststo, title(FE): xtreg d_c_resid i.age_group lag_log_a_resid ib2015.wave D.fsize if $sample2, fe
+
+esttab, keep(lag_log_* _cons) ar2 label b(4) se(4) 
+
+// global sample3 a != . & age >= 25 & age <= 60 & housing_transition == 0 & lag_a > (L.income / 6)
+// eststo, title(Zeldes): reg d_c i.age_group lag_log_a  if $sample3, noomit
+// eststo, title(Zeldes): reg d_c i.age_group lag_log_a ib2015.wave D.fsize if $sample3, noomit
+
+// mat list e(b)
+// mat list e(V)
+
+*  IV1 includes lagged assets and income as instruments. IV2 includes assets, income, bank balances, and the second lag of consumption as instruments.
+
+
+
+// Now try with < 150 k restriction
+global sample a != . & age >= 25 & age <= 60 & housing_transition == 0 & lag_a > 1000 & a < 150000
+reg d_c i.age_group c.lag_log_a if $sample, noomit
+mat list e(b)
+mat list e(V)
+
+
+sdfsdf
 *******************************************************************************************************
 ** Non parameteric regression - SUPER slow! but looks great!!!!
 *******************************************************************************************************
-sdfsdf
+
 // Previously we were using this -- not good for comparison
 // global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 500
 
 global sample a > 1000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 // a> 500 & L.a > 500 & a < 500000
 
+// I wonder if i need to bootstrap the npregress command? can i just bootstrap the margins?
+npregress kernel d_c log_a age age2 if $sample // , vce(bootstrap, reps(100) seed(123))
+margins, at(log_a = (6.214608098 6.907755279 8.006367568 8.517193191 9.210340372 9.903487553 10.30895266 10.59663473 10.81977828 11.51292546 11.91839057 12.20607265 12.4292162 12.61153775 12.76568843 12.89921983 )) reps(100)
+
+
+// Just in case i need to bootstrap both 
+npregress kernel d_c log_a age age2 if $sample, vce(bootstrap, reps(100) seed(123))
+margins, at(log_a = (6.214608098 6.907755279 8.006367568 8.517193191 9.210340372 9.903487553 10.30895266 10.59663473 10.81977828 11.51292546 11.91839057 12.20607265 12.4292162 12.61153775 12.76568843 12.89921983 )) reps(100)
+
+beep
+beep
+beep
+beep
+
+
 
 gen L_log_a = L.log_a
-npregress kernel d_c L_log_a age age2 if $sample //, vce(bootstrap, reps(100) seed(123))
-margins, at(L_log_a = (6.214608098 6.907755279 8.006367568 8.517193191 9.210340372 9.903487553 10.30895266 10.59663473 10.81977828 11.51292546 11.91839057 12.20607265 12.4292162 12.61153775 12.76568843 12.89921983 ))
+npregress kernel d_c L_log_a age age2 if $sample, vce(bootstrap, reps(100) seed(123))
+margins, at(L_log_a = (6.214608098 6.907755279 8.006367568 8.517193191 9.210340372 9.903487553 10.30895266 10.59663473 10.81977828 11.51292546 11.91839057 12.20607265 12.4292162 12.61153775 12.76568843 12.89921983 )) reps(50)
+
+sfdfsdf
+
+
 
 beep
 beep
@@ -695,9 +838,6 @@ beep
 beep
 beep
 
-npregress kernel d_c log_a age age2 if $sample, vce(bootstrap, reps(100) seed(123))
-// margins, at(log_a=( 5 6 7 8 9 10 11 12 13 14 ))
-margins, at(log_a = (6.214608098 6.907755279 8.006367568 8.517193191 9.210340372 9.903487553 10.30895266 10.59663473 10.81977828 11.51292546 11.91839057 12.20607265 12.4292162 12.61153775 12.76568843 12.89921983 )) reps(100)
 
 beep
 
@@ -803,13 +943,26 @@ esttab , $esttabopts title("Lag Log Assets")
 ****************************************************************************************************
 
 * Look at mean change in consumption by liquid asset category
+global sample a != . & age >= 25 & age <= 60 & housing_transition == 0 & a > 1000 & a < 150000
 preserve
   keep if age >= 25 & $sample
   di "Sample: $sample"
+  cap drop a_group
   egen a_group = cut(a), at(0, 100, 500, 1000, 5000, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000, 150000, 200000, 10000000000)
   collapse (mean) d_c d_y (count) n = d_c, by(a_group) 
   scatter d_c a_group, name(scattergroups_levels, replace)
   scatter d_y a_group, name(scatter_d_y, replace)
+  list
+restore
+
+preserve
+  keep if age >= 25 & $sample
+  di "Sample: $sample"
+  cap drop lag_a_group
+  egen lag_a_group = cut(lag_a), at(0, 100, 500, 1000, 5000, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000, 150000, 200000, 10000000000)
+  collapse (mean) d_c d_y (count) n = d_c, by(lag_a_group) 
+  scatter d_c lag_a_group, name(scattergroups_levels, replace)
+  scatter d_y lag_a_group, name(scatter_d_y, replace)
   list
 restore
 
