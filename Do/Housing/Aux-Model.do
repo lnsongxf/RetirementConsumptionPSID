@@ -265,6 +265,10 @@ local control_vars age age2 age3 bought
 * sold L.housing new_mort
 * underwater
 
+
+sum fam_liq_wealth_real fam_LiqAndH_wealth_real fam_liq_housing_IRA_real fam_liq_housing_IRA_bus_real fam_wealth_real
+sdfsdf
+
 ****************************************************************************************************
 ** Calibrate initial liquid assets -- used for setting some params in model
 ****************************************************************************************************

@@ -18,6 +18,7 @@ global allow_kids_to_leave_hh 1 // When looking for stable households, what shou
 
 * drop if emp_status_head != 1 // only keep employed heads. Question: should I put this so early? ie to split up HH? or later?
 
+global use_longer_panel 0
 ****************************************************************************************************
 ** Sample selection
 ****************************************************************************************************
@@ -50,7 +51,7 @@ drop if fam_wealth_real - L.fam_wealth_real > 100 * inc_fam_real & fam_wealth !=
 * drop if housingstatus == 8 // neither own nor rent
 
 * Find first home purcahses (two alternative definitions)
-qui do "$folder/Do/Find-First-Home-Purchase.do"
+qui do "$folder/Do/Housing/Find-First-Home-Purchase.do"
 
 ****************************************************************************************************
 ** Gifts / Inheritance
@@ -122,6 +123,9 @@ replace t_homeownership_100 = 1000 if t_homeownership == .
 ****************************************************************************************************
 ** Simple means and medians by age
 ****************************************************************************************************
+
+sum fam_liq_wealth_real fam_LiqAndH_wealth_real fam_liq_housing_IRA_real fam_liq_housing_IRA_bus_real fam_wealth_real
+sdfsdf
 
 gen log_fam_wealth_real = log(fam_wealth_real)
 gen log_fam_wealth_ex_home_real = log(fam_wealth_ex_home_real)

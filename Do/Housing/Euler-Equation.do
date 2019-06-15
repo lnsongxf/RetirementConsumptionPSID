@@ -1,5 +1,5 @@
 ****************************************************************************************************
-** Run SUR for aux model
+** Run Euler Equation on the PSID
 ****************************************************************************************************
 
 set more off
@@ -604,13 +604,32 @@ xtreg d_c $controls age age2 log_a if $sample, fe
 xtreg d_c $controls age age2 L.log_a if $sample, fe
 
 
+* Wait! Runkle 1991 says that the "within estimator" (as used in xtreg fe)
+* will not work because it assumes taht HHs know the mean variable of every
+* variable before the end of the sample. therefore better to use the first
+* difference estimator
+
+* OLS with lagged assets and FIRST DIFFERENCES
+gen dd_c = D.d_c
+gen DL_log_a = D.L.log_a
+gen dd_fsize = D.D.fsize
+reg dd_c DL_log_a dd_fsize if $sample
 
 
-* IV with liq assets: bad news. loses significance
-xtivreg d_c $controls ib35.age (log_a = L.(log_a y log_bank_account_wealth log_stock_wealth) ) if $sample, fe
-xtivreg d_c $controls ib35.age (log_a = L(1 2).(log_a y log_bank_account_wealth log_stock) L2.log_consumption) if $sample, fe
+* or try KR:
 
+// gen L_log_a = L.log_a
+// xtkr d_c L_log_a
 
+// di "controls include $controls"
+
+// * IV with liq assets: bad news. loses significance
+// xtivreg d_c $controls ib35.age (log_a = L.(log_a y log_bank_account_wealth log_stock_wealth) ) if $sample, fe
+// xtivreg d_c $controls ib35.age (log_a = L(1 2).(log_a y log_bank_account_wealth log_stock) L2.log_consumption) if $sample, fe
+
+// xtkr d_c (log_a = L_log_a) // gives error saying too many values
+// xtkr d_c $controls ib35.age (log_a = L.log_a) if $sample // (log_a y log_bank_account_wealth log_stock_wealth) ) if $sample
+// xtkr d_c $controls ib35.age (log_a = L(1 2).(log_a y log_bank_account_wealth log_stock) L2.log_consumption) if $sample
 * OR try fixed effects with IV reg
 * it's a bit more complicated
 * https://www.stata.com/support/faqs/statistics/fixed-effects-regression/
@@ -686,18 +705,19 @@ esttab , $esttab_opts title("$model_name: No constraint on liq assets. $controls
 // }
 
 *******************************************************************************************************
-** Simple aux model with LAGGED assets - with age bins 
+** Simple aux model with LAGGED assets - with age bins
+** BASELINE RESULTS USED FOR INDIRECT INFERENCE !!! 
 *******************************************************************************************************
 
 lab var lag_log_a "Liquid Assets"
 eststo clear 
 global sample a != . & age >= 25 & age <= 60 & housing_transition == 0 & lag_a > 1000 // & a < 150000
-eststo, title(Over1000): reg d_c i.age_group lag_log_a                     if $sample, noomit
-eststo, title(Over1000): reg d_c i.age_group lag_log_a ib2015.wave D.fsize if $sample, noomit
+qui eststo, title(Over1000): reg d_c i.age_group lag_log_a                     if $sample, noomit
+qui eststo, title(Over1000): reg d_c i.age_group lag_log_a ib2015.wave D.fsize if $sample, noomit
 
 global sample2 a != . & age >= 25 & age <= 60 & housing_transition == 0 & lag_a > (L.income / 24)
-eststo, title(Non HtM): reg d_c i.age_group lag_log_a                     if $sample2, noomit
-eststo, title(Non HtM): reg d_c i.age_group lag_log_a ib2015.wave D.fsize if $sample2, noomit
+qui eststo, title(Non HtM): reg d_c i.age_group lag_log_a                     if $sample2, noomit
+qui eststo, title(Non HtM): reg d_c i.age_group lag_log_a ib2015.wave D.fsize if $sample2, noomit
 
 global esttabopts keep(lag_log_* _cons) ar2 label b(4) se(4) mtitles star(* 0.10 ** 0.05 *** 0.01) indicate("Age controls = *age*" "Year controls = *wave*" "Kids controls = *fsize*")
 esttab using "$folder_output_presentation\EE_PSID_Lagged.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation") addnotes("Sample: Households with liq assets $>$ 1,000 at time t, ages 25 to 60," "not moving homes that year.")
@@ -790,13 +810,55 @@ esttab, keep(lag_log_* _cons) ar2 label b(4) se(4)
 *  IV1 includes lagged assets and income as instruments. IV2 includes assets, income, bank balances, and the second lag of consumption as instruments.
 
 
+// BASELINE FOR ESTIMATION - JUNE 3 2019
+global sample a != . & age >= 25 & age <= 60 & housing_transition == 0 & lag_a > 1000 // & a < 150000
+reg d_c i.age_group lag_log_a if $sample, noomit
+xi i.age_group
+reg d_c _I* lag_log_a if $sample, noomit
 
-// Now try with < 150 k restriction
-global sample a != . & age >= 25 & age <= 60 & housing_transition == 0 & lag_a > 1000 & a < 150000
-reg d_c i.age_group c.lag_log_a if $sample, noomit
+gen sample = e(sample)
 mat list e(b)
 mat list e(V)
 
+/*
+preserve
+  keep if sample
+  keep d_c _Iage_group_* lag_log_a 
+  reg d_c _Iage_group_* lag_log_a
+  export delimited "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID\Results\AuxModelData\AuxModelLagA.csv", replace
+restore
+*/
+
+// Now with non HtM only
+global sample a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.HtM == 0 
+reg d_c i.age_group c.lag_log_a  if $sample, noomit
+
+
+// Now try with interaction between those with more versus less than cutoff -- STIL WORKS!!
+// Keane and Rory both think this is a better aux model!
+global sample a != . & age >= 25 & age <= 60 & housing_transition == 0 // & lag_a > 1000 
+reg d_c i.age_group i.L.HtM##c.lag_log_a if $sample, noomit
+reg d_c i.age_group i.L.HtM##c.lag_log_a D.fsize if $sample, noomit
+
+reg d_c i.L.HtM##i.age_group i.L.HtM##c.lag_log_a D.fsize if $sample, noomit
+reg d_c i.age_group i.L.HtM##c.lag_log_a if $sample, noomit
+
+
+
+global sample a != . & age >= 25 & age <= 60 // & housing_transition == 0 & lag_a > 1000 
+reg d_c i.age_group lag_log_a if $sample, noomit
+gen sample2 = e(sample)
+
+local vars_for_aux_model  
+missings report log_income log_consumption housing  log_liq_wealth log_housing_wealth liq_wealth housing_wealth log_mortgage mortgage
+
+preserve
+  keep if sample2
+  gen L_HtM = L.HtM
+  keep d_c _Iage_group_* lag_log_a L_HtM
+
+  export delimited "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID\Results\AuxModelData\PSID_AuxModelData.csv", replace
+restore
 
 sdfsdf
 *******************************************************************************************************
