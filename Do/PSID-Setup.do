@@ -673,6 +673,11 @@ psid use
 	[13]ER58161 [15]ER65358
 	// imputed for just under 5% of people
 
+	|| acc_bank_account_wealth
+	// [84]S105A [89]S205A [94]S305A 
+	[99]S405A [01]S505A [03]S605A [05]S705A [07]S805A [09]ER46943 [11]ER52351 [13]ER58162 [15]ER65359 // [17]ER71436
+	// imputed for just under 5% of people (1 == imputed)
+
 	// IMP VALUE ANNUITY/IRA (W22)
 	|| IRA_wealth
 	// W22. How much would they be worth? This is an imputed version of a
@@ -690,6 +695,11 @@ psid use
 	// [84]S111 [89]S211 [94]S311
 	[99]S411 [01]S511 [03]S611 [05]S711 [07]S811 [09]ER46954 [11]ER52358
 	[13]ER58171 [15]ER65368
+
+	|| acc_stock_wealth 
+	// [84]S111A [89]S211A [94]S311A 
+	[99]S411A [01]S511A [03]S611A [05]S711A [07]S811A [09]ER46955 [11]ER52359 [13]ER58172 [15]ER65369 // [17]ER71446
+	// imputed in about 1% of cases (though lots of people just dont hold any stock)
 
 	|| business_wealth // NOTE: this is NET
 	// [84]S103 [89]S203 [94]S303
@@ -732,8 +742,21 @@ psid use
 	[99]ER13041 [01]ER17044 [03]ER21043 [05]ER25029 [07]ER36029 [09]ER42030
 	[11]ER47330 [13]ER53030 [15]ER60031
 
+	|| acc_housevalue
+	// [68]V7 [69]V450 [70]V1123 [71]V1824 [72]V2424 [73]V3022 [74]V3418
+	// [75]V3818 [76]V4319 [77]V5218 [78]V5718 [79]V6320 [80]V6918 [81]V7518
+	// [82]V8218 [83]V8818 [84]V10019 [85]V11126 [86]V12525 [87]V13725 [88]V14825
+	// [89]V16325 [90]V17725 [91]V19025 [92]V20325 [93]V21611 
+	[01]ER17045
+	[03]ER21044 [05]ER25030 [07]ER36030 [09]ER42031 [11]ER47331 [13]ER53031
+	[15]ER60032 // [17]ER66032
+
 	// TODO: look at accuracy codes for housevalue
-	// [68]V7 [69]V450 [70]V1123 [71]V1824 [72]V2424 [73]V3022 [74]V3418 [75]V3818 [76]V4319 [77]V5218 [78]V5718 [79]V6320 [80]V6918 [81]V7518 [82]V8218 [83]V8818 [84]V10019 [85]V11126 [86]V12525 [87]V13725 [88]V14825 [89]V16325 [90]V17725 [91]V19025 [92]V20325 [93]V21611 [01]ER17045 [03]ER21044 [05]ER25030 [07]ER36030 [09]ER42031 [11]ER47331 [13]ER53031 [15]ER60032 [17]ER66032
+	// [68]V7 [69]V450 [70]V1123 [71]V1824 [72]V2424 [73]V3022 [74]V3418 
+	// [75]V3818 [76]V4319 [77]V5218 [78]V5718 [79]V6320 [80]V6918 [81]V7518 
+	// [82]V8218 [83]V8818 [84]V10019 [85]V11126 [86]V12525 [87]V13725 [88]V14825 
+	// [89]V16325 [90]V17725 [91]V19025 [92]V20325 [93]V21611 
+	// [01]ER17045 [03]ER21044 [05]ER25030 [07]ER36030 [09]ER42031 [11]ER47331 [13]ER53031 [15]ER60032 [17]ER66032
 
 	// IMP VALUE HOME EQUITY
 	|| homeequity
@@ -789,6 +812,9 @@ psid use
 	[99]ER13047 [01]ER17052 [03]ER21051 [05]ER25042 [07]ER36042 [09]ER42043
 	[11]ER47348 [13]ER53048 [15]ER60049
 
+	|| acc_mortgage1 
+	[01]ER17053 [03]ER21052 [05]ER25043 [07]ER36043 [09]ER42044 [11]ER47349 [13]ER53049 [15]ER60050 // [17]ER66052
+
 	// REM PRINCIPAL MOR 2
 	|| mortgage2
 	// About how much is the remaining principal on this loan?--SECOND
@@ -799,6 +825,9 @@ psid use
 	[99]ER13056 [01]ER17063 [03]ER21062 [05]ER25053 [07]ER36054 [09]ER42062
 	[11]ER47369 [13]ER53069 [15]ER60070
 	// Note: very few people have second mortgage. 4% in 2013
+
+	|| acc_mortgage2
+	[01]ER17064 [03]ER21063 [05]ER25054 [07]ER36055 [09]ER42063 [11]ER47370 [13]ER53070 [15]ER60071 // [17]ER66073
 
 	// How many rooms do you have (for your family) not counting bathrooms?
 	|| room_count
@@ -1241,6 +1270,11 @@ drop `kid' `counted_children' `kid0_17' `kid0_2' `kid3_5' `kid6_13' `kid14_17m' 
 
 // sort family_id wave pid
 // edit family_id wave pid age rel2head children counted_children kid sequence if DIF != 0
+
+// Accuracy of house value not available in 1999
+replace acc_housevalue = 0 if acc_housevalue == . & wave == 1999
+replace acc_mortgage1 = 0 if acc_mortgage1 == . & wave == 1999
+replace acc_mortgage2 = 0 if acc_mortgage2 == . & wave == 1999
 
 ****************************************************************************************************
 ** Keep only heads of household

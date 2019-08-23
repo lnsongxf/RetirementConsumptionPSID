@@ -5,7 +5,7 @@
 set more off
 graph close
 set autotabgraphs on
-pause off
+pause on
 
 global folder "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID"
 global folder_output "$folder\Results\EulerEquation"
@@ -21,25 +21,25 @@ if $use_longer_panel == 0 {
 if $use_longer_panel == 1 {
   use "$folder/Data/Intermediate/Basic-Panel-1982-2015.dta", clear
 
-*   * TODO: will need 1982 wave if we want a two year EE
-*   gen fake_wave = 1 if wave == 1982
-*   gen fake_wave = 2 if wave == 1984
+  *   * TODO: will need 1982 wave if we want a two year EE
+  *   gen fake_wave = 1 if wave == 1982
+  *   gen fake_wave = 2 if wave == 1984
 
-*   gen fake_wave = 3 if wave == 1992
-*   gen fake_wave = 4 if wave == 1994
+  *   gen fake_wave = 3 if wave == 1992
+  *   gen fake_wave = 4 if wave == 1994
 
-*   gen fake_wave = 5 if wave == 1997
-*   gen fake_wave = 6 if wave == 1999
+  *   gen fake_wave = 5 if wave == 1997
+  *   gen fake_wave = 6 if wave == 1999
 
-*   gen fake_wave = 7 if wave == 2001
-*   gen fake_wave = 8 if wave == 2003
+  *   gen fake_wave = 7 if wave == 2001
+  *   gen fake_wave = 8 if wave == 2003
 
-* ...
-*   keep if fake wave != .
-*   xtset pid fake_wave
-tab wave
-keep if wave == 1982 | wave == 1984 | wave == 1992 | wave == 1994 | wave == 1997 | wave > 1998
-replace wave = wave - 1 if wave <= 1994
+  * ...
+  *   keep if fake wave != .
+  *   xtset pid fake_wave
+  tab wave
+  keep if wave == 1982 | wave == 1984 | wave == 1992 | wave == 1994 | wave == 1997 | wave > 1998
+  replace wave = wave - 1 if wave <= 1994
 }
 
 cap mkdir "$folder/Results/Aux_Model_Estimates/AuxModelLatex/"
@@ -52,15 +52,15 @@ global allow_kids_to_leave_hh 1 // When looking for stable households, what shou
 
 * cap ssc install mat2txt
 
-global drop_top_x 0 // 5 // can be 0, 1, or 5
-global drop_by_income 1 // can be 1 to drop by income, 0 to drop by wealth
+// global drop_top_x 0 // 5 // can be 0, 1, or 5
+// global drop_by_income 1 // can be 1 to drop by income, 0 to drop by wealth
 
-global estimate_reg_by_age 0 // 0 is our baseline where we estimate SUREG with everyone pooled together. 1 is alternative where we do two buckets
-global cutoff_age 40
+// global estimate_reg_by_age 0 // 0 is our baseline where we estimate SUREG with everyone pooled together. 1 is alternative where we do two buckets
+// global cutoff_age 40
 
-global no_age_coefs 0 // default is  0 (include age and age2). NOTE: I manually removed age and age2 from the SUR
-global residualized_vars 1 // original version was 0 (no residualization) (NOTE: only works for log variables)
-global house_price_by_age 0 // plot distribution of house price by age?
+// global no_age_coefs 0 // default is  0 (include age and age2). NOTE: I manually removed age and age2 from the SUR
+// global residualized_vars 1 // original version was 0 (no residualization) (NOTE: only works for log variables)
+// global house_price_by_age 0 // plot distribution of house price by age?
 
 global compute_htm_persistence 0
 global makeplots 0
@@ -209,6 +209,8 @@ replace mortgage          = . if suspicious_homeequity == 1
 replace house_price       = . if suspicious_homeequity == 1
 drop difff suspicious_homeequity computed_home_eq
 
+egen acc_count = rowtotal( acc_homeequity acc_housevalue  acc_mortgage1  acc_mortgage2) // acc_bank_acco acc_stock
+gen not_imputed = acc_count == 0
 
 // gen WHtM = HtM & housing == 1
 // gen PHtM = HtM & housing == 0
@@ -231,6 +233,7 @@ drop if income < 100 // important!!! about 100 people. many with negative income
 // mortgage_debt_real
 * TODO: if I combine these, do I get housing_wealth?
 
+sum consumption
 
 * Convert variables to logs
 local level_vars consumption liq_wealth housing_wealth income mortgage
@@ -256,62 +259,6 @@ preserve
 restore
 */
 
-****************************************************************************************************
-** Simple means and medians by age EXCLUDING TOP x%
-****************************************************************************************************
-* TODO: define this based on fam_wealth_real or Liquid + Housing wealth?
-
-if $drop_top_x > 0{
-  gen NetWealth = liq_wealth + housing_wealth
-
-  * local sort_var fam_wealth_real
-  if $drop_by_income == 1 {
-	local sort_var income
-  }
-  else{
-	local sort_var NetWealth
-  }
-	
-  * Find top x% by age
-  by age, sort: egen p95 = pctile(`sort_var'), p(95)
-  by age, sort: egen p99 = pctile(`sort_var'), p(99)
-  * TODO: try this with a dif measure of wealth ?
-
-/*
-  * Plot the 95th and 99th percentiles
-  preserve
-  	keep age p95 p99
-  	duplicates drop
-  	sort age
-  	list
-  	tsset age
-  	tsline p95 p99
-  restore
-*/
-
-  * Flag observations in the top x%
-  gen top_95_ = `sort_var' >= p95 & `sort_var' != .
-  gen top_99_ = `sort_var' >= p99 & `sort_var' != .
-
-  * Flag HHs with any observation in the top x%
-  by pid, sort: egen top_95 = max(top_95_)
-  by pid, sort: egen top_99 = max(top_99_)
-
-  tab top_95
-  tab top_99
-
-  * Plot while excluding those in top 1% in any wave
-  if $drop_top_x == 1 {
-    drop if top_99 == 1
-  }
-  if $drop_top_x == 5 {
-    drop if top_95 == 1
-  }
-
-  sort pid wave
-
-}
-
 rename age_sq age2
 gen age3 = age^3
 local control_vars age age2 age3 bought 
@@ -322,6 +269,7 @@ local control_vars age age2 age3 bought
 
 drop if housing == 0 & housing_wealth != 0 & housing_wealth != . // renters who have non zero housing wealth -- weird 
 drop if housing == 0 & mortgage != 0 // no such people anyway :)
+
 
 /*sum housing_wealth if housing == 1
 sum housing_wealth if housing == 0*/
@@ -370,8 +318,6 @@ xtile p_c = consumption, nquantiles(100)
 drop if p_c == 1 
 drop p_c
 sum consumption, det
-
-pause 
 
 gen y     = log_income 
 gen d_y   = D.y
@@ -429,7 +375,7 @@ drop if p_d_c == 1 | p_d_c == 100 // results seem robust to doing this... magnit
 * drop if p_d_c <= 5 | p_d_c >= 95 // much better IV results from this
 * drop if p_d_c <= 10 | p_d_c >= 90 
 sum d_c, det
-pause
+
 
 
 * TODO: should we drop those with 700% change in income?
@@ -502,7 +448,6 @@ if $use_longer_panel == 1 {
   esttab , $esttabopts title("Depvar: Change in Food Expenditure. $sample")
   esttab using "$folder_output\EE_PSID_Food_Expenditure_Longer_Sample.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation (Food Expenditure - Longer Sample)") addnotes("Sample: Households with liq assets $>$ 500 at time t, ages 25 to 60, not moving homes that year")
 
-  pause
 }
 
 
@@ -645,7 +590,6 @@ reg dd_c DL_log_a dd_fsize if $sample
 * ivreg d_c (log_a = l_log_a l_y l_log_bank_account_wealth l_log_stock_wealth )
 
 
-pause
 
 *******************************************************************************************************
 ** Publication Quality
@@ -840,25 +784,190 @@ global sample a != . & age >= 25 & age <= 60 & housing_transition == 0 // & lag_
 reg d_c i.age_group i.L.HtM##c.lag_log_a if $sample, noomit
 reg d_c i.age_group i.L.HtM##c.lag_log_a D.fsize if $sample, noomit
 
+// Deal with zero values: allow that for log_a, log_mortgage, and log_hw
+replace log_a              = exp(1) if liq_wealth == 0 & lag_a == .
+replace log_mortgage       = exp(1) if mortgage == 0 & log_mortgage == .
+replace log_housing_wealth = exp(1) if housing_wealth == 0 & log_housing_wealth == .
+replace lag_log_a          = exp(1) if L.liq_wealth == 0 & lag_log_a == .
+
+
 reg d_c i.L.HtM##i.age_group i.L.HtM##c.lag_log_a D.fsize if $sample, noomit
 reg d_c i.age_group i.L.HtM##c.lag_log_a if $sample, noomit
 
-
-
 global sample a != . & age >= 25 & age <= 60 // & housing_transition == 0 & lag_a > 1000 
-reg d_c i.age_group lag_log_a if $sample, noomit
-gen sample2 = e(sample)
+reg d_c i.age_group i.L.HtM##c.lag_log_a if $sample, noomit
+reg d_c i.L.HtM##i.age_group i.L.HtM##c.lag_log_a if $sample, noomit
 
-local vars_for_aux_model  
-missings report log_income log_consumption housing  log_liq_wealth log_housing_wealth liq_wealth housing_wealth log_mortgage mortgage
+
+*******************************************************************************************************
+** Output data for aux model
+*******************************************************************************************************
+
+// Generate variables with same names as in julia
+gen owner     = homeowner
+gen lag_owner = L.owner
+gen m         = log(mortgage + 1)
+gen h_price   = log(house_price + 1)
+gen lag_h_price = L.h_price
+cap drop a
+gen a            = log(liq_wealth)
+replace a        = log(1) if liq_wealth <= 1
+cap drop lag_a
+gen lag_a        = log( L.liq_wealth )
+replace lag_a    = log( 1 ) if L.liq_wealth <= 1 // ERROR!!!!
+gen htm          = HtM
+gen c            = log_consumption
+
+
+// Generate variables in levels
+gen M = mortgage
+gen C = consumption 
+gen A = liq_wealth
+gen NHW = homeequity_real
+
+cap drop ltv_if_owner
+gen ltv_if_owner = mortgage / house_price
+// gen difm = mortgage - house_price
+// sum difm  if ltv_if_owner > 1 & ltv_if_owner != ., det
+replace ltv_if_owner = 1 if ltv_if_owner > 1 & ltv_if_owner != . // NOTE: maybe we should edit mortgage balance for all these people who claim mortgage > house_price
+replace ltv_if_owner = 0 if owner == 0
+
+// ERROR !!! 
+// gen upgrader_orig = housing_transition & (h_price > L.lag_h_price) // ERROR!!! this results in a double lag
+gen upgrader = ( housing_transition & (h_price > lag_h_price)) | (owner == 1 & lag_owner == 0)
+gen downgrader = housing_transition & (h_price < lag_h_price)
+gen HEW = (housing_transition == 0) * (m > L.m) 
+
+// sum owner upgrader_orig upgrader if lag_owner == 0
+
+// Gen lag variables
+cap drop y
+cap drop d_y
+gen y       = log_income
+gen lag_y   = L.y
+gen d_y     = D.y
+gen lag_c   = L.c
+gen lag_htm = L.htm 
+gen lag_m   = L.m 
+gen lag_ltv_if_owner = L.ltv_if_owner
+gen d_fsize = D.fsize
+
+gen net_housing_wealth = log(homeequity_real)
+count if homeequity_real == 0 & owner == 1
+pause
+replace net_housing_wealth = log(1) if homeequity_real == 0 & owner == 0
+// replace net_housing_wealth = log(1) if homeequity_real < 0 // NOTE: there are some underwater households, which get missings for log home equity. so by not doing this we are going to drop them
+
+gen lag_net_housing_wealth = log(L.homeequity_real)
+replace lag_net_housing_wealth = log(1) if L.homeequity_real == 0
+
+// Define variables to export -- will require all nonmissings 
+global vars_for_aux_model d_c m h_price owner a c htm ltv_if_owner upgrader downgrader HEW lag_owner y lag_y d_y lag_a lag_c lag_htm lag_m lag_h_price lag_ltv_if_owner age d_fsize lag_log_a housing_transition net_housing_wealth M A C NHW lag_net_housing_wealth
+
+
+sum $vars_for_aux_model
+missings report $vars_for_aux_model
+cap drop missing_vars
+missings tag d_c $vars_for_aux_model, gen(missing_vars)
+tab wave missing_vars
+
+// Choose sample for aux model reg and make sure it looks good
+global sample a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.HtM == 0 & missing_vars == 0
+reg d_c i.age_group c.lag_log_a  if $sample, noomit
+reg d_c i.age_group c.log_a  if $sample, noomit
+
+
+// TRY OUT NEW REG
+// m, h_price, owner, a, c, htm, ltv_if_owner, upgrader, downgrader, HEW
+// Age30, Age35, Age40, Age45, Age50, Age55, CONS, lag_y, d_y, lag_a, lag_c, lag_htm, lag_m, lag_h_price, lag_ltv_if_owner
+
+// Choose sample: require no missing values!
+// global sample_full age >= 25 & age <= 60 & missing_vars == 0 & not_imputed // & lag_a > 1000 
+global sample_full age >= 22 & age <= 65 & missing_vars == 0 & not_imputed // & lag_a > 1000 
+
+count if $sample_full
+
+global sample $sample_full // & housing_transition == 0 
+reg d_c i.age_group i.L.HtM##c.lag_log_a if $sample_full, noomit
+reg d_c i.age_group i.L.HtM##c.lag_log_a D.fsize if $sample_full, noomit
+reg d_c i.age_group i.L.HtM##c.lag_log_a D.fsize L.log_income if $sample_full, noomit
+
+
+// Note: all of these are significant when we use the $500 cutoff. Only the first is significant when using the 1000 cutoff.
+reg d_c i.age log_a                if $sample_full & a > log(500) , noomit
+reg d_c i.age log_a D.fsize        if $sample_full & a > log(500) , noomit
+reg d_c i.age log_a D.fsize i.wave if $sample_full & a > log(500) , noomit
+reg d_c i.age log_a D.fsize i.wave if $sample_full & a > y/24 , noomit 
+
+
 
 preserve
-  keep if sample2
-  gen L_HtM = L.HtM
-  keep d_c _Iage_group_* lag_log_a L_HtM
+  keep if $sample_full
+  tab not_imputed
+  keep pid wave $vars_for_aux_model
+  count
+  missings report *
+  desc
 
+  gen Age25 = (age < 30)
+  gen Age30 = (age >= 30) & (age < 35)
+  gen Age35 = (age >= 35) & (age < 40)
+  gen Age40 = (age >= 40) & (age < 45)
+  gen Age45 = (age >= 45) & (age < 50)
+  gen Age50 = (age >= 50) & (age < 55)
+  gen Age55 = (age >= 55) & (age <= 60)
+  gen Age60 = (age >= 60) & (age <= 65)
+  
+  /*
+  gen A1000 = a > log(500)
+  gen Not_A1000 = !A1000
+
+  gen Age25_A1000 = Age25*A1000 
+  gen Age30_A1000 = Age30*A1000 
+  gen Age35_A1000 = Age35*A1000 
+  gen Age40_A1000 = Age40*A1000 
+  gen Age45_A1000 = Age45*A1000 
+  gen Age50_A1000 = Age50*A1000 
+  gen Age55_A1000 = Age55*A1000 
+
+
+  // EE REG as in julia
+  gen lag_log_a_htm = lag_log_a * lag_htm
+  gen lag_log_a_not_htm = lag_log_a * !lag_htm
+
+  reg d_c Age30 Age35 Age40 Age45 Age50 Age55 lag_log_a_htm lag_log_a_not_htm lag_htm, noomit
+
+  reg d_c Age30 Age35 Age40 Age45 Age50 Age55 lag_a 
+
+
+
+  reg d_c Age25 Age30 Age35 Age40 Age45 Age50 Age55 Age25_A1000 Age30_A1000 Age35_A1000 Age40_A1000 Age45_A1000 Age50_A1000 Age55_A1000 c.a#i.A1000, nocons
+  */
+
+  reg d_c Age25 Age30 Age35 Age40 Age45 Age50 Age55 Age60 lag_a if lag_a >= log(1000) , nocons
+  reg d_c i.age lag_a if lag_a >= log(1000), nocons
+
+  mat list e(V)
+
+  gen CONS = 1
+
+  export delimited "C:\Users\pedm\Documents\GitHub\HousingAndCommitment_Model\PSID\PSID_AuxModelData_22To65.csv", replace
+
+  keep if age >= 25
+  export delimited "C:\Users\pedm\Documents\GitHub\HousingAndCommitment_Model\PSID\PSID_AuxModelData_25To65.csv", replace
+
+  keep if age <= 60
   export delimited "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID\Results\AuxModelData\PSID_AuxModelData.csv", replace
+  export delimited "C:\Users\pedm\Documents\GitHub\HousingAndCommitment_Model\PSID\PSID_AuxModelData.csv", replace
+
+
+  // keep if wave <= 2007
+  // reg d_c Age30 Age35 Age40 Age45 Age50 Age55 lag_log_a_htm lag_log_a_not_htm lag_htm, noomit
+  // export delimited "C:\Users\pedm\Documents\GitHub\RetirementConsumptionPSID\Results\AuxModelData\PSID_AuxModelData_PreCrisis.csv", replace
 restore
+
+// TODO: in future might want to allow people who have liquid assets = 0 !!!
+
 
 sdfsdf
 *******************************************************************************************************
