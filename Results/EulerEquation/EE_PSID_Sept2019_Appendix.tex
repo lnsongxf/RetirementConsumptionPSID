@@ -1,0 +1,74 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{longtable}{l*{4}{c}}
+\caption{Euler Equation: Testing for Temptation}\\
+\toprule\endfirsthead\midrule\endhead\midrule\endfoot\endlastfoot
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
+                    &\multicolumn{1}{c}{Baseline}&\multicolumn{1}{c}{Year FE}&\multicolumn{1}{c}{Non Hand to Mouth}&\multicolumn{1}{c}{IV}\\
+\midrule
+Liquid Assets ($ a $) $\;\;\;\;\;\;\;\;\;\;\;\;$&     0.00447\sym{***}&     0.00393\sym{**} &     0.00561\sym{***}&     0.00563\sym{***}\\
+                    &   (0.00170)         &   (0.00169)         &   (0.00189)         &   (0.00171)         \\
+\addlinespace
+Age25               &     0.04161\sym{**} &     0.07751\sym{***}&     0.07999\sym{***}&     0.05663\sym{***}\\
+                    &   (0.01836)         &   (0.01445)         &   (0.01522)         &   (0.01925)         \\
+\addlinespace
+Age30               &     0.03516\sym{**} &     0.06807\sym{***}&     0.07268\sym{***}&     0.07131\sym{***}\\
+                    &   (0.01787)         &   (0.01301)         &   (0.01368)         &   (0.01468)         \\
+\addlinespace
+Age35               &     0.03282\sym{*}  &     0.07131\sym{***}&     0.07526\sym{***}&     0.07939\sym{***}\\
+                    &   (0.01789)         &   (0.01250)         &   (0.01313)         &   (0.01377)         \\
+\addlinespace
+Age40               &     0.01995         &     0.06442\sym{***}&     0.06892\sym{***}&     0.05857\sym{***}\\
+                    &   (0.01799)         &   (0.01217)         &   (0.01277)         &   (0.01337)         \\
+\addlinespace
+Age45               &     0.00722         &     0.06044\sym{***}&     0.06520\sym{***}&     0.07581\sym{***}\\
+                    &   (0.01805)         &   (0.01184)         &   (0.01236)         &   (0.01290)         \\
+\addlinespace
+Age50               &    -0.04979\sym{***}&     0.00562         &     0.00615         &     0.00478         \\
+                    &   (0.01851)         &   (0.01166)         &   (0.01216)         &   (0.01249)         \\
+\addlinespace
+Age55               &    -0.05106\sym{***}&     0.00383         &     0.00140         &     0.01119         \\
+                    &   (0.01884)         &   (0.01182)         &   (0.01227)         &   (0.01248)         \\
+\addlinespace
+Age60               &    -0.05228\sym{***}&     0.00000         &     0.00000         &     0.00000         \\
+                    &   (0.01925)         &         (.)         &         (.)         &         (.)         \\
+\addlinespace
+Family size         &                     &     0.05983\sym{***}&     0.05443\sym{***}&     0.05427\sym{***}\\
+                    &                     &   (0.00549)         &   (0.00597)         &   (0.00608)         \\
+\addlinespace
+wave=2001           &                     &     0.00000         &     0.00000         &     0.00000         \\
+                    &                     &         (.)         &         (.)         &         (.)         \\
+\addlinespace
+wave=2003           &                     &    -0.05391\sym{***}&    -0.05328\sym{***}&     0.00332         \\
+                    &                     &   (0.01276)         &   (0.01350)         &   (0.01331)         \\
+\addlinespace
+wave=2005           &                     &    -0.02224\sym{*}  &    -0.03025\sym{**} &     0.04047\sym{***}\\
+                    &                     &   (0.01256)         &   (0.01329)         &   (0.01320)         \\
+\addlinespace
+wave=2007           &                     &    -0.03181\sym{**} &    -0.03983\sym{***}&     0.01619         \\
+                    &                     &   (0.01239)         &   (0.01309)         &   (0.01307)         \\
+\addlinespace
+wave=2009           &                     &    -0.12379\sym{***}&    -0.12992\sym{***}&    -0.06948\sym{***}\\
+                    &                     &   (0.01219)         &   (0.01291)         &   (0.01266)         \\
+\addlinespace
+wave=2011           &                     &     0.01620         &     0.01029         &     0.07098\sym{***}\\
+                    &                     &   (0.01254)         &   (0.01320)         &   (0.01282)         \\
+\addlinespace
+wave=2013           &                     &    -0.02739\sym{**} &    -0.02996\sym{**} &     0.02145\sym{*}  \\
+                    &                     &   (0.01221)         &   (0.01292)         &   (0.01274)         \\
+\addlinespace
+wave=2015           &                     &    -0.05404\sym{***}&    -0.05952\sym{***}&     0.00000         \\
+                    &                     &   (0.01233)         &   (0.01302)         &         (.)         \\
+\addlinespace
+wave=1999           &                     &                     &                     &     0.00000         \\
+                    &                     &                     &                     &         (.)         \\
+\addlinespace
+Constant            &                     &    -0.00346         &    -0.01867         &    -0.08099\sym{***}\\
+                    &                     &   (0.02120)         &   (0.02354)         &   (0.01984)         \\
+\midrule
+Observations        &       15780         &       15780         &       14171         &       12087         \\
+\bottomrule
+\multicolumn{5}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{5}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{longtable}
+}

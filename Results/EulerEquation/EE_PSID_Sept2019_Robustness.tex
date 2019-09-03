@@ -1,0 +1,26 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{longtable}{l*{3}{c}}
+\caption{Euler Equation: Alternative Specifications}\\
+\toprule\endfirsthead\midrule\endhead\midrule\endfoot\endlastfoot
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}\\
+                    &\multicolumn{1}{c}{Baseline}&\multicolumn{1}{c}{HH FE}&\multicolumn{1}{c}{Habits}\\
+\midrule
+Liquid Assets ($ a $) $\;\;\;\;\;\;\;\;\;\;\;\;$&     0.00447\sym{***}&     0.01217\sym{***}&     0.00619\sym{***}\\
+                    &   (0.00170)         &   (0.00400)         &   (0.00176)         \\
+\addlinespace
+$\Delta c_{-2}$     &                     &                     &    -0.35118\sym{***}\\
+                    &                     &                     &   (0.00832)         \\
+\addlinespace
+Age controls        &         Yes         &         Yes         &         Yes         \\
+\addlinespace
+$\Delta\text{Family size}$ &          No         &         Yes         &         Yes         \\
+\addlinespace
+Year FE             &          No         &         Yes         &         Yes         \\
+\midrule
+Observations        &       15780         &       15780         &       12098         \\
+\bottomrule
+\multicolumn{4}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{4}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{longtable}
+}

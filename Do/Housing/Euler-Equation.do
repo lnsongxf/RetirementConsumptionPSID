@@ -494,7 +494,7 @@ global sample a > 1000 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_t
 
 * NOTE: It seems that the L.HtM == 0 has a lot of bite
 * global sample a > 1000 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & HtM == 0  & L.HtM == 0 & L.a > 1000
-global sample a > 500 & a < 500000 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 500
+global sample a > 500 & a != . & age >= 25 & age <= 60 & housing_transition == 0 & L.a > 500
 
 eststo clear 
 global controls
@@ -510,6 +510,7 @@ if $write_tex {
   esttab using "$folder_output\EE_PSID.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation (Baseline)") addnotes("Sample: Households with liq assets $>$ 500 at time t and t-1, ages 25 to 60, not moving homes that year")
   esttab using "$folder_output\EE_PSID.csv", $esttabopts csv obslast replace
 }
+pause 
 
 * BASLELINE - Contains good controls. IV results "robust"
 * This looks very good!
@@ -535,6 +536,7 @@ if $write_tex {
 esttab using "$folder_output\EE_PSID_Control_for_kids_and_year.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation (More Controls)") addnotes("Sample: Households with liq assets $>$ 500 at time t, ages 25 to 60, not moving homes that year.")
 esttab using "$folder_output\EE_PSID_Control_for_kids_and_year.csv", $esttabopts csv obslast replace
 }
+pause 
 
 * Taha suggestion: what about heterogeneity in beta? Try with fixed effect
 * OLS: Good news! Get same results with indiv-level fixed effect
@@ -607,6 +609,8 @@ if $write_tex == 1 & $use_longer_panel == 0 {
   *  IV1 includes lagged assets and income as instruments. IV2 includes assets, income, bank balances, and the second lag of consumption as instruments.
   esttab using "$folder_output_presentation\EE_PSID_Full_Controls.tex", $esttabopts longtable booktabs obslast replace title("PSID Euler Equation") addnotes("Sample: Households with liq assets $>$ 500 at time t, ages 25 to 60," "not moving homes that year.")
 }
+
+pause
 
 *******************************************************************************************************
 ** Non linear Euler Equation 
@@ -854,15 +858,17 @@ gen d_fsize = D.fsize
 
 gen net_housing_wealth = log(homeequity_real)
 count if homeequity_real == 0 & owner == 1
-pause
 replace net_housing_wealth = log(1) if homeequity_real == 0 & owner == 0
 // replace net_housing_wealth = log(1) if homeequity_real < 0 // NOTE: there are some underwater households, which get missings for log home equity. so by not doing this we are going to drop them
 
 gen lag_net_housing_wealth = log(L.homeequity_real)
 replace lag_net_housing_wealth = log(1) if L.homeequity_real == 0
 
+inspect fsize
+pause 
+
 // Define variables to export -- will require all nonmissings 
-global vars_for_aux_model d_c m h_price owner a c htm ltv_if_owner upgrader downgrader HEW lag_owner y lag_y d_y lag_a lag_c lag_htm lag_m lag_h_price lag_ltv_if_owner age d_fsize lag_log_a housing_transition net_housing_wealth M A C NHW lag_net_housing_wealth
+global vars_for_aux_model d_c m h_price owner a c htm ltv_if_owner upgrader downgrader HEW lag_owner y lag_y d_y lag_a lag_c lag_htm lag_m lag_h_price lag_ltv_if_owner age d_fsize lag_log_a housing_transition net_housing_wealth M A C NHW lag_net_housing_wealth fsize
 
 
 sum $vars_for_aux_model
@@ -900,23 +906,78 @@ reg d_c i.age log_a D.fsize i.wave if $sample_full & a > log(500) , noomit
 reg d_c i.age log_a D.fsize i.wave if $sample_full & a > y/24 , noomit 
 
 
+gen Age25 = (age < 30)
+gen Age30 = (age >= 30) & (age < 35)
+gen Age35 = (age >= 35) & (age < 40)
+gen Age40 = (age >= 40) & (age < 45)
+gen Age45 = (age >= 45) & (age < 50)
+gen Age50 = (age >= 50) & (age < 55)
+gen Age55 = (age >= 55) & (age < 60)
+gen Age60 = (age >= 60) & (age <= 65)
 
+* --------------------------------------------------------------------------------------------------------------------------------------
+* Baseline EE Table
+* NOTE: all of these look even better if we restrict to L.a > log(500) instead of a > log(500)
+* --------------------------------------------------------------------------------------------------------------------------------------
+
+global write_tex = 1
+global sample  $sample_full &     a > log(500) & age >= 25 & housing_transition == 0 & ((m <= lag_m) | owner == 0 )         // & acc_bank_acco == 0 & acc_stock == 0
+global sample2 $sample_full & exp(a) > exp(y)/24 & age >= 25 & housing_transition == 0 & ((m <= lag_m) | owner == 0 )  // & acc_bank_acco == 0 & acc_stock == 0
+global sample3 $sample_full & exp(a) > exp(y)/48 & age >= 25 & housing_transition == 0 & ((m <= lag_m) | owner == 0 )  // & acc_bank_acco == 0 & acc_stock == 0
+global sample4 $sample_full & exp(a) > exp(y)/6 & age >= 25 & housing_transition == 0 & ((m <= lag_m) | owner == 0 )   // & acc_bank_acco == 0 & acc_stock == 0
+global sampleIV  $sample_full & L.a > log(500) & age >= 25 & housing_transition == 0 & ((m <= lag_m) | owner == 0 )         // & acc_bank_acco == 0 & acc_stock == 0
+
+
+cap gen d_fsize = D.fsize
+lab var d_fsize "Family size"
+lab var a "Liquid Assets ($ a $) $\;\;\;\;\;\;\;\;\;\;\;\;$"
+
+eststo clear 
+qui eststo, title(Baseline):                           reg d_c Age25 Age30 Age35 Age40 Age45 Age50 Age55 Age60 a if $sample  , nocons
+// qui eststo, title(NHtM):                               reg d_c Age25 Age30 Age35 Age40 Age45 Age50 Age55 Age60 a           D.fsize i.wave if $sample2 , nocons
+qui eststo, title(Year FE):                            reg d_c Age25 Age30 Age35 Age40 Age45 Age50 Age55 Age60 a d_fsize i.wave if $sample 
+qui eststo, title(Non Hand to Mouth):                               reg d_c Age25 Age30 Age35 Age40 Age45 Age50 Age55 Age60 a  d_fsize i.wave if $sample3 
+// qui eststo, title(Zeldes):                               reg d_c Age25 Age30 Age35 Age40 Age45 Age50 Age55 Age60 a         D.fsize i.wave if $sample4 , nocons
+// qui eststo, title(Control for Kids):                   reg d_c Age25 Age30 Age35 Age40 Age45 Age50 Age55 Age60 a D.fsize    if $sample , nocons
+// qui eststo, title(Lag Assets):                           reg d_c Age25 Age30 Age35 Age40 Age45 Age50 Age55 Age60 L.a if $sample  , nocons
+qui eststo, title(IV):          ivregress 2sls d_c Age25 Age30 Age35 Age40 Age45 Age50 Age55 Age60 d_fsize i.wave (a = L(1 2).(a y log_bank_account_wealth) ) if $sampleIV, first
+
+global esttabopts keep(*a ) label b(5) se(5) mtitles indicate("Age controls = *Age*" "$\Delta\text{Family size}$ = d_fsize" "Year FE = *wave*") star(* 0.10 ** 0.05 *** 0.01)
+esttab , $esttabopts title("Depvar: d_c. $sample")
+if $write_tex {
+  esttab using "$folder_output\EE_PSID_Sept2019.tex", $esttabopts longtable booktabs obslast replace title("Euler Equation: Testing for Temptation") // addnotes("Sample: Households with liq assets $>$ 500 at time t and t-1, ages 25 to 60, not moving homes that year")
+  // Full controls:
+  global esttabopts_app label b(5) se(5) mtitles order(a) star(* 0.10 ** 0.05 *** 0.01)
+  esttab using "$folder_output\EE_PSID_Sept2019_Appendix.tex", $esttabopts_app longtable booktabs obslast replace title("Euler Equation: Testing for Temptation") // addnotes("Sample: Households with liq assets $>$ 500 at time t and t-1, ages 25 to 60, not moving homes that year")
+}
+
+* --------------------------------------------------------------------------------------------------------------------------------------
+* Robustness EE Table
+* HH FE and Lag d_c
+* --------------------------------------------------------------------------------------------------------------------------------------
+cap gen L_d_c = L.d_c
+lab var L_d_c "$\Delta c_{-2}$"
+eststo clear 
+qui eststo, title(Baseline):                           reg d_c Age25 Age30 Age35 Age40 Age45 Age50 Age55 Age60 a if $sample  , nocons
+qui eststo, title(HH FE):                           xtreg d_c Age25 Age30 Age35 Age40 Age45 Age50 Age55 Age60 a d_fsize i.wave if $sample  , fe
+qui eststo, title(Habits):                             reg d_c Age25 Age30 Age35 Age40 Age45 Age50 Age55 Age60 a L_d_c  d_fsize i.wave if $sample  , nocons
+
+global esttabopts keep(*a L_d_c) label b(5) se(5) mtitles indicate("Age controls = *Age*" "$\Delta\text{Family size}$ = d_fsize" "Year FE = *wave*")  star(* 0.10 ** 0.05 *** 0.01) substitute(\_ _)
+esttab , $esttabopts title("Depvar: d_c. $sample")
+if $write_tex {
+  esttab using "$folder_output\EE_PSID_Sept2019_Robustness.tex", $esttabopts longtable booktabs obslast replace title("Euler Equation: Alternative Specifications") // addnotes("Sample: Households with liq assets $>$ 500 at time t and t-1, ages 25 to 60, not moving homes that year")
+  global esttabopts_app label b(5) se(5) mtitles order(a) star(* 0.10 ** 0.05 *** 0.01) substitute(\_ _)
+  esttab using "$folder_output\EE_PSID_Sept2019_Robustness_Appendix.tex", $esttabopts_app longtable booktabs obslast replace title("Euler Equation: Alternative Specifications") // addnotes("Sample: Households with liq assets $>$ 500 at time t and t-1, ages 25 to 60, not moving homes that year")
+}
+
+sdfdsf
 preserve
   keep if $sample_full
   tab not_imputed
-  keep pid wave $vars_for_aux_model
+  keep pid wave $vars_for_aux_model acc_bank_acco acc_stock
   count
   missings report *
   desc
-
-  gen Age25 = (age < 30)
-  gen Age30 = (age >= 30) & (age < 35)
-  gen Age35 = (age >= 35) & (age < 40)
-  gen Age40 = (age >= 40) & (age < 45)
-  gen Age45 = (age >= 45) & (age < 50)
-  gen Age50 = (age >= 50) & (age < 55)
-  gen Age55 = (age >= 55) & (age <= 60)
-  gen Age60 = (age >= 60) & (age <= 65)
   
   /*
   gen A1000 = a > log(500)
@@ -947,7 +1008,13 @@ preserve
   reg d_c Age25 Age30 Age35 Age40 Age45 Age50 Age55 Age60 lag_a if lag_a >= log(1000) , nocons
   reg d_c i.age lag_a if lag_a >= log(1000), nocons
 
-  mat list e(V)
+
+  * NEW EE TABLES
+    reg d_c Age25 Age30 Age35 Age40 Age45 Age50 Age55 Age60 a if a > log(500) & age >= 25 , nocons
+    reg d_c Age25 Age30 Age35 Age40 Age45 Age50 Age55 Age60 a if a > log(500) & age >= 25 & housing_transition == 0, nocons
+
+
+
 
   gen CONS = 1
 
