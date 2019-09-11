@@ -113,26 +113,13 @@ gen log_homeequity = log(homeequity_real + 1)
 lab var log_stock_wealth "Log Home Equity"
 
 ****************************************************************************************************
-** Look into home equity loans by year
-****************************************************************************************************
-
-/*
-gen mortgage = (type_mortgage1 >= 1 & type_mortgage1 <= 7 ) | (type_mortgage2 >= 1 & type_mortgage2 <= 7 )
-gen home_equity_loan = (type_mortgage1 == 3 | type_mortgage2 == 3) 
-gen HELOC = (type_mortgage1 == 5 | type_mortgage2 == 5) 
-
-collapse (sum) mortgage home_equity_loan HELOC, by(wave)
-*/
-
-****************************************************************************************************
 ** Define variables
 ****************************************************************************************************
 keep if age >= 22 & age <= 65
-* keep if age >= 20 & age <= 65
 
 gen consumption     = expenditure_exH_real_2015 // blundell expenditure excluding housing
 gen liq_wealth      = fam_liq_wealth_real // 2015 dollars
-* gen housing_wealth= fam_LiqAndH_wealth_real - fam_liq_wealth_real // 2015 dollars (includes other housing wealth)
+// gen housing_wealth_all = fam_LiqAndH_wealth_real - fam_liq_wealth_real // 2015 dollars (includes other housing wealth)
 gen housing_wealth  = homeequity_real
 gen mortgage        = mortgage_debt_real
 * gen house_price   = housing_wealth + mortgage
@@ -219,12 +206,28 @@ gen age3 = age^3
 local control_vars age age2 age3 bought 
 
 ****************************************************************************************************
+** correlation_between_log_IRA_and_log_income
+****************************************************************************************************
+
+cap drop log_IRA
+gen log_IRA = log(IRA_wealth + 1000)
+
+reg log_IRA log_income if age >= 60 & age <= 65 & emp_status_head  == 1, nocons
+
+reg log_IRA log_income if age == 65 & emp_status_head  == 1, nocons
+
+poisson IRA_wealth log_income if age >= 60 & age <= 65 & emp_status_head  == 1
+
+poisson IRA_wealth log_income if age >= 60 & age <= 65 & emp_status_head  == 1, nocons 
+
+poisson IRA_wealth log_income if age >= 64 & age <= 65 & emp_status_head  == 1, nocons 
+
+****************************************************************************************************
 ** Drop renters with home equity
 ****************************************************************************************************
 
 drop if housing == 0 & housing_wealth != 0 & housing_wealth != . // renters who have non zero housing wealth -- weird 
 drop if housing == 0 & mortgage != 0 // no such people anyway :)
-
 
 /*sum housing_wealth if housing == 1
 sum housing_wealth if housing == 0*/

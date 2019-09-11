@@ -970,7 +970,9 @@ if $write_tex {
   esttab using "$folder_output\EE_PSID_Sept2019_Robustness_Appendix.tex", $esttabopts_app longtable booktabs obslast replace title("Euler Equation: Alternative Specifications") // addnotes("Sample: Households with liq assets $>$ 500 at time t and t-1, ages 25 to 60, not moving homes that year")
 }
 
-sdfdsf
+lookfor id 
+sdfsdf
+
 preserve
   keep if $sample_full
   tab not_imputed
@@ -978,43 +980,6 @@ preserve
   count
   missings report *
   desc
-  
-  /*
-  gen A1000 = a > log(500)
-  gen Not_A1000 = !A1000
-
-  gen Age25_A1000 = Age25*A1000 
-  gen Age30_A1000 = Age30*A1000 
-  gen Age35_A1000 = Age35*A1000 
-  gen Age40_A1000 = Age40*A1000 
-  gen Age45_A1000 = Age45*A1000 
-  gen Age50_A1000 = Age50*A1000 
-  gen Age55_A1000 = Age55*A1000 
-
-
-  // EE REG as in julia
-  gen lag_log_a_htm = lag_log_a * lag_htm
-  gen lag_log_a_not_htm = lag_log_a * !lag_htm
-
-  reg d_c Age30 Age35 Age40 Age45 Age50 Age55 lag_log_a_htm lag_log_a_not_htm lag_htm, noomit
-
-  reg d_c Age30 Age35 Age40 Age45 Age50 Age55 lag_a 
-
-
-
-  reg d_c Age25 Age30 Age35 Age40 Age45 Age50 Age55 Age25_A1000 Age30_A1000 Age35_A1000 Age40_A1000 Age45_A1000 Age50_A1000 Age55_A1000 c.a#i.A1000, nocons
-  */
-
-  reg d_c Age25 Age30 Age35 Age40 Age45 Age50 Age55 Age60 lag_a if lag_a >= log(1000) , nocons
-  reg d_c i.age lag_a if lag_a >= log(1000), nocons
-
-
-  * NEW EE TABLES
-    reg d_c Age25 Age30 Age35 Age40 Age45 Age50 Age55 Age60 a if a > log(500) & age >= 25 , nocons
-    reg d_c Age25 Age30 Age35 Age40 Age45 Age50 Age55 Age60 a if a > log(500) & age >= 25 & housing_transition == 0, nocons
-
-
-
 
   gen CONS = 1
 
